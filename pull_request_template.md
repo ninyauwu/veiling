@@ -11,7 +11,6 @@ Closes #<issue-number>
 ### 2. File Structure
 
 - [ ] Are assets like directories, graphics, fonts or sound files named using lower_snake_case (e.g., company_logo.png)?
-- [ ] Did the changes avoid unnecessary scene modifications? If new changes were needed for testing, were they done in Scenes/Dev/<Specification> and then discarded?
 
 ### 3. Code
 
