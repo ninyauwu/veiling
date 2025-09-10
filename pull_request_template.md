@@ -25,5 +25,5 @@ Closes #<issue-number>
 
 ### 4. Proper Git Usage
 
-- [ ] Does your branch name follow the convention of <change-type>/<change> (e.g. feature/user-dashboard or hotfix/purchase-crash)?
+- [ ] Does your branch name follow the convention of \<change-type\>/\<change\> (e.g. feature/user-dashboard or hotfix/purchase-crash)?
 - [ ] Do all your commit messages follow the 7 rules outlined in https://cbea.ms/git-commit/?
