@@ -18,8 +18,8 @@ RUN apt-get -y install nodejs
 
 FROM with-node AS build
 ARG BUILD_CONFIGURATION=Release
-RUN npm install --save-dev @types/node@latest
 WORKDIR /src
+RUN npm install --no-update-notifier --save-dev @types/node@latest
 COPY ["Veiling.Server/Veiling.Server.csproj", "Veiling.Server/"]
 COPY ["veiling.client/veiling.client.esproj", "veiling.client/"]
 RUN dotnet restore "./Veiling.Server/Veiling.Server.csproj"

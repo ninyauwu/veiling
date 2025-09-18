@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "rimraf ./build && react-scripts --openssl-legacy-provider start",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
