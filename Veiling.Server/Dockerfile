@@ -23,7 +23,12 @@ RUN npm install --no-update-notifier --save-dev @types/node@latest
 COPY ["Veiling.Server/Veiling.Server.csproj", "Veiling.Server/"]
 COPY ["veiling.client/veiling.client.esproj", "veiling.client/"]
 RUN dotnet restore "./Veiling.Server/Veiling.Server.csproj"
-COPY . .
+
+# Copy source code
+COPY ["Veiling.Server/", "Veiling.Server/"]
+COPY ["veiling.client/", "veiling.client/"]
+
+# Build the entire project, starting with server which will then build the client
 WORKDIR "/src/Veiling.Server"
 RUN dotnet build "./Veiling.Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
