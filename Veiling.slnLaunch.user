@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Veiling.Server\\Veiling.Server.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "veiling.client\\veiling.client.esproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
