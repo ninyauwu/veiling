@@ -1,0 +1,4 @@
+services:
+  app:
+    environment:
+      Docker__IsContainerized: true
