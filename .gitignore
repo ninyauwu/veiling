@@ -1,5 +1,5 @@
 .env
-
+OmniSharp
 **/.vs
 **/.vscode
 **/node_modules
