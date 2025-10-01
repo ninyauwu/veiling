@@ -63,13 +63,14 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    if (db.Database.CanConnect())
+    try
     {
-        app.Logger.LogInformation("Successfully connected to the database!");
+        var canConnect = await db.Database.ExecuteSqlRawAsync("SELECT 1");
+        app.Logger.LogInformation("Successfully connected to database and executed test query.");
     }
-    else
+    catch (Exception ex)
     {
-        app.Logger.LogError("Failed to connect to the database!");
+        app.Logger.LogError(ex, "Failed to connect to database or execute query.");
     }
 }
 
