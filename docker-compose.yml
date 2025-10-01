@@ -19,7 +19,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_Kestrel__Certificates__Default__Password: ${CERT_PASSWORD}
-      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/veiling.client.pfx
+      ASPNETCORE_Kestrel__Certificates__Default__Path: ${CERT_PATH}
       DB_SERVER: ${DB_SERVER}
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
