@@ -16,3 +16,4 @@ if (Test-Path $envFile) {
 # Build containers
 # -------------------------------
 docker compose up --build
+pause

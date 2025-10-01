@@ -31,11 +31,18 @@ env_vars = dotenv_values(env_path)
 
 # Create SSL certificate if necessary
 print("\n==Setting up SSL certificate==")
-if cert_file.exists() & ("CERT_PASSWORD" in env_vars):
+if cert_file.exists() & ("CERT_PASSWORD" in env_vars) & ("CERT_PATH" in env_vars):
     if not click.confirm("Certificate already exists. Skip certificate creation?"):
         password = getpass.getpass("Enter a password for your (local) SSL certificate: ")
-        set_key(env_path, "CERT_PASSWORD", password)
+        set_key(env_path, "CERT_PASSWORD", password, quote_mode="never")
         create_certificate(cert_file, password)
+        set_key(env_path, "CERT_PATH", str(cert_dir), quote_mode="never")
+else:
+    print(f"No certificate found, creating SSL certificate at {cert_dir}")
+    password = getpass.getpass("Enter a password for your (local) SSL certificate: ")
+    set_key(env_path, "CERT_PASSWORD", password, quote_mode="never")
+    create_certificate(cert_file, password)
+    set_key(env_path, "CERT_PATH", str(cert_dir), quote_mode="never")
 
 # Connect to database
 print("\n==Setting up database connection==")
