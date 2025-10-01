@@ -10,16 +10,19 @@ builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 // Create connection string
 string? db_server;
+string? db_username;
 if (builder.Configuration["Docker:IsContainerized"] == "False") {
     Env.TraversePath().Load();
     db_server = Environment.GetEnvironmentVariable("DB_SERVER");
+    db_username = Environment.GetEnvironmentVariable("DB_USERNAME");
 } else {
     db_server = "tcp:db,1433";
+    db_username = "sa";
 }
 var connectionString
     = $"Server={db_server};"
     + $"Database={Environment.GetEnvironmentVariable("DB_NAME")};"
-    + $"User Id={Environment.GetEnvironmentVariable("DB_USERNAME")};"
+    + $"User Id={db_username};"
     + $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"
     + "Encrypt=false;"
     + "MultipleActiveResultSets=true;"
