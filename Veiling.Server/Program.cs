@@ -16,6 +16,7 @@ if (builder.Configuration["Docker:IsContainerized"] == "False") {
     db_server = Environment.GetEnvironmentVariable("DB_SERVER");
     db_username = Environment.GetEnvironmentVariable("DB_USERNAME");
 } else {
+    Console.WriteLine("Running via docker compose. Setting up database link.");
     db_server = "tcp:db,1433";
     db_username = "sa";
 }
@@ -23,10 +24,13 @@ var connectionString
     = $"Server={db_server};"
     + $"Database={Environment.GetEnvironmentVariable("DB_NAME")};"
     + $"User Id={db_username};"
-    + $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"
     + "Encrypt=false;"
     + "MultipleActiveResultSets=true;"
-    + "TrustServerCertificate=true";
+    + "TrustServerCertificate=true;";
+var db_password = $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")}";
+
+Console.WriteLine($"Connecting to database via {connectionString} "
+        + $"with a password of {Environment.GetEnvironmentVariable("DB_PASSWORD")?.Length} chars long.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -36,7 +40,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options => 
-        options.UseSqlServer(connectionString));
+        options.UseSqlServer(connectionString + db_password));
 
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
