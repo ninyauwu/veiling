@@ -20,7 +20,7 @@ WORKDIR /src
 RUN npm install --no-update-notifier --save-dev @types/node@latest
 COPY ["Veiling.Server/Veiling.Server.csproj", "Veiling.Server/"]
 COPY ["veiling.client/veiling.client.esproj", "veiling.client/"]
-RUN dotnet dev-certs https --trust 
+RUN dotnet dev-certs https -ep --trust 
 RUN dotnet restore "./Veiling.Server/Veiling.Server.csproj"
 
 # Copy source code

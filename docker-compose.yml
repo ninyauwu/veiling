@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: ${DB_PASSWORD}
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  app:
+    build:
+      context: .
+      dockerfile: Veiling.Server/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Development
+        CERT_PATH: ${CERT_PATH}
+        CERT_PASSWORD: ${CERT_PASSWORD}
+    container_name: veiling
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_Kestrel__Certificates__Default__Password: ${CERT_PASSWORD}
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/veiling.client.pfx
+      DB_SERVER: ${DB_SERVER}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "7080:8081"
+      - "32274:8080"
+    volumes:
+      - ${CERT_PATH}:/https:ro
+
+volumes:
+  sql_data:

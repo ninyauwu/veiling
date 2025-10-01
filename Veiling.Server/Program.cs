@@ -1,13 +1,45 @@
+using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
+using Veiling.Server;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 
-builder.Services.AddControllers();
+// Create connection string
+string? db_server;
+string? db_username;
+if (builder.Configuration["Docker:IsContainerized"] == "False") {
+    Env.TraversePath().Load();
+    db_server = Environment.GetEnvironmentVariable("DB_SERVER");
+    db_username = Environment.GetEnvironmentVariable("DB_USERNAME");
+} else {
+    db_server = "tcp:db,1433";
+    db_username = "sa";
+}
+var connectionString
+    = $"Server={db_server};"
+    + $"Database={Environment.GetEnvironmentVariable("DB_NAME")};"
+    + $"User Id={db_username};"
+    + $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"
+    + "Encrypt=false;"
+    + "MultipleActiveResultSets=true;"
+    + "TrustServerCertificate=true";
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<AppDbContext>(options => 
+        options.UseSqlServer(connectionString));
+
 var app = builder.Build();
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -27,4 +59,20 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (db.Database.CanConnect())
+    {
+        app.Logger.LogInformation("Successfully connected to the database!");
+    }
+    else
+    {
+        app.Logger.LogError("Failed to connect to the database!");
+    }
+}
+
 app.Run();
+
+
