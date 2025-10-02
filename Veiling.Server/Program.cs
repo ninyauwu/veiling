@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 using Veiling.Server;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,14 +26,11 @@ if (!containerized) {
 
 // Part 2 - General variables
 var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
-var db_name = Environment.GetEnvironmentVariable("DB_NAME");
-db_name = db_name == null || (db_name == "" && !containerized) ? "master" : db_name;
 
 // Part 3 - Build connection string
 var connectionString
     = builder.Configuration.GetConnectionString("Default")
     + $"Server={db_server};"
-    + $"Database={db_name};"
     + $"User Id={db_username};";
 Console.WriteLine($"Connecting to database via {connectionString} "
         + $"with a password of {password?.Length} chars long.");
@@ -45,9 +43,6 @@ builder.Services.AddControllersWithViews();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<AppDbContext>(options => 
-        options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -70,21 +65,16 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
-using (var scope = app.Services.CreateScope())
+using (var connection = new SqlConnection(connectionString))
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    connection.Open();
 
-    try
+    using (var command = new SqlCommand("SELECT 1", connection)) // 👈 pass connection
     {
-        var canConnect = await db.Database.ExecuteSqlRawAsync("SELECT 1");
-        app.Logger.LogInformation("Successfully connected to database and executed test query.");
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "Failed to connect to database or execute query.");
+        var result = command.ExecuteScalar();
+        Console.WriteLine($"First User: {result}");
     }
 }
 
 app.Run();
-
 
