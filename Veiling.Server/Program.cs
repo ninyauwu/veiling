@@ -35,7 +35,8 @@ var connectionString
 Console.WriteLine($"Connecting to database via {connectionString} "
         + $"with a password of {password?.Length} chars long.");
 if (password?.Length < 8) Console.WriteLine("Warning: Password should be at least 8 characters.");
-connectionString += $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"; 
+connectionString += $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};";
+ConnectionStore.ConnectionString = connectionString;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
