@@ -25,7 +25,6 @@ def create_certificate(cert_file, password):
 def certificate_setup(cert_dir, cert_file):
     password = getpass.getpass("Enter a password for your (local) SSL certificate: ")
     set_key(env_path, "CERT_PASSWORD", password, quote_mode="never")
-    set_key(env_path, "ASPNETCORE_Kestrel__Certificates__Default__Password", password, quote_mode="never")
     create_certificate(cert_file, password)
     set_key(env_path, "CERT_PATH", str(cert_dir), quote_mode="never")
     set_key(env_path, "ASPNETCORE_Kestrel__Certificates__Default__Path", str(cert_file.resolve()), quote_mode="never")
@@ -33,11 +32,11 @@ def certificate_setup(cert_dir, cert_file):
 def create_db_username():
     print("Please enter your SQL system admin name (will be saved locally):", end = " ")
     name = input()
-    set_key(env_path, "DB_USERNAME", name)
+    set_key(env_path, "DB_USERNAME", name, quote_mode="never")
     
 def create_db_password():
     password = getpass.getpass("Please enter your SQL system admin password (will be saved locally): ")
-    set_key(env_path, "DB_PASSWORD", password)
+    set_key(env_path, "DB_PASSWORD", password,quote_mode="never")
     
 
 # Setup path vars
