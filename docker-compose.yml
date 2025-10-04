@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: db
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       SA_PASSWORD: ${DB_PASSWORD}

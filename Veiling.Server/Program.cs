@@ -8,10 +8,12 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
-// Create connection string
+// ==Create connection string==
+// Part 1 - Container-specific variables
 string? db_server;
 string? db_username;
-if (builder.Configuration["Docker:IsContainerized"] == "False") {
+var containerized = builder.Configuration["Docker:IsContainerized"] != "False";
+if (!containerized) {
     Env.TraversePath().Load();
     db_server = Environment.GetEnvironmentVariable("DB_SERVER");
     db_username = Environment.GetEnvironmentVariable("DB_USERNAME");
@@ -20,17 +22,22 @@ if (builder.Configuration["Docker:IsContainerized"] == "False") {
     db_server = "tcp:db,1433";
     db_username = "sa";
 }
-var connectionString
-    = $"Server={db_server};"
-    + $"Database={Environment.GetEnvironmentVariable("DB_NAME")};"
-    + $"User Id={db_username};"
-    + "Encrypt=false;"
-    + "MultipleActiveResultSets=true;"
-    + "TrustServerCertificate=true;";
-var db_password = $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")}";
 
+// Part 2 - General variables
+var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+var db_name = Environment.GetEnvironmentVariable("DB_NAME");
+db_name = db_name == null || (db_name == "" && !containerized) ? "master" : db_name;
+
+// Part 3 - Build connection string
+var connectionString
+    = builder.Configuration.GetConnectionString("Default")
+    + $"Server={db_server};"
+    + $"Database={db_name};"
+    + $"User Id={db_username};";
 Console.WriteLine($"Connecting to database via {connectionString} "
-        + $"with a password of {Environment.GetEnvironmentVariable("DB_PASSWORD")?.Length} chars long.");
+        + $"with a password of {password?.Length} chars long.");
+if (password?.Length < 8) Console.WriteLine("Warning: Password should be at least 8 characters.");
+connectionString += $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"; 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -40,7 +47,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options => 
-        options.UseSqlServer(connectionString + db_password));
+        options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
