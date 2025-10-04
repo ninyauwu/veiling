@@ -26,7 +26,7 @@ if (!containerized) {
 // Part 2 - General variables
 var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 var db_name = Environment.GetEnvironmentVariable("DB_NAME");
-db_name = db_name == null || (db_name == "" && !containerized) ? "master" : db_name;
+db_name = db_name == null || (db_name == "") ? "master" : db_name;
 
 // Part 3 - Build connection string
 var connectionString

@@ -9,8 +9,19 @@ services:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          '/opt/mssql-tools18/bin/sqlcmd -S "$DB_SERVER" -U sa -P "$DB_PASSWORD" -C -Q ''SELECT 1'' || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   app:
+    container_name: veiling
     build:
       context: .
       dockerfile: Veiling.Server/Dockerfile
@@ -18,7 +29,9 @@ services:
         BUILD_CONFIGURATION: Development
         CERT_PATH: ${CERT_PATH}
         CERT_PASSWORD: ${CERT_PASSWORD}
-    container_name: veiling
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_Kestrel__Certificates__Default__Password: ${CERT_PASSWORD}
