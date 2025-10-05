@@ -15,27 +15,17 @@ string? db_username;
 var containerized = builder.Configuration["Docker:IsContainerized"] != "False";
 if (!containerized) {
     Env.TraversePath().Load();
-    db_server = Environment.GetEnvironmentVariable("DB_SERVER");
-    db_username = Environment.GetEnvironmentVariable("DB_USERNAME");
-} else {
-    Console.WriteLine("Running via docker compose. Setting up database link.");
-    db_server = "tcp:db,1433";
-    db_username = "sa";
 }
 
 // Part 2 - General variables
 var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
-var db_name = Environment.GetEnvironmentVariable("DB_NAME");
-db_name = db_name == null || (db_name == "") ? "master" : db_name;
 
 // Part 3 - Build connection string
 var connectionString
     = builder.Configuration.GetConnectionString("Default")
-    + $"Server={db_server};"
-    + $"Database={db_name};"
-    + $"User Id={db_username};";
-Console.WriteLine($"Connecting to database via {connectionString} "
-        + $"with a password of {password?.Length} chars long.");
+    + $"Server={Environment.GetEnvironmentVariable("DB_SERVER")};"
+    + $"User Id={Environment.GetEnvironmentVariable("DB_USERNAME")};";
+Console.WriteLine($"Connecting to database via {connectionString}");
 if (password?.Length < 8) Console.WriteLine("Warning: Password should be at least 8 characters.");
 connectionString += $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"; 
 
@@ -73,6 +63,7 @@ app.MapFallbackToFile("/index.html");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
 
     try
     {
@@ -82,6 +73,11 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         app.Logger.LogError(ex, "Failed to connect to database or execute query.");
+    }
+
+    if (app.Environment.IsDevelopment())
+    {
+        AppDbSeeder.Seed(db);
     }
 }
 
