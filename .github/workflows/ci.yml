@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    env:
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD_KEY }}
+      CERT_PASSWORD: ${{ secrets.CERT_PASSWORD_KEY }}
+      CERT_PATH: ./Veiling.Server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate temporary dev certificate
+        run: |
+          sudo mkdir -p /https
+          sudo dotnet dev-certs https --export-path /https/veiling.client.pfx -p $CERT_PASSWORD
+          echo "CERT_PATH=/https" >> $GITHUB_ENV
+
+      - name: Build Docker images
+        run: |
+          docker compose -f docker-compose.yml build \
+            --build-arg BUILD_CONFIGURATION=Release \
+            --build-arg CERT_PATH=$CERT_PATH \
+            --build-arg CERT_PASSWORD=$CERT_PASSWORD \
+            --build-arg DB_PASSWORD=$DB_PASSWORD
+
+      - name: Build and start services
+        run: docker compose -f docker-compose.yml up -d
+
+      - name: Wait for container to be healthy (manual)
+        run: |
+          for i in {1..30}; do
+            docker inspect --format='{{.State.Health.Status}}' veiling | grep -q healthy && break
+            echo "Waiting for veiling..."
+            sleep 2
+          done
+
+      - name: Show veiling logs
+        run: docker logs veiling
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml down -v
