@@ -7,6 +7,6 @@
         public int KVKnummer { get; set; }
         
         // Relaties
-        public ICollection<Kavel> Kavels { get; set; } = new List<Kavel>();
+        public ICollection<Gebruiker> Gebruikers { get; set; } = new List<Gebruiker>();
     }
 }

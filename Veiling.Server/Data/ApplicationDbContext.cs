@@ -26,7 +26,7 @@ namespace Veiling.Server.Data
                 .HasKey(v => v.Id);
 
             modelBuilder.Entity<Gebruiker>()
-                .HasKey(g => g.GebruikerId);
+                .HasKey(g => g.Id);
 
             modelBuilder.Entity<Bedrijf>()
                 .HasKey(b => b.Bedrijfscode);

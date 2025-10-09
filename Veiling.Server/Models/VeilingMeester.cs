@@ -5,6 +5,12 @@
         public int Id { get; set; }
         public int AantalVeilingenBeheerd { get; set; }
         
-        public ICollection<VeilingItem> Veilingen { get; set; } = new List<VeilingItem>();  // 👈 Update!
+        // Foreign key naar Gebruiker
+        public int GebruikerId { get; set; }
+    
+        // Navigation property
+        public Gebruiker Gebruiker { get; set; }
+        
+        public ICollection<VeilingItem> Veilingen { get; set; } = new List<VeilingItem>();  
     }
 }
