@@ -1,5 +1,4 @@
-﻿// src/components/location_dropdown.tsx
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import './location_dropdown.css';
 
 interface LocationDropdownProps {
