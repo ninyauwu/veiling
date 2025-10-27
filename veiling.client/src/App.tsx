@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import ImageUpload from './components/ImageUpload';
+import ImageUpload from './components/ImageUpload.js';
 
 interface Forecast {
     date: string;
