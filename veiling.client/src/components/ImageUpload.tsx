@@ -1,9 +1,10 @@
-import React, {useState, useRef, type FormEvent, type ChangeEvent} from 'react';
-import DefaultImage from "../assets/Upload_Img.png";
-import DefaultImageIcon from "../assets/Upload_icon.svg";
+import {useState, useRef, type FormEvent} from 'react';
+import DefaultImage from "../assets/upload_Img.png";
+import DefaultImageIcon from "../assets/upload_icon.tsx";
 
 const ImageUpload = () => {
     const [avatarURL, setAvatarURL] = useState<string>(DefaultImage);
+    const [showIcon, setShowIcon] = useState<boolean>(true);
 
     const fileUploadRef = useRef<HTMLInputElement>(null); 
 
@@ -12,25 +13,27 @@ const ImageUpload = () => {
         fileUploadRef.current?.click();
     }
 
-    const uploadImageDisplay = async (event: ChangeEvent<HTMLInputElement>) => {
+    const uploadImageDisplay = async () => {
         try {
-        if (!fileUploadRef.current?.files) return;
+            if (!fileUploadRef.current?.files) return;
 
-        const uploadedFile = fileUploadRef.current.files[0];
-        const formData = new FormData();
+            const uploadedFile = fileUploadRef.current.files[0];
 
-        formData.append("File", uploadedFile);
+            const  cashedURL = URL.createObjectURL(uploadedFile);
+            setAvatarURL(cashedURL);
+            setShowIcon(false);
 
-        const response = await fetch("https://api.escuelajs.co/api/v1/files/upload", {
-            method: "post",
-            body: formData
-        })
+            const formData = new FormData();
+            formData.append("file", uploadedFile);
 
-        if (response.status === 201) {
-            const data = await response.json();
-            setAvatarURL(data?.location);
-        }
+            const response = await fetch("https://api.escuelajs.co/api/v1/files/upload", {
+                method: "post",
+                body: formData
+            })
 
+            if (response.status === 201) {
+                const data = await response.json();
+            }
     } catch(error) {
         console.error(error);
         setAvatarURL(DefaultImage);
@@ -41,21 +44,20 @@ const ImageUpload = () => {
     }
 
     return (
-        <div className="relative">
+        <div className="relative w-full h-full">
             <img 
             src={avatarURL}
             alt="UploadImage"
-            className="fixed top-0 left-0" />
+            className="w-full h-full object-cover" />
             <form id="form" encType="multipart/form-data">
+            {showIcon && (
                 <button
                     type="submit"
                     onClick={handleImageUpload}
-                    className="relative-center">
-                    <img
-                        src={DefaultImageIcon}
-                        alt="Upload Image Here."
-                        className="object-cover" />
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <DefaultImageIcon className="w-16 h-16 text-gray-600 hover:text-gray-800" />
                 </button>
+            )}
                 <input 
                 type="file"
                 id="file" 
