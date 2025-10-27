@@ -232,7 +232,7 @@ namespace Veiling.Server.Migrations
                     b.ToTable("Leveranciers");
                 });
 
-            modelBuilder.Entity("Veiling.Server.Models.VeilingItem", b =>
+            modelBuilder.Entity("Veiling.Server.Models.Veiling", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -324,7 +324,7 @@ namespace Veiling.Server.Migrations
                         .HasForeignKey("LeverancierId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Veiling.Server.Models.VeilingItem", "Veiling")
+                    b.HasOne("Veiling.Server.Models.Veiling", "Veiling")
                         .WithMany("Kavels")
                         .HasForeignKey("VeilingId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -344,7 +344,7 @@ namespace Veiling.Server.Migrations
                     b.Navigation("Bedrijf");
                 });
 
-            modelBuilder.Entity("Veiling.Server.Models.VeilingItem", b =>
+            modelBuilder.Entity("Veiling.Server.Models.Veiling", b =>
                 {
                     b.HasOne("Veiling.Server.Models.Veilingmeester", "Veilingmeester")
                         .WithMany("Veilingen")
@@ -385,7 +385,7 @@ namespace Veiling.Server.Migrations
                     b.Navigation("Kavels");
                 });
 
-            modelBuilder.Entity("Veiling.Server.Models.VeilingItem", b =>
+            modelBuilder.Entity("Veiling.Server.Models.Veiling", b =>
                 {
                     b.Navigation("Kavels");
                 });

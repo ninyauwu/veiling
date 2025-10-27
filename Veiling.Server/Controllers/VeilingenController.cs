@@ -17,7 +17,7 @@ namespace Veiling.Server.Controllers
 
         // GET: api/veilingen
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VeilingItem>>> GetVeilingen()
+        public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetVeilingen()
         {
             return await _context.Veilingen
                 .Include(v => v.Veilingmeester)
@@ -28,7 +28,7 @@ namespace Veiling.Server.Controllers
 
         // GET: api/veilingen/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<VeilingItem>> GetVeiling(int id)
+        public async Task<ActionResult<Models.Veiling>> GetVeiling(int id)
         {
             var veiling = await _context.Veilingen
                 .Include(v => v.Veilingmeester)
@@ -46,7 +46,7 @@ namespace Veiling.Server.Controllers
 
         // GET: api/veilingen/actief
         [HttpGet("actief")]
-        public async Task<ActionResult<IEnumerable<VeilingItem>>> GetActieveVeilingen()
+        public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetActieveVeilingen()
         {
             var nu = DateTime.Now;
             return await _context.Veilingen
@@ -59,7 +59,7 @@ namespace Veiling.Server.Controllers
 
         // POST: api/veilingen
         [HttpPost]
-        public async Task<ActionResult<VeilingItem>> CreateVeiling(VeilingItem veiling)
+        public async Task<ActionResult<Models.Veiling>> CreateVeiling(Models.Veiling veiling)
         {
             _context.Veilingen.Add(veiling);
             await _context.SaveChangesAsync();
@@ -69,7 +69,7 @@ namespace Veiling.Server.Controllers
 
         // PUT: api/veilingen/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVeiling(int id, VeilingItem veiling)
+        public async Task<IActionResult> UpdateVeiling(int id, Models.Veiling veiling)
         {
             if (id != veiling.Id)
             {

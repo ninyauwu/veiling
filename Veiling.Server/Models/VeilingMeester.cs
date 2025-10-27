@@ -11,6 +11,6 @@
         // Navigation property
         public Gebruiker Gebruiker { get; set; }
         
-        public ICollection<VeilingItem> Veilingen { get; set; } = new List<VeilingItem>();  
+        public ICollection<Veiling> Veilingen { get; set; } = new List<Veiling>();  
     }
 }
