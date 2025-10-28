@@ -1,6 +1,6 @@
 import {useState, useRef, type FormEvent} from 'react';
-import DefaultImage from "../assets/upload_img.png";
-import DefaultImageIcon from "../assets/upload_icon.tsx";
+import DefaultImage from "../assets/img_upload_bg.png";
+import DefaultImageIcon from "../assets/img_upload.tsx";
 
 interface UploadResponse {
     originalname: string;
