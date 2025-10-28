@@ -36,7 +36,11 @@ h1 {
   line-height: 1.1;
 }
 
-h2,
+h2 {
+  text-align: start;
+  font-size: 2em;
+  font-weight: bold;
+}
 h3 {
   text-align: left;
   margin: 0px;
@@ -45,6 +49,7 @@ p {
   width: 700px;
   word-wrap: normal;
   text-align: left;
+  margin-bottom: 12px;
 }
 
 button {
