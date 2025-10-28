@@ -2,6 +2,12 @@ import {useState, useRef, type FormEvent} from 'react';
 import DefaultImage from "../assets/upload_Img.png";
 import DefaultImageIcon from "../assets/upload_icon.tsx";
 
+interface UploadResponse {
+    originalname: string;
+    filename: string;
+    location: string;
+}
+
 const ImageUpload = () => {
     const [avatarURL, setAvatarURL] = useState<string>(DefaultImage);
     const [showIcon, setShowIcon] = useState<boolean>(true);
@@ -31,16 +37,19 @@ const ImageUpload = () => {
                 body: formData
             })
 
-            if (response.status === 201) {
-                const data = await response.json();
+            if(!response.ok) {
+                throw new Error(`Upload failed: ${response.status}`);
             }
-    } catch(error) {
-        console.error(error);
-        setAvatarURL(DefaultImage);
-    }
 
-        // const  cashedURL = URL.createObjectURL(uploadedFile);
-        // setAvatarURL(cashedURL); 
+            const data = await response.json() as UploadResponse;
+
+            if(data.location) {
+                console.log("Upload succesful: ", data.location);
+            }
+        } catch(error) {
+            console.error(error);
+            setAvatarURL(DefaultImage);
+        }
     }
 
     return (
