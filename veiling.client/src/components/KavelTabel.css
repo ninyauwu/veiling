@@ -1,0 +1,28 @@
+.kavel-tabel table,
+.kavel-tabel th,
+.kavel-tabel td {
+  border: 2px solid;
+  border-color: #d6d6d6;
+  border-collapse: collapse;
+  font-size: 18px;
+  font-weight: normal;
+
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.kavel-tabel th {
+  background-color: #d6d6d6;
+  padding: 6px;
+}
+
+.kavel-row-selected {
+  background-color: #7a1f3d;
+  color: #ffffff;
+}
+
+.kavel-tabel tbody tr:not(.kavel-row-selected) {
+  cursor: pointer;
+}
