@@ -1,17 +1,33 @@
 /* Shared base button */
 .simpele-knop {
   display: inline-flex;
-  align-items: center; /* centers icon + text vertically */
+  align-items: center;
   justify-content: center;
-  gap: 4px; /* spacing between icon and text */
-  padding: 6px;
+  gap: 4px;
+  padding: 12px 32px; /* Meer padding voor grotere knoppen */
   cursor: pointer;
   text-decoration: none;
   border: none;
+  font-size: 16px; /* Grotere tekst */
+  font-weight: 500; /* Medium gewicht */
+  border-radius: 4px; /* Kleine afronding */
+  transition: all 0.2s ease;
 }
 
 /* Primary variant */
-.simpele-knop.primary {
+.simpele-knop-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 32px;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.2s ease;
   background-color: #7a1f3d;
   color: #ffffff;
   box-sizing: border-box;
@@ -19,7 +35,19 @@
 }
 
 /* Secondary variant */
-.simpele-knop.secondary {
+.simpele-knop-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 32px;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.2s ease;
   background-color: transparent;
   color: #7a1f3d;
   box-sizing: border-box;
@@ -27,31 +55,31 @@
 }
 
 /* Hover state for all buttons */
-.simpele-knop.primary:hover {
+.simpele-knop.primary:hover,
+.simpele-knop-primary:hover {
   background-color: #ad327a;
   box-sizing: border-box;
   box-shadow: inset 0 0 0 2.5px #ad327a;
 }
 
-.simpele-knop.secondary:hover {
+.simpele-knop.secondary:hover,
+.simpele-knop-secondary:hover {
   color: #ad327a;
   box-sizing: border-box;
   box-shadow: inset 0 0 0 2.5px #ad327a;
 }
 
 /* Active state for all buttons */
-.simpele-knop:active {
-  /* Default: override in variants if needed */
-}
-
-.simpele-knop.primary:active {
+.simpele-knop.primary:active,
+.simpele-knop-primary:active {
   background-color: #ffffff;
   color: #ad327a;
   box-sizing: border-box;
   box-shadow: inset 0 0 0 2.5px #ad327a;
 }
 
-.simpele-knop.secondary:active {
+.simpele-knop.secondary:active,
+.simpele-knop-secondary:active {
   background-color: #7a1f3d;
   box-sizing: border-box;
   box-shadow: inset 0 0 0 2.5px #7a1f3d;
@@ -63,23 +91,22 @@
   height: 0.8em;
   aspect-ratio: 1 / 1;
   display: inline-block;
-
-  /* Default mask */
   mask: url("/icons/arrow_left.svg") no-repeat center / contain;
   -webkit-mask: url("/icons/arrow_left.svg") no-repeat center / contain;
-
-  background-color: currentColor; /* makes color inherit from button */
+  background-color: currentColor;
 }
 
-.simpele-knop.primary:active .masked-color {
+.simpele-knop.primary:active .masked-color,
+.simpele-knop-primary:active .masked-color {
   color: #ad327a;
 }
 
-/* Change icon color on hover/active based on button state */
-.simpele-knop.secondary:hover .masked-color {
+.simpele-knop.secondary:hover .masked-color,
+.simpele-knop-secondary:hover .masked-color {
   color: #ad327a;
 }
 
-.simpele-knop.secondary:active .masked-color {
+.simpele-knop.secondary:active .masked-color,
+.simpele-knop-secondary:active .masked-color {
   color: #ffffff;
 }
