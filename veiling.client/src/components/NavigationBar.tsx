@@ -1,4 +1,3 @@
-import React from "react";
 import { SimpeleKnopPijl } from "./SimpeleKnop";
 
 interface NavigationBarProps {
