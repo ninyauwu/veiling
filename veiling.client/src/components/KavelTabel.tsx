@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import "./KavelTabel.css";
 
-export default function KavelTabel({ endpoint, onRowSelect }: KavelTabelProps) {
+export default function KavelTabel({
+  endpoint,
+  onRowSelect,
+  onRowChange,
+}: KavelTabelProps) {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +47,12 @@ export default function KavelTabel({ endpoint, onRowSelect }: KavelTabelProps) {
 
         await new Promise((resolve) => setTimeout(resolve, 500));
         setRows(data);
+
+        // Auto-select first row when data loads
+        if (data.length > 0) {
+          setSelectedRowIndex(0);
+          onRowSelect?.(data[0]);
+        }
       } catch (err) {
         if (err instanceof Error) setError(err.message);
         else setError(String(err));
@@ -53,6 +63,29 @@ export default function KavelTabel({ endpoint, onRowSelect }: KavelTabelProps) {
 
     fetchData();
   }, [endpoint]);
+
+  // Effect to handle external row changes
+  useEffect(() => {
+    if (onRowChange && selectedRowIndex !== null && rows.length > 0) {
+      const newIndex = onRowChange(selectedRowIndex, rows.length);
+
+      // Only update if the index is valid and different from current
+      if (
+        newIndex >= 0 &&
+        newIndex < rows.length &&
+        newIndex !== selectedRowIndex
+      ) {
+        setSelectedRowIndex(newIndex);
+        onRowSelect?.(rows[newIndex]);
+      }
+    }
+  }, [onRowChange, selectedRowIndex, rows, onRowSelect]);
+
+  const handleRowClick = (i: number) => {
+    if (selectedRowIndex === i) return;
+    setSelectedRowIndex(i);
+    onRowSelect?.(rows[i]);
+  };
 
   if (loading) return <p className="text-gray-500">Loading...</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
@@ -73,11 +106,7 @@ export default function KavelTabel({ endpoint, onRowSelect }: KavelTabelProps) {
         {rows.map((row, i) => (
           <tr
             key={i}
-            onClick={() => {
-              if (selectedRowIndex == i) return;
-              setSelectedRowIndex(i);
-              if (onRowSelect) onRowSelect(rows[i]);
-            }}
+            onClick={() => handleRowClick(i)}
             className={selectedRowIndex === i ? "kavel-row-selected" : ""}
           >
             {columns.map((col) => (
@@ -95,4 +124,5 @@ export default function KavelTabel({ endpoint, onRowSelect }: KavelTabelProps) {
 interface KavelTabelProps {
   endpoint: string;
   onRowSelect?: (row: object) => void;
+  onRowChange?: (currentRowIndex: number, maxRows: number) => number;
 }
