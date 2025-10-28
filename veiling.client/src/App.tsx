@@ -1,10 +1,12 @@
 import './App.css';
-import ImageUpload from './components/ImageUpload.js';
+import ImageUpload from './components/ImageUpload';
+import LoginWidget from './components/LoginWidget';
 
 function App() {
     return (
         <div className="flex">
             <>
+                <LoginWidget />
                 <ImageUpload />
             </>
         </div>
