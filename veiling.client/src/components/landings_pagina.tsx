@@ -1,0 +1,64 @@
+﻿import Header from './header_loggedout';
+
+function LandingsPagina() {
+    return (
+        <div className="bg-white w-full overflow-x-hidden">
+            <Header />
+
+            <div
+                className="w-screen bg-cover bg-center bg-no-repeat flex items-center justify-center"
+                style={{
+                    backgroundImage: 'url(/background.jpg)',
+                    minHeight: '100vh',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    position: 'relative'
+                }}
+            >
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        zIndex: 1
+                    }}
+                />
+
+                <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 1rem' }}>
+                    <h1
+                        className="text-5xl md:text-7xl font-bold text-white mb-12 max-w-5xl leading-tight mx-auto"
+                        style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.5)' }}
+                    >
+                        Het veilingplatform voor de moderne sierteelthandelaar
+                    </h1>
+
+                    <div className="flex gap-6 justify-center">
+                        <button
+                            className="px-8 py-4 rounded-lg font-semibold text-lg transition"
+                            style={{
+                                backgroundColor: 'white',
+                                color: '#7A1F3D',
+                                border: '2px solid white'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                        >
+                            Ik ben een koper
+                        </button>
+                        <button
+                            className="text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/20 transition border-2 border-white"
+                            style={{ backgroundColor: 'transparent', backdropFilter: 'blur(10px)' }}
+                        >
+                            Ik ben een verkoper
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default LandingsPagina;
