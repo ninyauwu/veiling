@@ -1,6 +1,6 @@
 ﻿namespace Veiling.Server.Models
 {
-    public class VeilingItem  // ✅ Geen conflict!
+    public class Veiling 
     {
         public int Id { get; set; }
         public string Naam { get; set; } = string.Empty;

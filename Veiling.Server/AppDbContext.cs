@@ -15,7 +15,7 @@ namespace Veiling.Server
         public DbSet<Gebruiker> Gebruikers { get; set; }
         public DbSet<Veilingmeester> Veilingmeesters { get; set; }
         public DbSet<Leverancier> Leveranciers { get; set; }
-        public DbSet<VeilingItem> Veilingen { get; set; }
+        public DbSet<Models.Veiling> Veilingen { get; set; }
         public DbSet<Kavel> Kavels { get; set; }
         public DbSet<Bod> Boden { get; set; }
 
@@ -49,12 +49,6 @@ namespace Veiling.Server
                 .WithMany()
                 .HasForeignKey(vm => vm.GebruikerId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Veilingmeester>()
-                .HasMany(vm => vm.Veilingen)
-                .WithOne(v => v.Veilingmeester)
-                .HasForeignKey(v => v.VeilingmeesterId)
-                .OnDelete(DeleteBehavior.SetNull);
             
             modelBuilder.Entity<Leverancier>()
                 .HasKey(l => l.Id);
@@ -71,10 +65,10 @@ namespace Veiling.Server
                 .HasForeignKey(k => k.LeverancierId)
                 .OnDelete(DeleteBehavior.SetNull);
             
-            modelBuilder.Entity<VeilingItem>()
+            modelBuilder.Entity<Models.Veiling>()
                 .HasKey(v => v.Id);
 
-            modelBuilder.Entity<VeilingItem>()
+            modelBuilder.Entity<Models.Veiling>()
                 .HasMany(v => v.Kavels)
                 .WithOne(k => k.Veiling)
                 .HasForeignKey(k => k.VeilingId)
@@ -91,6 +85,7 @@ namespace Veiling.Server
             
             modelBuilder.Entity<Bod>()
                 .HasKey(b => b.Id);
+            
         }
     }
 }
