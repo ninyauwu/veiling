@@ -43,14 +43,24 @@ function LandingsPagina() {
                                 color: '#7A1F3D',
                                 border: '2px solid white'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dddddd')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
                         >
                             Ik ben een koper
                         </button>
+
                         <button
-                            className="text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/20 transition border-2 border-white"
-                            style={{ backgroundColor: 'transparent', backdropFilter: 'blur(10px)' }}
+                            className="text-white px-8 py-4 rounded-lg font-semibold text-lg transition border-2 border-white"
+                            style={{
+                                backgroundColor: 'transparent',
+                                backdropFilter: 'blur(10px)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.18)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
                         >
                             Ik ben een verkoper
                         </button>

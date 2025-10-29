@@ -1,14 +1,13 @@
-import './App.css';
-import ImageUpload from './components/ImageUpload.js';
+// App.tsx
+import React from 'react';
+import LandingsPagina from './components/landings_pagina';
 
-function App() {
+const App: React.FC = () => {
     return (
-        <div className="flex">
-            <>
-                <ImageUpload />
-            </>
+        <div className="App">
+            <LandingsPagina />
         </div>
     );
-}
+};
 
 export default App;
