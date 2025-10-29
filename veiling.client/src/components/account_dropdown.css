@@ -1,0 +1,202 @@
+:root {
+    /* Kleuren kun je afstemmen op Bloomify */
+    --pd-bg: #ffffff;
+    --pd-fg: #111827;
+    --pd-muted: #6b7280;
+    --pd-border: #e5e7eb;
+    --pd-shadow: 0 12px 24px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.06);
+    --pd-brand: #7c1230; /* maroon-ish uit je wireframe */
+    --pd-danger: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --pd-bg: #0f172a;
+        --pd-fg: #e5e7eb;
+        --pd-muted: #93a3b8;
+        --pd-border: #1f2937;
+        --pd-shadow: 0 12px 24px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.25);
+        --pd-brand: #c34b6a;
+        --pd-danger: #ef4444;
+    }
+}
+
+.pd-wrapper {
+    position: fixed;
+    top: 16px;
+    right: 24px;
+    z-index: 2000;
+}
+
+.pd-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #111827;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+    .pd-trigger:hover {
+        border: 2px solid #7A1F3D;
+        box-shadow: 0 0 0 3px rgba(122, 31, 61, 0.25);
+        background-color: #f9f9f9;
+    }
+
+    .pd-trigger:focus,
+    .pd-trigger:focus-visible,
+    .pd-trigger:active {
+        outline: none;
+        border: 2px solid #7A1F3D;
+        box-shadow: 0 0 0 3px rgba(122, 31, 61, 0.25);
+    }
+
+.pd-avatar,
+.pd-icon {
+    width: 32px;
+    height: 32px;
+    color: #111827;
+}
+
+.pd-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    min-width: 320px;
+    max-width: 360px;
+    background: var(--pd-bg);
+    color: var(--pd-fg);
+    border: 1px solid var(--pd-border);
+    border-radius: 14px;
+    box-shadow: var(--pd-shadow);
+    z-index: 1000;
+    overflow: hidden;
+    animation: pd-pop .12s ease-out both;
+}
+
+.pd-menu--right {
+    right: 0;
+}
+
+.pd-menu--left {
+    left: 0;
+}
+
+@keyframes pd-pop {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.pd-header {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    align-items: center;
+    column-gap: 24px;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--pd-border);
+}
+
+    .pd-header:focus-visible {
+        box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--pd-brand) 30%, transparent);
+        border-radius: 10px;
+    }
+
+.pd-header__left {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.pd-header__avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(122, 31, 61, 0.1);
+    color: #7A1F3D;
+}
+
+.pd-header__avatarIcon {
+    width: 42px;
+    height: 42px;
+}
+
+.pd-header__avatar--fallback {
+    display: grid;
+    place-items: center;
+    background: color-mix(in oklab, var(--pd-brand) 12%, transparent);
+    color: var(--pd-brand);
+}
+
+.pd-header__right {
+    display: grid;
+    justify-items: start;
+    align-content: center;
+    row-gap: 4px;
+    text-align: left !important;
+}
+
+.pd-line {
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
+    color: #000;
+    letter-spacing: 0;
+}
+
+    .pd-line:nth-child(2),
+    .pd-line:nth-child(3) {
+        color: inherit;
+    }
+
+.pd-actions {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    background: color-mix(in oklab, var(--pd-bg) 94%, var(--pd-border));
+}
+
+.pd-action {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--pd-border);
+    background: var(--pd-bg);
+    color: var(--pd-fg);
+    cursor: pointer;
+    font: inherit;
+}
+
+    .pd-action:hover {
+        background: color-mix(in oklab, var(--pd-brand) 6%, var(--pd-bg));
+        border-color: color-mix(in oklab, var(--pd-brand) 25%, var(--pd-border));
+    }
+
+    .pd-action:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--pd-brand) 25%, transparent);
+    }
+
+.pd-action--danger {
+    color: var(--pd-danger);
+    border-color: color-mix(in oklab, var(--pd-danger) 25%, var(--pd-border));
+}
+
+    .pd-action--danger:hover {
+        background: color-mix(in oklab, var(--pd-danger) 6%, var(--pd-bg));
+    }
