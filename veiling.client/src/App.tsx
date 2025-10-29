@@ -1,4 +1,3 @@
-// App.tsx
 import React from 'react';
 import LandingsPagina from './components/landings_pagina';
 
