@@ -10,7 +10,7 @@
 .auc-card {
     background: var(--bg);
     border: 2px solid var(--brand);
-    border-radius: 8px;
+    border-radius: 0px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
     color: var(--ink);
     width: 440px;
