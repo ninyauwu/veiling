@@ -21,35 +21,35 @@ const ImageUpload = () => {
 
     const uploadImageDisplay = async () => {
         try {
-            if (!fileUploadRef.current?.files) return;
+                if (!fileUploadRef.current?.files) return;
 
-            const uploadedFile = fileUploadRef.current.files[0];
+                const uploadedFile = fileUploadRef.current.files[0];
 
-            const  cashedURL = URL.createObjectURL(uploadedFile);
-            setAvatarURL(cashedURL);
-            setShowIcon(false);
+                const  cashedURL = URL.createObjectURL(uploadedFile);
+                setAvatarURL(cashedURL);
+                setShowIcon(false);
 
-            const formData = new FormData();
-            formData.append("file", uploadedFile);
+                const formData = new FormData();
+                formData.append("file", uploadedFile);
 
-            const response = await fetch("https://api.escuelajs.co/api/v1/files/upload", {
-                method: "post",
-                body: formData
-            })
+                const response = await fetch("https://api.escuelajs.co/api/v1/files/upload", {
+                    method: "post",
+                    body: formData
+                })
 
-            if(!response.ok) {
-                throw new Error(`Upload failed: ${response.status}`);
+                if(!response.ok) {
+                    throw new Error(`Upload failed: ${response.status}`);
+                }
+
+                const data = await response.json() as UploadResponse;
+
+                if(data.location) {
+                    console.log("Upload succesful: ", data.location);
+                }
+            } catch(error) {
+                console.error(error);
+                setAvatarURL(DefaultImage);
             }
-
-            const data = await response.json() as UploadResponse;
-
-            if(data.location) {
-                console.log("Upload succesful: ", data.location);
-            }
-        } catch(error) {
-            console.error(error);
-            setAvatarURL(DefaultImage);
-        }
     }
 
     return (
