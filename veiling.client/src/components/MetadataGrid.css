@@ -1,0 +1,51 @@
+/* MetadataGrid.css */
+.metadata-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-left: -12px;
+  padding: 12px 0px;
+  color: #636363;
+}
+
+.metadata-item {
+  display: flex;
+  align-items: center;
+  padding: 0px 12px;
+  position: relative;
+}
+
+/* Add separator after each item */
+.metadata-item::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 80%;
+  width: 1.5px;
+  background-color: #d9d9d9;
+}
+
+/* Remove separator from the last item in the container */
+.metadata-item:last-child::after {
+  display: none;
+}
+
+/* Remove separator when item wraps to new line */
+@media (max-width: 768px) {
+  .metadata-item:nth-child(n)::after {
+    display: none;
+  }
+
+  .metadata-item:not(:last-child) {
+    margin-bottom: 8px;
+  }
+}
+
+.metadata-label {
+  margin-right: 5px;
+}
+
+.metadata-value {
+}
