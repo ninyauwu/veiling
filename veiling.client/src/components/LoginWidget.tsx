@@ -2,6 +2,7 @@ import React, { useState} from 'react';
 import bloomifyLogo from '../assets/bloomify_naam_logo.png';
 import emailIcon from '../assets/login/email.png';
 import keyIcon from '../assets/login/key.png';
+import './LoginWidget.css';
 
 interface UploadResponse {
     originalname: string;
@@ -47,62 +48,62 @@ function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-300 flex items-center justify-center p-8">
-            <div className="w-100 h-100">
-                <div className="space-y-8">
+        <div className="login-container">
+            <div className="login-form-wrapper">
+                <div className="login-form-content">
                     {/* Logo/Title Section */}
-                        <div className="text-center mb-12">
-                            <img src={bloomifyLogo} alt="Bloomify" className="mx-auto" />
-                        </div>
+                    <div className="login-logo-section">
+                        <img src={bloomifyLogo} alt="Bloomify" className="login-logo" />
+                    </div>
 
-                        {/* Email Input */}
-                        <div className="relative">
-                            <input
+                    {/* Email Input */}
+                    <div className="login-input-wrapper">
+                        <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Email"
-                            className="w-full bg-transparent border-b-2 border-black pb-2 text-lg placeholder-black focus:outline-none focus:border-purple-900"
+                            className="login-input"
                             required
-                            />
-                            <img src={emailIcon} alt="" className="absolute right-0 top-0 w-6 h-6" />
-                        </div>
+                        />
+                        <img src={emailIcon} alt="" className="login-input-icon" />
+                    </div>
 
-                        {/* Password Input */}
-                        <div className="relative">
+                    {/* Password Input */}
+                    <div className="login-input-wrapper">
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Password"
+                            className="login-input"
+                            required
+                        />
+                        <img src={keyIcon} alt="" className="login-input-icon" />
+                    </div>
+
+                    {/* Remember Me and Forgot Password */}
+                    <div className="login-options">
+                        <label className="login-remember-label">
                             <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Password"
-                                className="w-full bg-transparent border-b-2 border-black pb-2 text-lg placeholder-black focus:outline-none focus:border-purple-900"
-                                required
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="login-checkbox"
                             />
-                            <img src={keyIcon} alt="" className="absolute right-0 top-0 w-6 h-6" />
-                        </div>
+                            <span className="login-remember-text">Remember me</span>
+                        </label>
+                        <a href="#" className="login-forgot-link">
+                            Forgot password?
+                        </a>
+                    </div>
 
-                        {/* Remember Me and Forgot Password */}
-                        <div className="flex items-center justify-between text-sm">
-                            <label className="flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                    className="w-5 h-5 mr-2 cursor-pointer accent-black"
-                                />
-                                <span className="font-semibold">Remember me</span>
-                            </label>
-                            <a href="#" className="italic underline font-medium">
-                                Forgot password?
-                            </a>
-                        </div>
-
-            {/* Login Button */}
+                    {/* Login Button */}
                     <button
                         type="button"
                         onClick={handleSubmit}
-                        className="w-full bg-purple-900 text-white py-4 text-2xl font-semibold hover:bg-purple-800 transition-colors"
-                        >
+                        className="login-button"
+                    >
                         Login
                     </button>
                 </div>

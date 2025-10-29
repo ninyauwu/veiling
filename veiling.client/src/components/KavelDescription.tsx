@@ -1,19 +1,20 @@
 import { useState } from 'react';
+import './KavelDescription.css';
 
-function ImageDescription() {
+function KavelDescription() {
     const [description, setDescription] = useState('');
-
+    
     return (
-        <div className="w-100 ">
+        <div className="kavel-container">
             <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Description"
-                className="w-full bg-grey-400 p-4 text-white placeholder-gray-600 border border-gray-400 focus:outline-none focus:border-gray-600 resize-none"
+                className="kavel-textarea"
                 rows={4}
             />
         </div>
     );
 }
 
-export default ImageDescription;
+export default KavelDescription;
