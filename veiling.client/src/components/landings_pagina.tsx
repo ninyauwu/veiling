@@ -45,6 +45,20 @@ function LandingsPagina() {
                             }}
                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dddddd')}
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
+                            onMouseDown={(e) => {
+                                // tijdelijk stijl van de verkoper knop
+                                e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.18)';
+                                e.currentTarget.style.color = 'white';
+                                e.currentTarget.style.backdropFilter = 'blur(10px)';
+                                e.currentTarget.style.border = '2px solid white';
+                            }}
+                            onMouseUp={(e) => {
+                                // terug naar originele stijl
+                                e.currentTarget.style.backgroundColor = 'white';
+                                e.currentTarget.style.color = '#7A1F3D';
+                                e.currentTarget.style.backdropFilter = 'none';
+                                e.currentTarget.style.border = '2px solid white';
+                            }}
                         >
                             Ik ben een koper
                         </button>
@@ -55,11 +69,21 @@ function LandingsPagina() {
                                 backgroundColor: 'transparent',
                                 backdropFilter: 'blur(10px)'
                             }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.18)';
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.18)')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                            onMouseDown={(e) => {
+                                // tijdelijk stijl van de koper knop
+                                e.currentTarget.style.backgroundColor = 'white';
+                                e.currentTarget.style.color = '#7A1F3D';
+                                e.currentTarget.style.backdropFilter = 'none';
+                                e.currentTarget.style.border = '2px solid white';
                             }}
-                            onMouseLeave={(e) => {
+                            onMouseUp={(e) => {
+                                // terug naar originele stijl
                                 e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.color = 'white';
+                                e.currentTarget.style.backdropFilter = 'blur(10px)';
+                                e.currentTarget.style.border = '2px solid white';
                             }}
                         >
                             Ik ben een verkoper
