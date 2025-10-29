@@ -1,12 +1,10 @@
 import './App.css';
-import ImageUpload from './components/ImageUpload.js';
+import AuctionCountdown from './components/AuctionCountdown';
 
 function App() {
     return (
         <div className="flex">
-            <>
-                <ImageUpload />
-            </>
+            <AuctionCountdown />
         </div>
     );
 }
