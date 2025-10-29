@@ -47,8 +47,8 @@ function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-300 flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
+        <div className="min-h-screen bg-gray-300 flex items-center justify-center p-8">
+            <div className="w-100 h-100">
                 <div className="space-y-8">
                     {/* Logo/Title Section */}
                         <div className="text-center mb-12">
