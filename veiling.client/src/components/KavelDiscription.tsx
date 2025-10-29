@@ -9,7 +9,7 @@ function ImageDescription() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Description"
-                className="w-full bg-gray-800 p-4 text-black placeholder-gray-600 border border-gray-400 focus:outline-none focus:border-gray-600 resize-none"
+                className="w-full bg-grey-400 p-4 text-white placeholder-gray-600 border border-gray-400 focus:outline-none focus:border-gray-600 resize-none"
                 rows={4}
             />
         </div>
