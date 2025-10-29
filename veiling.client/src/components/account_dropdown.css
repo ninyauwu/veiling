@@ -1,11 +1,10 @@
 :root {
-    /* Kleuren kun je afstemmen op Bloomify */
     --pd-bg: #ffffff;
     --pd-fg: #111827;
     --pd-muted: #6b7280;
     --pd-border: #e5e7eb;
     --pd-shadow: 0 12px 24px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.06);
-    --pd-brand: #7c1230; /* maroon-ish uit je wireframe */
+    --pd-brand: #7c1230;
     --pd-danger: #b91c1c;
 }
 

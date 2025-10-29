@@ -3,9 +3,7 @@ import "./account_dropdown.css";
 
 interface account_dropdownProps {
   className?: string;
-  // Optioneel: positie-variant ("right" voor rechts uitlijnen)
   align?: "left" | "right";
-  // Placeholder data kun je straks vervangen door echte user data
   lines?: [string, string, string, string];
   avatarUrl?: string;
 }
@@ -25,7 +23,6 @@ export default function account_dropdown({
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // Buiten-klik en Escape om te sluiten
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!open) return;
@@ -50,10 +47,8 @@ export default function account_dropdown({
     };
   }, [open]);
 
-  // Focus het menu wanneer open
   useEffect(() => {
     if (open) {
-      // focus het eerste focuseerbare element in het menu
       const first = menuRef.current?.querySelector<HTMLElement>("[tabindex]");
       first?.focus();
     }
