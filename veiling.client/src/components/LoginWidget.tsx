@@ -3,12 +3,6 @@ import bloomifyLogo from '../assets/bloomify_naam_logo.png';
 import emailIcon from '../assets/login/email.png';
 import keyIcon from '../assets/login/key.png';
 
-interface UploadResponse {
-    originalname: string;
-    filename: string;
-    location: string;
-}
-
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
