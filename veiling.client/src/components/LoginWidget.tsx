@@ -4,12 +4,6 @@ import emailIcon from '../assets/login/email.png';
 import keyIcon from '../assets/login/key.png';
 import './LoginWidget.css';
 
-interface UploadResponse {
-    originalname: string;
-    filename: string;
-    location: string;
-}
-
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,6 +12,7 @@ function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Login submitted:', { email, password, rememberMe });
+    };
 
     return (
         <div className="login-container">
