@@ -1,0 +1,47 @@
+.form-table-container {
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    font-family: Arial, sans-serif;
+}
+
+.form-table-header {
+    background-color: #6b2c3e;
+    color: white;
+    padding: 0.75rem;
+    text-align: right;
+    font-weight: normal;
+    font-size: 1rem;
+}
+
+.form-table-row {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #ffffff;
+}
+
+.form-table-row:last-child {
+    border-bottom: none;
+}
+
+.form-table-label {
+    background-color: #e0e0e0;
+    padding: 0.75rem;
+    text-align: right;
+    font-weight: normal;
+    color: #000;
+}
+
+.form-table-input {
+    background-color: white;
+    padding: 0.75rem;
+    text-align: right;
+    border: none;
+    outline: none;
+    color: #999;
+    font-size: 1rem;
+}
+
+.form-table-input::placeholder {
+    color: #999;
+}
