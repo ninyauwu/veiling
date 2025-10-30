@@ -59,7 +59,7 @@ function getIcon(maskUrl: string) {
 }
 
 interface SimpeleKnopProps {
-  children: ReactNode;
+  children?: ReactNode;
   label?: string;
   onClick?: () => void;
   disabled?: boolean;
