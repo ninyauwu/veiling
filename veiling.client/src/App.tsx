@@ -1,15 +1,15 @@
-import './App.css';
-import ImageUpload from './components/ImageUpload';
-import LoginWidget from './components/LoginWidget';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingsPagina from './components/LandingsPagina';
+import LoginPagina from './components/LoginPagina';
 
 function App() {
     return (
-        <div className="flex">
-            <>
-                <LoginWidget />
-                <ImageUpload />
-            </>
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/" element={<LandingsPagina />} />
+                <Route path="/login" element={<LoginPagina />} />
+            </Routes>
+        </Router>
     );
 }
 

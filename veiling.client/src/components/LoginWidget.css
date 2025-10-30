@@ -1,6 +1,6 @@
 .login-container {
     min-height: 100vh;
-    background-color: #d1d5db;
+    background-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10,6 +10,8 @@
 .login-form-wrapper {
     width: 100%;
     max-width: 28rem;
+    background-color: rgba(209, 213, 219, 0.5);
+    padding: 3rem 2rem;
 }
 
 .login-form-content {
