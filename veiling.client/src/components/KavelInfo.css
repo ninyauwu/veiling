@@ -1,0 +1,33 @@
+.selection-box {
+  background-color: #d9d9d9;
+  padding: 5px;
+}
+
+.company-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  color: #636363;
+}
+
+.company-name {
+  font-size: 18px;
+  color: black;
+}
+
+.company-rating {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #7a1f3d;
+  color: #ffffff;
+  padding: 0px 6px;
+  height: 2em;
+}
+
+.quality-star {
+  width: 1.25em;
+  height: 1.25em;
+  margin-left: -2px;
+}
