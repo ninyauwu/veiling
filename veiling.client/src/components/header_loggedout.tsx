@@ -14,8 +14,8 @@ function Header({ showLocationDropdown = true }: HeaderProps) {
         <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
             <div className="max-w-[1920px] mx-auto px-8 py-4">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-40">
-                        <div className="scale-300 origin-left">
+                    <div className="flex items-center gap-50">
+                        <div className="scale-350 origin-left">
                             <img
                                 src={bloomifyLogo}
                                 alt="Bloomify Logo"

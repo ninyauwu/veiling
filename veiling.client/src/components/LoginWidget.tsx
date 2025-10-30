@@ -4,12 +4,6 @@ import emailIcon from '../assets/login/email.png';
 import keyIcon from '../assets/login/key.png';
 import './LoginWidget.css';
 
-interface UploadResponse {
-    originalname: string;
-    filename: string;
-    location: string;
-}
-
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,33 +12,6 @@ function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Login submitted:', { email, password, rememberMe });
-        
-        try {
-            if (email === '' || password === '') return;
-
-            const formData = new FormData();
-            var emailAndPassword = email + "&" + password;
-            formData.append("file", emailAndPassword);
-
-            const response = await fetch("https://api.escuelajs.co/api/v1/files/upload", {
-                method: "post",
-                body: formData
-            })
-
-            if(!response.ok) {
-                if(!response.ok) {
-                    throw new Error(`Upload failed: ${response.status}`);
-                }
-
-                const data = await response.json() as UploadResponse;
-
-                if(data.location) {
-                    console.log("Upload succesful: ", data.location);
-                }
-            }
-        } catch(error) {
-            console.log(error);
-        }
     };
 
     return (
