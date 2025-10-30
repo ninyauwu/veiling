@@ -15,7 +15,7 @@
 }
 
 /* Primary variant */
-.simpele-knop-primary {
+.simpele-knop.primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -35,7 +35,7 @@
 }
 
 /* Secondary variant */
-.simpele-knop-secondary {
+.simpele-knop.secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -55,15 +55,13 @@
 }
 
 /* Hover state for all buttons */
-.simpele-knop.primary:hover,
-.simpele-knop-primary:hover {
+.simpele-knop.primary:hover {
   background-color: #ad327a;
   box-sizing: border-box;
   box-shadow: inset 0 0 0 2.5px #ad327a;
 }
 
-.simpele-knop.secondary:hover,
-.simpele-knop-secondary:hover {
+.simpele-knop.secondary:hover {
   color: #ad327a;
   box-sizing: border-box;
   box-shadow: inset 0 0 0 2.5px #ad327a;
@@ -78,8 +76,7 @@
   box-shadow: inset 0 0 0 2.5px #ad327a;
 }
 
-.simpele-knop.secondary:active,
-.simpele-knop-secondary:active {
+.simpele-knop.secondary:active {
   background-color: #7a1f3d;
   box-sizing: border-box;
   box-shadow: inset 0 0 0 2.5px #7a1f3d;
@@ -96,17 +93,14 @@
   background-color: currentColor;
 }
 
-.simpele-knop.primary:active .masked-color,
-.simpele-knop-primary:active .masked-color {
+.simpele-knop.primary:active .masked-color {
   color: #ad327a;
 }
 
-.simpele-knop.secondary:hover .masked-color,
-.simpele-knop-secondary:hover .masked-color {
+.simpele-knop.secondary:hover .masked-color {
   color: #ad327a;
 }
 
-.simpele-knop.secondary:active .masked-color,
-.simpele-knop-secondary:active .masked-color {
+.simpele-knop.secondary:active .masked-color {
   color: #ffffff;
 }

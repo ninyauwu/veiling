@@ -11,7 +11,7 @@ export default function SimpeleKnop({
 }: SimpeleKnopProps) {
   return (
     <button
-      className={"simpele-knop-" + appearance}
+      className={"simpele-knop " + appearance}
       onClick={onClick}
       disabled={disabled}
       type={type}
