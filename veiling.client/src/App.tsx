@@ -1,18 +1,14 @@
-import "./App.css";
-import AccountDropdown, { AccountDropdownLine } from "./components/account_dropdown";
+import './App.css';
+import ImageUpload from './components/ImageUpload';
 
 function App() {
     return (
-        <div style={{ padding: "2rem" }}>
-            <AccountDropdown>
-                <AccountDropdownLine>Naam</AccountDropdownLine>
-                <AccountDropdownLine>E-mail</AccountDropdownLine>
-                <AccountDropdownLine>Bedrijf</AccountDropdownLine>
-                <AccountDropdownLine>Functie</AccountDropdownLine>
-            </AccountDropdown>
+        <div className="flex">
+            <>
+                <ImageUpload />
+            </>
         </div>
     );
 }
-
 
 export default App;
