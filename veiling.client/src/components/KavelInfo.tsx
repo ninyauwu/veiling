@@ -34,7 +34,13 @@ function KavelInfo() {
   };
 
   return (
-    <div className="flex-column">
+    <div
+      className="flex-column"
+      style={{
+        maxWidth: "60%",
+        paddingLeft: "20%",
+      }}
+    >
       <h1 className="hidden">Veilingpagina</h1>
       <h2 className="hidden">Kaveltabel</h2>
       <KavelTabel
