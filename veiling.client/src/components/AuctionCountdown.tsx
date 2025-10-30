@@ -14,7 +14,7 @@ export default function AuctionCountdown() {
                 </div>
                 <div className="auc-timer__cell">
                     <span className="auc-timer__value">12</span>
-                    <span className="auc-timer__unit">d</span>
+                    <span className="auc-timer__unit">h</span>
                 </div>
                 <div className="auc-timer__cell">
                     <span className="auc-timer__value">55</span>
