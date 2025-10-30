@@ -19,6 +19,9 @@
   width: 440px;
   padding-bottom: 0.5rem;
   overflow: hidden;
+
+  position: sticky;
+  top: 120px;
 }
 
 .auc-card__head {
@@ -135,4 +138,3 @@
   background-color: var(--border);
   opacity: 0.8;
 }
-
