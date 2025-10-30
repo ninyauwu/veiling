@@ -1,15 +1,18 @@
 import "./App.css";
-import AccountDropdown from "./components/account_dropdown.tsx";
+import AccountDropdown, { AccountDropdownLine } from "./components/account_dropdown";
 
 function App() {
-
     return (
-        <div className="app">
-            <h1>Veiling Test</h1>
-            <AccountDropdown />
-
+        <div style={{ padding: "2rem" }}>
+            <AccountDropdown>
+                <AccountDropdownLine>Naam</AccountDropdownLine>
+                <AccountDropdownLine>E-mail</AccountDropdownLine>
+                <AccountDropdownLine>Bedrijf</AccountDropdownLine>
+                <AccountDropdownLine>Functie</AccountDropdownLine>
+            </AccountDropdown>
         </div>
     );
 }
+
 
 export default App;

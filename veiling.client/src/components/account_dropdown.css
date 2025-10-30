@@ -145,7 +145,7 @@
     justify-items: start;
     align-content: center;
     row-gap: 4px;
-    text-align: left !important;
+    text-align: left;
 }
 
 .pd-line {
