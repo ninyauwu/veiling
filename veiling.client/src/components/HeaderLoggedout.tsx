@@ -1,51 +1,70 @@
 ﻿import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LocationDropdown from "./LocationDropdown";
 import SimpeleKnop from "./SimpeleKnop";
-import bloomifyLogo from "../assets/bloomify_logo.png";
+import bloomifyLogo from "../assets/bloomify_naam_logo.png";
 
 interface HeaderProps {
-  showLocationDropdown?: boolean;
+    showLocationDropdown?: boolean;
 }
 
 function Header({ showLocationDropdown = true }: HeaderProps) {
-  const [selectedLocation, setSelectedLocation] = useState("");
+    const [selectedLocation, setSelectedLocation] = useState("");
+    const navigate = useNavigate();
 
-  return (
-    <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-[1920px] mx-auto px-8 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-50">
-            <div className="scale-350 origin-left">
-              <img
-                src={bloomifyLogo}
-                alt="Bloomify Logo"
-                className="h-16 w-auto"
-              />
+    return (
+        <div
+            style={{
+                width: "100%",
+                height: "80px",
+                backgroundColor: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 40px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                position: "fixed",
+                top: 0,
+                left: 0,
+                zIndex: 1000,
+            }}
+        >
+            <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
+                <img
+                    src={bloomifyLogo}
+                    alt="Bloomify"
+                    style={{
+                        height: "80px",  
+                        cursor: "pointer",
+                        marginTop: "4px", 
+                    }}
+                    onClick={() => navigate('/')}
+                />
+
+                {showLocationDropdown && (
+                    <div>
+                        <LocationDropdown
+                            value={selectedLocation}
+                            onChange={setSelectedLocation}
+                        />
+                    </div>
+                )}
             </div>
 
-            {showLocationDropdown && (
-              <div className="relative z-50">
-                <LocationDropdown
-                  value={selectedLocation}
-                  onChange={setSelectedLocation}
+            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <SimpeleKnop
+                    label="Login"
+                    onClick={() => navigate('/login')}
+                    appearance="secondary"
                 />
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-8">
-            <SimpeleKnop label="Verkoop" appearance="primary">
-              {null}
-            </SimpeleKnop>
-            <SimpeleKnop label="Login" appearance="secondary">
-              {null}
-            </SimpeleKnop>
-          </div>
+                <SimpeleKnop
+                    label="Registreer"
+                    onClick={() => {}}
+                    appearance="primary"
+                />
+            </div>
         </div>
-      </div>
-    </header>
-  );
+    );
 }
 
 export default Header;
-
