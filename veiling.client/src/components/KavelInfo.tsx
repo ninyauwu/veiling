@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import KavelTabel from "./KavelTabel";
 import type { KavelTabelRef } from "./KavelTabel";
-import "../App.css";
 import "./KavelInfo.css";
 import Spacer from "./Spacer";
 import ImageSet from "./ImageSet";

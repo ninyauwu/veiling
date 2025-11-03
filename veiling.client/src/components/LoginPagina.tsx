@@ -41,11 +41,7 @@ function LoginPagina() {
                 >
 
                     {/* Login widget */}
-                    <div className="flex justify-center">
-                        <div className="bg-white bg-opacity-90 rounded-2xl shadow-lg p-8 w-full max-w-md">
-                            <Login />
-                        </div>
-                    </div>
+                    <Login />
                 </div>
             </div>
         </div>
