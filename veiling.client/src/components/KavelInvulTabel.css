@@ -1,10 +1,10 @@
-.form-table-container {
+.kavel-invul-container {
     width: 100%;
-    max-width: 400px;
+    max-width: 600px;
     border: 1px solid #ccc;
 }
 
-.form-table-header {
+.kavel-invul-header {
     background-color: #6b2c3e;
     color: white;
     padding: 0.75rem;
@@ -13,25 +13,29 @@
     font-size: 1rem;
 }
 
-.form-table-row {
+.kavel-invul-row {
     display: flex;
-    flex-direction: column;
-    border-bottom: 1px solid #ffffff;
+    border-bottom: 1px solid #ccc;
 }
 
-.form-table-row:last-child {
+.kavel-invul-row:last-child {
     border-bottom: none;
 }
 
-.form-table-label {
+.kavel-invul-label {
     background-color: #e0e0e0;
     padding: 0.75rem;
     text-align: right;
     font-weight: normal;
     color: #000;
+    border-right: 1px solid #ccc;
+    flex: 0 0 200px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
-.form-table-input {
+.kavel-invul-input {
     background-color: white;
     padding: 0.75rem;
     text-align: right;
@@ -39,8 +43,9 @@
     outline: none;
     color: #000000;
     font-size: 1rem;
+    flex: 1;
 }
 
-.form-table-input::placeholder {
+.kavel-invul-input::placeholder {
     color: #999;
 }

@@ -33,7 +33,8 @@ function VerkoperDashboard() {
                 <KavelDescription />
             </div>
             <div
-            style={{flex: 1}}>
+            style={{flex: 1
+            }}>
                 <KavelInvulTabel />
             </div>
             <div
@@ -42,7 +43,7 @@ function VerkoperDashboard() {
                 position: 'fixed',
                 gap: '10px',
                 right: '40px',               
-                top: '90%',                  
+                top: '92%',                  
                 transform: 'translateY(-50%)'
             }}>
                 <SimpeleKnop 
