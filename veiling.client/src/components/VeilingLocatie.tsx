@@ -91,32 +91,30 @@ export default function VeilingLocatieOverzicht() {
         {
             naam: "Amsterdam",
             actief: true,
-            // Over 5 uur en 20 minuten vanaf nu
+            // Over 5 uur en 20 minuten 
             eindTijd: new Date(Date.now() + 5 * 60 * 60 * 1000 + 20 * 60 * 1000),
             achtergrondAfbeelding:
-                "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=500&h=300&fit=crop", // Amsterdam grachten
+                "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=500&h=300&fit=crop", 
         },
         {
             naam: "Rotterdam",
             actief: false,
             eindTijd: null, // Nog niet gestart
             achtergrondAfbeelding:
-                "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=500&h=300&fit=crop", // Rotterdam skyline
+                "https://image.volkskrant.nl/224702415/width/2480/een-menigte-op-het-amsterdamse-mercatorplein-na-de-winst-van", 
         },
         {
             naam: "Delft",
             actief: true,
-            // Over 4 uur en 25 minuten vanaf nu
+            // Over 4 uur en 25 minuten 
             eindTijd: new Date(Date.now() + 4 * 60 * 60 * 1000 + 25 * 60 * 1000),
             achtergrondAfbeelding:
-                "https://www.discoverholland.com/product-images/948e5a43-41f5-4d1d-ae2a-4e79ecaed08a.jpg", // Delft kanalen
+                "https://www.discoverholland.com/product-images/948e5a43-41f5-4d1d-ae2a-4e79ecaed08a.jpg", 
         },
     ];
 
     const handleJoin = (locatieNaam: string) => {
         console.log(`Joining veiling in ${locatieNaam}`);
-        // Hier kun je navigatie toevoegen, bijvoorbeeld:
-        // navigate(`/veiling/${locatieNaam.toLowerCase()}`);
     };
 
     return (
