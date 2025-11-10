@@ -31,10 +31,12 @@ function VerkoperDashboard() {
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px',
-                    height: '400px',
+                    width: '800px',
                     flexShrink: 0
                 }}>
-                <ImageUpload />
+                <div style={{ height: '400px' }}>  {/* Wrap ImageUpload with fixed height */}
+                    <ImageUpload />
+                </div>
                 <KavelDescription />
             </div>
             <div
