@@ -71,6 +71,7 @@
     display: flex;
     align-items: center;
     cursor: pointer;
+    color: black;
 }
 
 .login-checkbox {
@@ -83,18 +84,19 @@
 
 .login-remember-text {
     font-weight: 600;
+    color: black;
 }
 
 .login-forgot-link {
     font-style: italic;
     text-decoration: underline;
     font-weight: 500;
-    color: inherit;
+    color: black;
 }
 
 .login-button {
     width: 100%;
-    background-color: #581c87;
+    background-color: #7A1F3D;
     color: white;
     padding: 1rem;
     font-size: 1.5rem;
@@ -105,5 +107,5 @@
 }
 
 .login-button:hover {
-    background-color: #6b21a8;
+    background-color: #451122;
 }
