@@ -7,7 +7,12 @@ import SimpeleKnop from "../components/SimpeleKnop";
 
 function VerkoperDashboard() {
     return (
-        <div>
+        <div style={{
+            maxWidth: '1400px',  
+            margin: '0 auto',     
+            padding: '0 40px',    
+            width: '100%'
+        }}>
             <HeaderLoggedout />
         <div
             style={{
