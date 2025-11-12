@@ -1,11 +1,20 @@
-// In je App.tsx of een andere pagina:
-import VeilingLocatie from './components/VeilingLocatie';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingsPagina from './components/LandingsPagina';
+import LoginPagina from './components/LoginPagina';
+import Veiling from './pages/Veiling';
+import LocatiePagina from './pages/locaties';
+
 
 function App() {
     return (
-        <div>
-            <VeilingLocatie />
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/" element={<LandingsPagina />} />
+                <Route path="/login" element={<LoginPagina />} />
+                <Route path="/veiling" element={<Veiling />} />
+                <Route path="/locations" element={<LocatiePagina />} />
+            </Routes>
+        </Router>
     );
 }
 
