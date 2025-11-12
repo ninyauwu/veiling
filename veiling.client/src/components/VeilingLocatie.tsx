@@ -101,7 +101,7 @@ export default function VeilingLocatieOverzicht() {
             actief: false,
             eindTijd: null, // Nog niet gestart
             achtergrondAfbeelding:
-                "https://image.volkskrant.nl/224702415/width/2480/een-menigte-op-het-amsterdamse-mercatorplein-na-de-winst-van", 
+                "https://image.volkskrant.nl/224702415/width/2480/een-menigte-op-het-amsterdamse-mercatorplein-na-de-winst-van",
         },
         {
             naam: "Delft",
@@ -119,7 +119,7 @@ export default function VeilingLocatieOverzicht() {
 
     return (
         <div className="veiling-locatie-container">
-            <h1 className="section-titel">Veiling locatie</h1>
+            <h1 className="section-titel">Kies veiling locatie</h1>
             <div className="locatie-grid">
                 {locaties.map((locatie) => (
                     <VeilingLocatie
