@@ -37,7 +37,6 @@ function KavelInfo() {
   const [selected, setSelected] = useState<number | null>(0);
   const [loading, setLoading] = useState(true);
 
-  // Fetch Kavels from the backend
   useEffect(() => {
     async function fetchKavels() {
       try {
