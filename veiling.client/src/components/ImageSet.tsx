@@ -40,7 +40,7 @@ const AspectRatioImageGrid: React.FC<AspectRatioImageGridProps> = ({
         >
           <img
             src={imagePath}
-            alt={`Image ${index + 1}`}
+            alt={`Kavel afbeelding ${index + 1}`}
             style={{
               width: "100%",
               height: "100%",
