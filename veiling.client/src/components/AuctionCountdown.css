@@ -1,140 +1,134 @@
 :root {
-  --brand: #7a1f3d;
-  --ink: #1f2937;
-  --muted: #6b7280;
-  --panel: #f3f4f6;
-  --border: #e5e7eb;
-  --bg: #ffffff;
+    --brand: #7A1F3D;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --panel: #f3f4f6;
+    --border: #e5e7eb;
+    --bg: #ffffff;
 }
 
 .auc-card {
-  display: inline-block; /* or inline-flex */
-  height: fit-content;
-  flex-direction: column;
-  background: var(--bg);
-  border: 2px solid var(--brand);
-  border-radius: 0px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  color: var(--ink);
-  width: 440px;
-  padding-bottom: 0.5rem;
-  overflow: hidden;
-
-  position: sticky;
-  top: 120px;
+    background: var(--bg);
+    border: 2px solid var(--brand);
+    border-radius: 0px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    color: var(--ink);
+    width: 440px;
+    padding-bottom: 0.5rem;
+    overflow: hidden;
 }
 
 .auc-card__head {
-  background: var(--panel);
-  padding: 0.55rem 0.9rem;
-  border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    padding: 0.55rem 0.9rem;
+    border-bottom: 1px solid var(--border);
 }
 
 .auc-card__title {
-  margin: 0;
-  font-weight: 600;
-  font-size: 0.95rem;
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .auc-timer {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.8rem 1.2rem;
-  text-align: center;
-  border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
 }
 
 .auc-timer__cell {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.4rem;
-  flex: 1;
-  position: relative;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.4rem;
+    flex: 1;
+    position: relative;
 }
 
 .auc-timer__value {
-  font-size: 1.9rem;
-  font-weight: 600;
+    font-size: 1.9rem;
+    font-weight: 600;
 }
 
 .auc-timer__unit {
-  font-size: 1.1rem;
-  font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .auc-divider {
-  margin: 0;
-  border: none;
-  border-top: 3px solid var(--panel);
+    margin: 0;
+    border: none;
+    border-top: 3px solid var(--panel);
 }
 
 .auc-field {
-  padding: 0.8rem 1.4rem 0.4rem;
-  text-align: left;
+    padding: 0.8rem 1.4rem 0.4rem;
+    text-align: left;
 }
 
 .auc-label {
-  font-weight: 600;
-  font-size: 1.05rem;
-  margin-bottom: 0.4rem;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 0.4rem;
 }
 
 .auc-price {
-  display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
-  margin-bottom: 0.8rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    margin-bottom: 0.8rem;
 }
 
 .auc-price__main {
-  font-size: 2.6rem;
-  font-weight: 700;
+    font-size: 2.6rem;
+    font-weight: 700;
 }
 
 .auc-price__sub {
-  color: var(--muted);
-  font-size: 1.2rem;
+    color: var(--muted);
+    font-size: 1.2rem;
 }
 
 .auc-qty {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
 }
 
 .auc-qty__main {
-  font-size: 2.4rem;
-  font-weight: 700;
+    font-size: 2.4rem;
+    font-weight: 700;
 }
 
 .auc-qty__sub {
-  color: var(--muted);
-  font-size: 1.05rem;
+    color: var(--muted);
+    font-size: 1.05rem;
 }
 
 @media (max-width: 480px) {
-  .auc-card {
-    width: 100%;
-  }
+    .auc-card {
+        width: 100%;
+    }
 
-  .auc-timer__value {
-    font-size: 1.9rem;
-    font-weight: 600;
-  }
+    .auc-timer__value {
+        font-size: 1.9rem;
+        font-weight: 600;
+    }
 
-  .auc-timer__unit {
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
+    .auc-timer__unit {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
 }
 .auc-timer__cell:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 10%;
-  right: 0;
-  width: 1px;
-  height: 80%;
-  background-color: var(--border);
-  opacity: 0.8;
+    content: "";
+    position: absolute;
+    top: 10%;
+    right: 0;
+    width: 1px;
+    height: 80%;
+    background-color: var(--border);
+    opacity: 0.8;
 }

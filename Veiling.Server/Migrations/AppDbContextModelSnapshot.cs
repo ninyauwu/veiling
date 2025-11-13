@@ -215,7 +215,7 @@ namespace Veiling.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BedrijfId")
+                    b.Property<int?>("BedrijfId")
                         .HasColumnType("int");
 
                     b.Property<string>("IndexOfReliabilityOfInformation")
@@ -336,8 +336,7 @@ namespace Veiling.Server.Migrations
                     b.HasOne("Veiling.Server.Models.Bedrijf", "Bedrijf")
                         .WithMany()
                         .HasForeignKey("BedrijfId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Bedrijf");
                 });

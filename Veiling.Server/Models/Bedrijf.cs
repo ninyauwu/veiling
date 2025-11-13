@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Veiling.Server.Models
+﻿namespace Veiling.Server.Models
 {
     public class Bedrijf
     {
@@ -9,7 +7,6 @@ namespace Veiling.Server.Models
         public int KVKnummer { get; set; }
         
         // Relaties
-        [JsonIgnore]
         public ICollection<Gebruiker> Gebruikers { get; set; } = new List<Gebruiker>();
     }
 }

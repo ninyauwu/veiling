@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Veiling.Server.Models
+﻿namespace Veiling.Server.Models
 {
     public class Gebruiker
     {
@@ -18,7 +16,6 @@ namespace Veiling.Server.Models
         public Bedrijf? Bedrijf { get; set; }
         
         // Relaties
-        [JsonIgnore]
         public ICollection<Bod> Boden { get; set; } = new List<Bod>();
     }
 }
