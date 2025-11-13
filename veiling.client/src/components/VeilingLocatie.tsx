@@ -1,13 +1,27 @@
-﻿import { useState, useEffect } from "react";
+﻿// veiling.client/src/components/VeilingLocatie.tsx
+import { useState, useEffect } from "react";
 import "./VeilingLocatie.css";
 import SimpeleKnop from "./SimpeleKnop";
 
+interface Locatie {
+    id: number;
+    naam: string;
+    klokId: number;
+    actief: boolean;
+}
 
+interface VeilingData {
+    id: number;
+    naam: string;
+    startTijd: string;
+    endTijd: string;
+    locatieId: number;
+}
 
 interface VeilingLocatie {
     naam: string;
     actief: boolean;
-    eindTijd: Date | null; // null betekent nog niet gestart (xx:xx)
+    eindTijd: Date | null;
     achtergrondAfbeelding: string;
 }
 
@@ -16,7 +30,7 @@ interface VeilingLocatieProps {
     onJoin?: (locatieNaam: string) => void;
 }
 
-function VeilingLocatie({ locatie, onJoin }: VeilingLocatieProps) {
+function VeilingLocatieCard({ locatie, onJoin }: VeilingLocatieProps) {
     const [tijdOver, setTijdOver] = useState<TimeRemaining | null>(null);
 
     useEffect(() => {
@@ -63,8 +77,8 @@ function VeilingLocatie({ locatie, onJoin }: VeilingLocatieProps) {
                     <div className="header">
                         <h2 className="locatie-naam">{locatie.naam}</h2>
                         <span className="locatie-status">
-              {locatie.actief ? "Actief" : "Non-Actief"}
-            </span>
+                            {locatie.actief ? "Actief" : "Non-Actief"}
+                        </span>
                     </div>
 
                     <div className="footer">
@@ -87,44 +101,88 @@ interface TimeRemaining {
     minuten: number;
 }
 
-// Hoofd component dat alle drie de locaties toont
+const locatieAfbeeldingen: Record<string, string> = {
+    "Amsterdam": "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=500&h=300&fit=crop",
+    "Rotterdam": "https://image.volkskrant.nl/224702415/width/2480/een-menigte-op-het-amsterdamse-mercatorplein-na-de-winst-van",
+    "Delft": "https://www.discoverholland.com/product-images/948e5a43-41f5-4d1d-ae2a-4e79ecaed08a.jpg",
+};
+
 export default function VeilingLocatieOverzicht() {
-    const locaties: VeilingLocatie[] = [
-        {
-            naam: "Amsterdam",
-            actief: true,
-            // Over 5 uur en 20 minuten 
-            eindTijd: new Date(Date.now() + 5 * 60 * 60 * 1000 + 20 * 60 * 1000),
-            achtergrondAfbeelding:
-                "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=500&h=300&fit=crop", 
-        },
-        {
-            naam: "Rotterdam",
-            actief: false,
-            eindTijd: null, // Nog niet gestart
-            achtergrondAfbeelding:
-                "https://image.volkskrant.nl/224702415/width/2480/een-menigte-op-het-amsterdamse-mercatorplein-na-de-winst-van",
-        },
-        {
-            naam: "Delft",
-            actief: true,
-            // Over 4 uur en 25 minuten 
-            eindTijd: new Date(Date.now() + 4 * 60 * 60 * 1000 + 25 * 60 * 1000),
-            achtergrondAfbeelding:
-                "https://www.discoverholland.com/product-images/948e5a43-41f5-4d1d-ae2a-4e79ecaed08a.jpg", 
-        },
-    ];
+    const [locaties, setLocaties] = useState<VeilingLocatie[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                // Haal locaties op
+                const locatiesResponse = await fetch('/api/locaties');
+                if (!locatiesResponse.ok) {
+                    throw new Error(`HTTP error! status: ${locatiesResponse.status}`);
+                }
+                const locatiesData: Locatie[] = await locatiesResponse.json();
+
+                // Haal actieve veilingen op
+                const veilingenResponse = await fetch('/api/veilingen/actief');
+                let veilingenData: VeilingData[] = [];
+                if (veilingenResponse.ok) {
+                    veilingenData = await veilingenResponse.json();
+                }
+
+                const veilingLocaties: VeilingLocatie[] = locatiesData.map((loc) => {
+                    // Zoek actieve veiling voor deze locatie
+                    const actieveVeiling = veilingenData.find(v => v.locatieId === loc.id);
+
+                    return {
+                        naam: loc.naam,
+                        actief: loc.actief && !!actieveVeiling, // Alleen actief als er een veiling is
+                        eindTijd: actieveVeiling
+                            ? new Date(actieveVeiling.endTijd)
+                            : null,
+                        achtergrondAfbeelding: locatieAfbeeldingen[loc.naam] || "https://via.placeholder.com/500x300",
+                    };
+                });
+
+                setLocaties(veilingLocaties);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Er is een fout opgetreden');
+                console.error('Fout bij ophalen data:', err);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchData();
+    }, []);
 
     const handleJoin = (locatieNaam: string) => {
         console.log(`Joining veiling in ${locatieNaam}`);
     };
+
+    if (loading) {
+        return (
+            <div className="veiling-locatie-container">
+                <h1 className="section-titel">Kies veiling locatie</h1>
+                <p style={{ textAlign: 'center', color: 'white' }}>Laden...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="veiling-locatie-container">
+                <h1 className="section-titel">Kies veiling locatie</h1>
+                <p style={{ textAlign: 'center', color: 'red' }}>Fout: {error}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="veiling-locatie-container">
             <h1 className="section-titel">Kies veiling locatie</h1>
             <div className="locatie-grid">
                 {locaties.map((locatie) => (
-                    <VeilingLocatie
+                    <VeilingLocatieCard
                         key={locatie.naam}
                         locatie={locatie}
                         onJoin={handleJoin}

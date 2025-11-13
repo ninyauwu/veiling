@@ -1,4 +1,5 @@
-﻿// Veiling.Server/Models/Veiling.cs
+﻿using System.Text.Json.Serialization;
+
 namespace Veiling.Server.Models
 {
     public class Veiling 
@@ -13,8 +14,13 @@ namespace Veiling.Server.Models
         public int? VeilingmeesterId { get; set; }
         public int? LocatieId { get; set; }
         
+        [JsonIgnore] 
         public Veilingmeester? Veilingmeester { get; set; }
+        
+        [JsonIgnore] 
         public Locatie? Locatie { get; set; }
+        
+        [JsonIgnore]
         public ICollection<Kavel> Kavels { get; set; } = new List<Kavel>();
     }
 }

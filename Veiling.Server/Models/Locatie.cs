@@ -1,4 +1,6 @@
-﻿namespace Veiling.Server.Models
+﻿using System.Text.Json.Serialization;
+
+namespace Veiling.Server.Models
 {
     public class Locatie
     {
@@ -8,6 +10,7 @@
         public bool Actief { get; set; }
         
         // Relaties
+        [JsonIgnore]
         public ICollection<Veiling> Veilingen { get; set; } = new List<Veiling>();
     }
 }

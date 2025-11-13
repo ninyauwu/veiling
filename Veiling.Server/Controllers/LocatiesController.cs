@@ -1,5 +1,4 @@
-﻿// Veiling.Server/Controllers/LocatiesController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
@@ -16,12 +15,14 @@ namespace Veiling.Server.Controllers
             _context = context;
         }
 
+        // GET: api/locaties
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Locatie>>> GetLocaties()
         {
             return await _context.Locaties.ToListAsync();
         }
 
+        // GET: api/locaties/actief
         [HttpGet("actief")]
         public async Task<ActionResult<IEnumerable<Locatie>>> GetActieveLocaties()
         {
@@ -30,6 +31,7 @@ namespace Veiling.Server.Controllers
                 .ToListAsync();
         }
 
+        // GET: api/locaties/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Locatie>> GetLocatie(int id)
         {
@@ -43,6 +45,38 @@ namespace Veiling.Server.Controllers
             }
 
             return locatie;
+        }
+
+        // PUT: api/locaties/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateLocatie(int id, Locatie locatie)
+        {
+            if (id != locatie.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(locatie).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!LocatieExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
+
+            return NoContent();
+        }
+
+        private bool LocatieExists(int id)
+        {
+            return _context.Locaties.Any(l => l.Id == id);
         }
     }
 }
