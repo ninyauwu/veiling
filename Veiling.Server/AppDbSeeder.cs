@@ -11,8 +11,8 @@ namespace Veiling.Server
             if (!context.Locaties.Any())
             {
                 context.Locaties.AddRange(
-                    new Locatie { Naam = "Amsterdam", KlokId = 1, Actief = true },
-                    new Locatie { Naam = "Rotterdam", KlokId = 2, Actief = false },
+                    new Locatie { Naam = "Amsterdam", KlokId = 1, Actief = false },
+                    new Locatie { Naam = "Rotterdam", KlokId = 2, Actief = true },
                     new Locatie { Naam = "Delft", KlokId = 3, Actief = true }
                 );
             }

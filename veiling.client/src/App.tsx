@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LandingsPagina from './components/LandingsPagina';
-import LoginPagina from './components/LoginPagina';
+import LandingsPagina from './pages/LandingsPagina';
+import LoginPagina from './pages/LoginPagina';
 import Veiling from './pages/Veiling';
 import LocatiePagina from './pages/Locatie.tsx';
 

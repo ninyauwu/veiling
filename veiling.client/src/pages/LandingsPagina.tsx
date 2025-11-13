@@ -1,4 +1,4 @@
-﻿import Header from "./HeaderLoggedout";
+﻿import Header from "../components/HeaderLoggedout";
 
 function LandingsPagina() {
   return (
