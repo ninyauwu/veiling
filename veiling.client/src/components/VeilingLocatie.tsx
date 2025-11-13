@@ -101,10 +101,18 @@ interface TimeRemaining {
     minuten: number;
 }
 
+// Actieve locatie afbeeldingen
 const locatieAfbeeldingen: Record<string, string> = {
     "Amsterdam": "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=500&h=300&fit=crop",
-    "Rotterdam": "https://image.volkskrant.nl/224702415/width/2480/een-menigte-op-het-amsterdamse-mercatorplein-na-de-winst-van",
+    "Rotterdam": "https://www.spido.nl/wp-content/smush-webp/2025/02/Spido-zonsondergang3-scaled.jpeg.webp",
     "Delft": "https://www.discoverholland.com/product-images/948e5a43-41f5-4d1d-ae2a-4e79ecaed08a.jpg",
+};
+
+// Inactieve locatie afbeeldingen 
+const inactieveAfbeeldingen: Record<string, string> = {
+    "Amsterdam": "https://images.ad.nl/N2E0NzY5ZTY1NzQwZTM1YjRjMDgvZGlvLzI1MDUzMTE0Ni9maXQtd2lkdGgvMTIwMA",
+    "Rotterdam": "https://image.volkskrant.nl/224702415/width/2480/een-menigte-op-het-amsterdamse-mercatorplein-na-de-winst-van",
+    "Delft": "https://redactie.rtl.nl/sites/default/files/content/images/2021/01/24/politie%20auto.jpg?itok=Ij_a8ZWx&offsetX=0&offsetY=31&cropWidth=1917&cropHeight=1078&width=2048&height=1152&impolicy=dynamic",
 };
 
 export default function VeilingLocatieOverzicht() {
@@ -130,16 +138,19 @@ export default function VeilingLocatieOverzicht() {
                 }
 
                 const veilingLocaties: VeilingLocatie[] = locatiesData.map((loc) => {
-                    // Zoek actieve veiling voor deze locatie
+                    // Zoek een actieve veiling voor deze locatie
                     const actieveVeiling = veilingenData.find(v => v.locatieId === loc.id);
 
                     return {
                         naam: loc.naam,
-                        actief: loc.actief && !!actieveVeiling, // Alleen actief als er een veiling is
+                        actief: loc.actief,
                         eindTijd: actieveVeiling
                             ? new Date(actieveVeiling.endTijd)
                             : null,
-                        achtergrondAfbeelding: locatieAfbeeldingen[loc.naam] || "https://via.placeholder.com/500x300",
+                        // Kies afbeelding op basis van actieve status
+                        achtergrondAfbeelding: loc.actief
+                            ? (locatieAfbeeldingen[loc.naam] || "https://via.placeholder.com/500x300")
+                            : (inactieveAfbeeldingen[loc.naam] || "https://via.placeholder.com/500x300/666666/999999?text=Inactief"),
                     };
                 });
 
