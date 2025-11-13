@@ -19,20 +19,35 @@ function getTimePartsUntil(target: Date) {
     const minutes = Math.floor((totalSec % 3600) / 60);
     const seconds = totalSec % 60;
     return { days, hours, minutes, seconds };
-}export default function AuctionCountdown({
+}
+
+export default function AuctionCountdown({
     price,
     quantity,
-    containers
+    containers,
+    targetDate
 }: {
-    price: string;
-    quantity: string;
-    containers: string;
+    price: number;
+    quantity: number;
+    containers: number;
+    targetDate: Date | number | null;
 }) {
-    const [t, setT] = useState(() => getTimePartsUntil(getNextNov15()));
+    const resolvedTarget = (() => {
+        if (targetDate === null) return getNextNov15();
+        if (targetDate === 0) return getNextNov15();
+        if (targetDate instanceof Date && !isNaN(targetDate.getTime())) {
+            return targetDate;
+        }
+        const parsed = new Date(targetDate as any);
+        if (!isNaN(parsed.getTime())) return parsed;
+        return getNextNov15();
+    })();
+
+    const [time, setTime] = useState(() => getTimePartsUntil(resolvedTarget));
 
     useEffect(() => {
         const id = setInterval(() => {
-            setT(getTimePartsUntil(getNextNov15()));
+            setTime(getTimePartsUntil(resolvedTarget));
         }, 1000);
         return () => clearInterval(id);
     }, []);
@@ -45,25 +60,24 @@ function getTimePartsUntil(target: Date) {
 
             <div className="auc-timer">
                 <div className="auc-timer__cell">
-                    <span className="auc-timer__value">{t.days}</span>
+                    <span className="auc-timer__value">{time.days}</span>
                     <span className="auc-timer__unit">d</span>
                 </div>
                 <div className="auc-timer__cell">
-                    <span className="auc-timer__value">{t.hours}</span>
+                    <span className="auc-timer__value">{time.hours}</span>
                     <span className="auc-timer__unit">h</span>
                 </div>
                 <div className="auc-timer__cell">
-                    <span className="auc-timer__value">{t.minutes}</span>
+                    <span className="auc-timer__value">{time.minutes}</span>
                     <span className="auc-timer__unit">m</span>
                 </div>
                 <div className="auc-timer__cell">
-                    <span className="auc-timer__value">{t.seconds}</span>
+                    <span className="auc-timer__value">{time.seconds}</span>
                     <span className="auc-timer__unit">s</span>
                 </div>
             </div>
 
             <hr className="auc-divider" />
-
             <div className="auc-field">
                 <div className="auc-label">Startprijs</div>
                 <div className="auc-price">
