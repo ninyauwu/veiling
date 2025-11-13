@@ -3,9 +3,108 @@ import KavelDescription from "../components/KavelDescription";
 import HeaderLoggedout from "../components/HeaderLoggedout";
 import KavelInvulTabel from "../components/KavelInvulTabel";
 import SimpeleKnop from "../components/SimpeleKnop";
-
+import { useState } from "react";
 
 function VerkoperDashboard() {
+    const [description, setDescription] = useState<string>('');
+    const [imageFile, setImageFile] = useState<string | File | null>();
+    const [formData, setFormData] = useState({
+        naam: '',
+        prijs: '',
+        aantal: '',
+        ql: '',
+        plaats: '',
+        stadium: '',
+        lengte: '',
+        kleur: '',
+        fustcode: ''
+    });
+
+    const [isFormValid, setIsFormValid] = useState(false);
+
+    const handleImageUpload = (file: string | File | null, ) => {
+        setImageFile(file); 
+    };
+
+    const handleTableDataChange = (data: any, isValid: boolean) => {
+        setFormData(data);
+        setIsFormValid(isValid);
+    };
+
+    const handleDescriptionChange = (description: string) => {
+        setDescription(description);
+    }
+
+    const uploadImageToServer = async (): Promise<string | null | string> => {
+        if (!imageFile) return null;
+
+        try {
+            const formData = new FormData();
+            formData.append('image', imageFile);
+
+            const response = await fetch('/api/kavels/upload-image', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Image upload failed');
+            }
+
+            const result = await response.json();
+            return result.imageUrl;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            throw error;
+        }
+    };
+
+    const handleSubmit = async () => {
+        try {
+            let uploadedImageUrl = null;
+            if (imageFile) {
+                uploadedImageUrl = await uploadImageToServer();
+            }
+
+            const payload = {
+                description: description,
+                imageUrl: uploadedImageUrl,
+                naam: formData.naam,
+                prijs: formData.prijs,
+                aantal: formData.aantal,
+                ql: formData.ql,
+                plaats: formData.plaats,
+                stadium: formData.stadium,
+                lengte: formData.lengte,
+                kleur: formData.kleur,
+                fustcode: formData.fustcode
+            };
+
+            console.log('Payload being sent:', payload);
+
+            const response = await fetch('/api/kavels', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+
+            const result = await response.json();
+            console.log('Success:', result);
+            alert('Kavel successfully created!');
+            
+        } catch (error) {
+            console.error('Error submitting data:', error);
+            alert('Failed to submit data. Please try again.');
+        }
+    };
+
     return (
         <div style={{
             maxWidth: '1400px',  
@@ -14,52 +113,48 @@ function VerkoperDashboard() {
             width: '100%'
         }}>
             <HeaderLoggedout />
-        <div
-            style={{
-                height: "96px",
-            }}
-        />
-        <div
-            style={{
+            <div style={{ height: "96px" }} />
+            
+            <div style={{
                 display: "flex",
                 flexDirection: "row",
                 gap: "60px",
-            }}
-        >
-            <div
-                style={{
+            }}>
+                <div style={{
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px',
                     width: '800px',
                     flexShrink: 0
                 }}>
-                <div style={{ height: '400px' }}>  {/* Wrap ImageUpload with fixed height */}
-                    <ImageUpload />
+                    <div style={{ height: '400px' }}>
+                        <ImageUpload onImageUpload={handleImageUpload}/>
+                    </div>
+                    <KavelDescription onDescriptionChange={handleDescriptionChange}/>
                 </div>
-                <KavelDescription />
-            </div>
-            <div
-            style={{flex: 1
-            }}>
-                <KavelInvulTabel />
-            </div>
-            <div
-            style={{
-                display: 'flex',
-                position: 'fixed',
-                gap: '10px',
-                right: '40px',               
-                top: '92%',                  
-                transform: 'translateY(-50%)'
-            }}>
-                <SimpeleKnop 
-                    label="Submit"
-                    appearance="primary"
+                
+                <div style={{ flex: 1 }}>
+                    <KavelInvulTabel onDataChange={handleTableDataChange} />
+                </div>
+                
+                <div style={{
+                    display: 'flex',
+                    position: 'fixed',
+                    gap: '10px',
+                    right: '40px',               
+                    bottom: '40px'
+                }}>
+                    {/* UPDATED: Disable button when form is invalid */}
+                    <SimpeleKnop 
+                        label="Submit"
+                        appearance="primary"
+                        onClick={handleSubmit}
+                        disabled={!isFormValid}
                     />
+                </div>
             </div>
         </div>
-    </div>
-);}
+    );
+}
 
 export default VerkoperDashboard;
