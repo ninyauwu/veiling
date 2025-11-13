@@ -229,6 +229,29 @@ namespace Veiling.Server.Migrations
                     b.ToTable("Leveranciers");
                 });
 
+            modelBuilder.Entity("Veiling.Server.Models.Locatie", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Actief")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("KlokId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Naam")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Locaties");
+                });
+
             modelBuilder.Entity("Veiling.Server.Models.Veiling", b =>
                 {
                     b.Property<int>("Id")
@@ -243,11 +266,11 @@ namespace Veiling.Server.Migrations
                     b.Property<float>("GeldPerTickCode")
                         .HasColumnType("real");
 
-                    b.Property<int>("KlokId")
-                        .HasColumnType("int");
-
                     b.Property<float>("Klokduur")
                         .HasColumnType("real");
+
+                    b.Property<int?>("LocatieId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Naam")
                         .IsRequired()
@@ -260,6 +283,8 @@ namespace Veiling.Server.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocatieId");
 
                     b.HasIndex("VeilingmeesterId");
 
@@ -343,9 +368,16 @@ namespace Veiling.Server.Migrations
 
             modelBuilder.Entity("Veiling.Server.Models.Veiling", b =>
                 {
+                    b.HasOne("Veiling.Server.Models.Locatie", "Locatie")
+                        .WithMany("Veilingen")
+                        .HasForeignKey("LocatieId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Veiling.Server.Models.Veilingmeester", "Veilingmeester")
                         .WithMany("Veilingen")
                         .HasForeignKey("VeilingmeesterId");
+
+                    b.Navigation("Locatie");
 
                     b.Navigation("Veilingmeester");
                 });
@@ -379,6 +411,11 @@ namespace Veiling.Server.Migrations
             modelBuilder.Entity("Veiling.Server.Models.Leverancier", b =>
                 {
                     b.Navigation("Kavels");
+                });
+
+            modelBuilder.Entity("Veiling.Server.Models.Locatie", b =>
+                {
+                    b.Navigation("Veilingen");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Veiling", b =>

@@ -2,6 +2,8 @@
 import "./VeilingLocatie.css";
 import SimpeleKnop from "./SimpeleKnop";
 
+
+
 interface VeilingLocatie {
     naam: string;
     actief: boolean;
