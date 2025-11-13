@@ -19,8 +19,15 @@ function getTimePartsUntil(target: Date) {
     const minutes = Math.floor((totalSec % 3600) / 60);
     const seconds = totalSec % 60;
     return { days, hours, minutes, seconds };
-}
-export default function AuctionCountdown({ price }: { price: string }) {
+}export default function AuctionCountdown({
+    price,
+    quantity,
+    containers
+}: {
+    price: string;
+    quantity: string;
+    containers: string;
+}) {
     const [t, setT] = useState(() => getTimePartsUntil(getNextNov15()));
 
     useEffect(() => {
@@ -67,8 +74,8 @@ export default function AuctionCountdown({ price }: { price: string }) {
             <div className="auc-field">
                 <div className="auc-label">Aantal Eenheden</div>
                 <div className="auc-qty">
-                    <span className="auc-qty__main">200</span>
-                    <span className="auc-qty__sub">(3 containers)</span>
+                    <span className="auc-qty__main">{quantity}</span>
+                    <span className="auc-qty__sub">{containers}</span>
                 </div>
             </div>
         </section>
