@@ -4,26 +4,17 @@
     {
         public int Id { get; set; }
         public string Naam { get; set; } = string.Empty;
-        public string Beschrijving { get; set; } = string.Empty;
-        public string ArtikelKenmerken { get; set; } = string.Empty;
-        public int GekochteContainers { get; set; }
-        public float MinimumPrijs { get; set; }
-        public float MaximumPrijs { get; set; }
-        public float GekochtPrijs { get; set; }
-        public int Minimumhoeveelheid { get; set; }
-        public string Foto { get; set; } = string.Empty;
-        public string Kavelkleur { get; set; } = string.Empty; 
-        public int Karnummer { get; set; }
-        public int Rijnummer { get; set; }
-        public int HoeveelheidContainers { get; set; }
-        public int AantalProductenPerContainer { get; set; }
-        public float LengteVanBloemen { get; set; } 
-        public float GewichtVanBloemen { get; set; } 
-        public string StageOfMaturity { get; set; } = string.Empty;
-        public char NgsCode { get; set; }
-        public string Keurcode { get; set; } = string.Empty;
-        public int Fustcode { get; set; }
-        public string GeldPerTickCode { get; set; } = string.Empty;
+        public string? Beschrijving { get; set; }  
+        public decimal StartPrijs { get; set; }     
+        public int Aantal { get; set; }             
+        public string? Kwaliteit { get; set; }      
+        public string? PlaatsVanVerkoop { get; set; }
+        public string? Stadium { get; set; }        
+        public string? Lengte { get; set; }  
+        public string? Kleur { get; set; }   
+        public string? Fustcode { get; set; }
+
+        public string? AfbeeldingUrl { get; set; }
         
         // Foreign Keys
         public int? VeilingId { get; set; }

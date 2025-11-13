@@ -9,10 +9,46 @@ namespace Veiling.Server.Controllers
     public class KavelsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public KavelsController(AppDbContext context)
+        public KavelsController(AppDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
+        }
+
+        [HttpPost("upload-image")]
+        public async Task<ActionResult<object>> UploadImage(IFormFile image)
+        {
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest(new { error = "No image provided" });
+            }
+
+            try
+            {
+                // Create uploads directory if it doesn't exist
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "kavels");
+                Directory.CreateDirectory(uploadsFolder);
+
+                // Generate unique filename
+                var uniqueFileName = $"{Guid.NewGuid()}_{image.FileName}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Save the file
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await image.CopyToAsync(fileStream);
+                }
+
+                // Return the URL
+                var imageUrl = $"/uploads/kavels/{uniqueFileName}";
+                return Ok(new { imageUrl });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = $"Image upload failed: {ex.Message}" });
+            }
         }
 
         // GET: api/kavels
@@ -57,8 +93,23 @@ namespace Veiling.Server.Controllers
 
         // POST: api/kavels
         [HttpPost]
-        public async Task<ActionResult<Kavel>> CreateKavel(Kavel kavel)
+        public async Task<ActionResult<Kavel>> CreateKavel([FromBody] CreateKavelDto dto)
         {
+            var kavel = new Kavel
+            {
+                Naam = dto.Naam,
+                Beschrijving = dto.Description,
+                StartPrijs = decimal.Parse(dto.Prijs),  // Convert string to decimal
+                Aantal = int.Parse(dto.Aantal),          // Convert string to int
+                Kwaliteit = dto.Ql,
+                PlaatsVanVerkoop = dto.Plaats,
+                Stadium = dto.Stadium,
+                Lengte = dto.Lengte,
+                Kleur = dto.Kleur,
+                Fustcode = dto.Fustcode,
+                AfbeeldingUrl = dto.ImageUrl, 
+            };
+
             _context.Kavels.Add(kavel);
             await _context.SaveChangesAsync();
 
@@ -112,5 +163,21 @@ namespace Veiling.Server.Controllers
         {
             return _context.Kavels.Any(k => k.Id == id);
         }
+    }
+
+    // NEW: DTO class for receiving JSON data
+    public class CreateKavelDto
+    {
+        public string Description { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
+        public string Naam { get; set; } = string.Empty;
+        public string Prijs { get; set; } = string.Empty;
+        public string Aantal { get; set; } = string.Empty;
+        public string Ql { get; set; } = string.Empty;
+        public string Plaats { get; set; } = string.Empty;
+        public string Stadium { get; set; } = string.Empty;
+        public string Lengte { get; set; } = string.Empty;
+        public string Kleur { get; set; } = string.Empty;
+        public string Fustcode { get; set; } = string.Empty;
     }
 }
