@@ -1,128 +1,87 @@
 import { useState } from 'react';
 import './KavelInvulTabel.css';
 
-function KavelInvulTabel() {
+interface KavelInvulTabelProps {
+    onDataChange: (data: any, isValid: boolean) => void;
+}
+
+function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     const [formData, setFormData] = useState({
-        naam: '',
-        prijs: '',
-        aantal: '',
-        ql: '',
-        plaats: '',
-        stadium: '',
-        lengte: '',
-        kleur: '',
-        fustcode: ''
+    naam: '',
+    prijs: '',
+    aantal: '',
+    ql: '',
+    plaats: '',
+    stadium: '',
+    lengte: '',
+    kleur: '',
+    fustcode: ''
     });
 
-    const handleChange = (field: string, value: string) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+    const isWholeNumber = (value: string) => /^[0-9]+$/.test(value);
+    const isDecimal = (value: string) => /^\d+(\.\d{1,2})?$/.test(value); // 12 or 12.34
+
+    const validateField = (field: string, value: string): string => {
+        if (!value.trim()) return 'Dit veld is verplicht.';
+
+        if (field === 'aantal' && !isWholeNumber(value)) {
+            return 'Geheel getal.';
+        }
+
+        if (field === 'prijs' && !isDecimal(value)) {
+            return 'Geldig decimaal astublieft(bijv. 12.50).';
+        }
+
+        return '';
     };
+
+    const validateForm = (data: typeof formData) => {
+        return Object.values(data).every(v => v.trim() !== '') &&
+        isWholeNumber(data.aantal) &&
+        isDecimal(data.prijs);
+    };
+
+    const handleInputChange = (field: string, value: string) => {
+        const updatedData = { ...formData, [field]: value };
+        setFormData(updatedData);
+
+        const fieldError = validateField(field, value);
+        const newErrors = { ...errors, [field]: fieldError };
+        setErrors(newErrors);
+
+        const isValid = validateForm(updatedData);
+        onDataChange(updatedData, isValid);
+    };
+
+    const renderInput = (label: string, field: keyof typeof formData, placeholder: string) => (
+        <div className="kavel-invul-row">
+        <div className="kavel-invul-label">{label}</div>
+        <input
+            type="text"
+            className={`kavel-invul-input ${errors[field] ? 'input-error' : ''}`}
+            placeholder={placeholder}
+            value={formData[field]}
+            onChange={(e) => handleInputChange(field, e.target.value)}
+        />
+        {errors[field] && <div className="error-text">{errors[field]}</div>}
+        </div>
+    );
 
     return (
         <div className="kavel-invul-container">
             <div className="kavel-invul-header">Invullen</div>
-            
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Naam</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Naam"
-                    value={formData.naam}
-                    onChange={(e) => handleChange('naam', e.target.value)}
-                />
-            </div>
 
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Prijs</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Minimum"
-                    value={formData.prijs}
-                    onChange={(e) => handleChange('prijs', e.target.value)}
-                />
-            </div>
-
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Aantal</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Aantal"
-                    value={formData.aantal}
-                    onChange={(e) => handleChange('aantal', e.target.value)}
-                />
-            </div>
-
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Ql</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Qualiteit van product"
-                    value={formData.ql}
-                    onChange={(e) => handleChange('ql', e.target.value)}
-                />
-            </div>
-
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Plaats van verkoop</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Plaats van verkoop"
-                    value={formData.plaats}
-                    onChange={(e) => handleChange('plaats', e.target.value)}
-                />
-            </div>
-
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Stadium</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Stadium"
-                    value={formData.stadium}
-                    onChange={(e) => handleChange('stadium', e.target.value)}
-                />
-            </div>
-
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Lengte x Gewicht</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Lengte x Gewicht"
-                    value={formData.lengte}
-                    onChange={(e) => handleChange('lengte', e.target.value)}
-                />
-            </div>
-
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Kleur</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Kleur"
-                    value={formData.kleur}
-                    onChange={(e) => handleChange('kleur', e.target.value)}
-                />
-            </div>
-
-            <div className="kavel-invul-row">
-                <div className="kavel-invul-label">Fustcode</div>
-                <input
-                    type="text"
-                    className="kavel-invul-input"
-                    placeholder="Fustcode"
-                    value={formData.fustcode}
-                    onChange={(e) => handleChange('fustcode', e.target.value)}
-                />
-            </div>
+            {renderInput('Naam', 'naam', 'Naam')}
+            {renderInput('Prijs (€)', 'prijs', 'Bijv. 12.50')}
+            {renderInput('Aantal', 'aantal', 'Bijv. 25')}
+            {renderInput('Ql', 'ql', 'Kwaliteit van product')}
+            {renderInput('Plaats van verkoop', 'plaats', 'Bijv. Aalsmeer')}
+            {renderInput('Stadium', 'stadium', 'Stadium')}
+            {renderInput('Lengte x Gewicht', 'lengte', 'Bijv. 70 x 250g')}
+            {renderInput('Kleur', 'kleur', 'Kleur')}
+            {renderInput('Fustcode', 'fustcode', 'Fustcode')}
         </div>
     );
 }

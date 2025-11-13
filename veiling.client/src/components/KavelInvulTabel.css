@@ -46,6 +46,17 @@
     flex: 1;
 }
 
+.input-error {
+    border-color: #ff1900 !important;
+    background-color: #fff6f6;
+}
+
+.error-text {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
 .kavel-invul-input::placeholder {
     color: #999;
 }
