@@ -58,7 +58,7 @@ namespace Veiling.Server
                 .HasOne(l => l.Bedrijf)
                 .WithMany()
                 .HasForeignKey(l => l.BedrijfId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Leverancier>()
                 .HasMany(l => l.Kavels)
