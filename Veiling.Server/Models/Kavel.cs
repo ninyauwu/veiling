@@ -1,4 +1,6 @@
-﻿namespace Veiling.Server.Models
+﻿using System.Text.Json.Serialization;
+
+namespace Veiling.Server.Models
 {
     public class Kavel
     {
@@ -30,8 +32,11 @@
         public int? LeverancierId { get; set; }
         
         // Relaties
-        public Veiling? Veiling { get; set; }   
+        [JsonIgnore]
+        public Veiling? Veiling { get; set; }
+        [JsonIgnore]
         public Leverancier? Leverancier { get; set; }
+        [JsonIgnore]
         public ICollection<Bod> Boden { get; set; } = new List<Bod>();
     }
 }
