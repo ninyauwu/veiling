@@ -1,5 +1,4 @@
-﻿// veiling.client/src/components/VeilingLocatie.tsx
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import "./VeilingLocatie.css";
 import SimpeleKnop from "./SimpeleKnop";
 
@@ -115,7 +114,11 @@ const inactieveAfbeeldingen: Record<string, string> = {
     "Delft": "https://redactie.rtl.nl/sites/default/files/content/images/2021/01/24/politie%20auto.jpg?itok=Ij_a8ZWx&offsetX=0&offsetY=31&cropWidth=1917&cropHeight=1078&width=2048&height=1152&impolicy=dynamic",
 };
 
-export default function VeilingLocatieOverzicht() {
+interface VeilingLocatieOverzichtProps {
+    onJoin?: (locatieNaam: string) => void;
+}
+
+export default function VeilingLocatieOverzicht({ onJoin }: VeilingLocatieOverzichtProps) {
     const [locaties, setLocaties] = useState<VeilingLocatie[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -166,10 +169,6 @@ export default function VeilingLocatieOverzicht() {
         fetchData();
     }, []);
 
-    const handleJoin = (locatieNaam: string) => {
-        console.log(`Joining veiling in ${locatieNaam}`);
-    };
-
     if (loading) {
         return (
             <div className="veiling-locatie-container">
@@ -193,11 +192,7 @@ export default function VeilingLocatieOverzicht() {
             <h1 className="section-titel">Kies veiling locatie</h1>
             <div className="locatie-grid">
                 {locaties.map((locatie) => (
-                    <VeilingLocatieCard
-                        key={locatie.naam}
-                        locatie={locatie}
-                        onJoin={handleJoin}
-                    />
+                    <VeilingLocatieCard key={locatie.naam} locatie={locatie} onJoin={onJoin} />
                 ))}
             </div>
         </div>
