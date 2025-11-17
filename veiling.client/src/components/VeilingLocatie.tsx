@@ -21,6 +21,7 @@ interface VeilingLocatie {
     naam: string;
     actief: boolean;
     eindTijd: Date | null;
+    startTijd: Date | null;
     achtergrondAfbeelding: string;
 }
 
@@ -33,36 +34,45 @@ function VeilingLocatieCard({ locatie, onJoin }: VeilingLocatieProps) {
     const [tijdOver, setTijdOver] = useState<TimeRemaining | null>(null);
 
     useEffect(() => {
-        if (!locatie.eindTijd) {
+        // Bepaal welke tijd we gebruiken: eindTijd voor actieve veilingen, startTijd voor inactieve
+        const targetTime = locatie.actief ? locatie.eindTijd : locatie.startTijd;
+
+        if (!targetTime) {
             setTijdOver(null);
             return;
         }
 
         const updateTimer = () => {
             const now = new Date();
-            const verschil = locatie.eindTijd!.getTime() - now.getTime();
+            const verschil = targetTime.getTime() - now.getTime();
 
             if (verschil <= 0) {
-                setTijdOver({ uren: 0, minuten: 0 });
+                setTijdOver({ uren: 0, minuten: 0, seconden: 0 });
                 return;
             }
 
             const uren = Math.floor(verschil / (1000 * 60 * 60));
             const minuten = Math.floor((verschil % (1000 * 60 * 60)) / (1000 * 60));
+            const seconden = Math.floor((verschil % (1000 * 60)) / 1000);
 
-            setTijdOver({ uren, minuten });
+            setTijdOver({ uren, minuten, seconden });
         };
 
         updateTimer();
         const interval = setInterval(updateTimer, 1000);
 
         return () => clearInterval(interval);
-    }, [locatie.eindTijd]);
+    }, [locatie.eindTijd, locatie.startTijd, locatie.actief]);
 
     const formatTijd = () => {
-        if (!locatie.eindTijd) return "xx:xx";
-        if (!tijdOver) return "0:00";
-        return `${tijdOver.uren}:${tijdOver.minuten.toString().padStart(2, "0")}`;
+        const targetTime = locatie.actief ? locatie.eindTijd : locatie.startTijd;
+        if (!targetTime) return "xx:xx:xx";
+        if (!tijdOver) return "0:00:00";
+        return `${tijdOver.uren}:${tijdOver.minuten.toString().padStart(2, "0")}:${tijdOver.seconden.toString().padStart(2, "0")}`;
+    };
+
+    const getTimerLabel = () => {
+        return locatie.actief ? "Veiling eindigt in:" : "Veiling begint in:";
     };
 
     return (
@@ -81,6 +91,7 @@ function VeilingLocatieCard({ locatie, onJoin }: VeilingLocatieProps) {
                     </div>
 
                     <div className="footer">
+                        <div className="timer-label">{getTimerLabel()}</div>
                         <div className="tijd-display">{formatTijd()}</div>
                         <SimpeleKnop
                             label="Join"
@@ -98,6 +109,7 @@ function VeilingLocatieCard({ locatie, onJoin }: VeilingLocatieProps) {
 interface TimeRemaining {
     uren: number;
     minuten: number;
+    seconden: number;
 }
 
 // Actieve locatie afbeeldingen
@@ -134,15 +146,37 @@ export default function VeilingLocatieOverzicht({ onJoin }: VeilingLocatieOverzi
                 const locatiesData: Locatie[] = await locatiesResponse.json();
 
                 // Haal actieve veilingen op
-                const veilingenResponse = await fetch('/api/veilingen/actief');
-                let veilingenData: VeilingData[] = [];
-                if (veilingenResponse.ok) {
-                    veilingenData = await veilingenResponse.json();
+                const actieveVeilingenResponse = await fetch('/api/veilingen/actief');
+                let actieveVeilingenData: VeilingData[] = [];
+                if (actieveVeilingenResponse.ok) {
+                    actieveVeilingenData = await actieveVeilingenResponse.json();
                 }
+
+                // Haal alle veilingen op voor toekomstige veilingen
+                const alleVeilingenResponse = await fetch('/api/veilingen');
+                let alleVeilingenData: VeilingData[] = [];
+                if (alleVeilingenResponse.ok) {
+                    alleVeilingenData = await alleVeilingenResponse.json();
+                }
+
+                const now = new Date();
 
                 const veilingLocaties: VeilingLocatie[] = locatiesData.map((loc) => {
                     // Zoek een actieve veiling voor deze locatie
-                    const actieveVeiling = veilingenData.find(v => v.locatieId === loc.id);
+                    const actieveVeiling = actieveVeilingenData.find(v => v.locatieId === loc.id);
+
+                    let startTijd: Date | null = null;
+
+                    // Als locatie niet actief is, zoek de volgende toekomstige veiling
+                    if (!loc.actief) {
+                        const toekomstigeVeilingen = alleVeilingenData
+                            .filter(v => v.locatieId === loc.id && new Date(v.startTijd) > now)
+                            .sort((a, b) => new Date(a.startTijd).getTime() - new Date(b.startTijd).getTime());
+
+                        if (toekomstigeVeilingen.length > 0) {
+                            startTijd = new Date(toekomstigeVeilingen[0].startTijd);
+                        }
+                    }
 
                     return {
                         naam: loc.naam,
@@ -150,6 +184,7 @@ export default function VeilingLocatieOverzicht({ onJoin }: VeilingLocatieOverzi
                         eindTijd: actieveVeiling
                             ? new Date(actieveVeiling.endTijd)
                             : null,
+                        startTijd: startTijd,
                         // Kies afbeelding op basis van actieve status
                         achtergrondAfbeelding: loc.actief
                             ? (locatieAfbeeldingen[loc.naam] || "https://via.placeholder.com/500x300")
