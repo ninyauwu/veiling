@@ -40,9 +40,17 @@ const KavelTabel: React.FC<KavelTabelProps> = ({
       <tbody>
         {rows.map((row, i) => (
           <tr
+            tabIndex={0}
             key={i}
             onClick={() => handleRowSelect(i)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault(); // prevents page scrolling on Space
+                handleRowSelect(i); // same as click
+              }
+            }}
             className={currentIndex === i ? "kavel-row-selected" : ""}
+            role={currentIndex === i ? null : "button"}
           >
             {columns.map((col) => (
               <td key={col} className="border border-gray-300 p-2">
