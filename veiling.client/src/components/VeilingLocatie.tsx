@@ -34,7 +34,7 @@ function VeilingLocatieCard({ locatie, onJoin }: VeilingLocatieProps) {
     const [tijdOver, setTijdOver] = useState<TimeRemaining | null>(null);
 
     useEffect(() => {
-        // Bepaal welke tijd we gebruiken: eindTijd voor actieve veilingen, startTijd voor inactieve
+        // eindTijd voor actieve veilingen, startTijd voor inactieve
         const targetTime = locatie.actief ? locatie.eindTijd : locatie.startTijd;
 
         if (!targetTime) {
@@ -166,26 +166,35 @@ export default function VeilingLocatieOverzicht({ onJoin }: VeilingLocatieOverzi
                     const actieveVeiling = actieveVeilingenData.find(v => v.locatieId === loc.id);
 
                     let startTijd: Date | null = null;
+                    let eindTijd: Date | null = null;
 
-                    // Als locatie niet actief is, zoek de volgende toekomstige veiling
-                    if (!loc.actief) {
+                    if (loc.actief) {
+                        if (actieveVeiling) {
+                            eindTijd = new Date(actieveVeiling.endTijd + 'Z');
+                        } else {
+                            const toekomstigeVeilingen = alleVeilingenData
+                                .filter(v => v.locatieId === loc.id && new Date(v.endTijd + 'Z') > now)
+                                .sort((a, b) => new Date(a.endTijd + 'Z').getTime() - new Date(b.endTijd + 'Z').getTime());
+
+                            if (toekomstigeVeilingen.length > 0) {
+                                eindTijd = new Date(toekomstigeVeilingen[0].endTijd + 'Z');
+                            }
+                        }
+                    } else {
                         const toekomstigeVeilingen = alleVeilingenData
-                            .filter(v => v.locatieId === loc.id && new Date(v.startTijd) > now)
-                            .sort((a, b) => new Date(a.startTijd).getTime() - new Date(b.startTijd).getTime());
+                            .filter(v => v.locatieId === loc.id && new Date(v.startTijd + 'Z') > now)
+                            .sort((a, b) => new Date(a.startTijd + 'Z').getTime() - new Date(b.startTijd + 'Z').getTime());
 
                         if (toekomstigeVeilingen.length > 0) {
-                            startTijd = new Date(toekomstigeVeilingen[0].startTijd);
+                            startTijd = new Date(toekomstigeVeilingen[0].startTijd + 'Z');
                         }
                     }
 
                     return {
                         naam: loc.naam,
                         actief: loc.actief,
-                        eindTijd: actieveVeiling
-                            ? new Date(actieveVeiling.endTijd)
-                            : null,
+                        eindTijd: eindTijd,
                         startTijd: startTijd,
-                        // Kies afbeelding op basis van actieve status
                         achtergrondAfbeelding: loc.actief
                             ? (locatieAfbeeldingen[loc.naam] || "https://via.placeholder.com/500x300")
                             : (inactieveAfbeeldingen[loc.naam] || "https://via.placeholder.com/500x300/666666/999999?text=Inactief"),
