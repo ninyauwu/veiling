@@ -1,4 +1,3 @@
-
 using Veiling.Server;
 using Veiling.Server.Models;
 
