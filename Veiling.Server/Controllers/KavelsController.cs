@@ -99,15 +99,17 @@ namespace Veiling.Server.Controllers
             {
                 Naam = dto.Naam,
                 Beschrijving = dto.Description,
-                StartPrijs = decimal.Parse(dto.Prijs),  // Convert string to decimal
-                Aantal = int.Parse(dto.Aantal),          // Convert string to int
-                Kwaliteit = dto.Ql,
-                PlaatsVanVerkoop = dto.Plaats,
-                Stadium = dto.Stadium,
-                Lengte = dto.Lengte,
-                Kleur = dto.Kleur,
-                Fustcode = dto.Fustcode,
-                AfbeeldingUrl = dto.ImageUrl, 
+                Foto = dto.ImageUrl, 
+                MinimumPrijs = float.Parse(dto.MinimumPrijs), 
+                HoeveelheidContainers = int.Parse(dto.Aantal),
+                Keurcode = dto.Ql,
+                VeilingId = int.Parse(dto.Plaats),
+                StageOfMaturity = dto.Stadium,
+                LengteVanBloemen = float.Parse(dto.Lengte),
+                Kavelkleur = dto.Kleur,
+                Fustcode = int.Parse(dto.Fustcode),
+                AantalProductenPerContainer = int.Parse(dto.AantalProductenPerContainer),
+                GewichtVanBloemen = float.Parse(dto.GewichtVanBloemen)
             };
 
             _context.Kavels.Add(kavel);
@@ -171,7 +173,7 @@ namespace Veiling.Server.Controllers
         public string Description { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
         public string Naam { get; set; } = string.Empty;
-        public string Prijs { get; set; } = string.Empty;
+        public string MinimumPrijs { get; set; } = string.Empty;
         public string Aantal { get; set; } = string.Empty;
         public string Ql { get; set; } = string.Empty;
         public string Plaats { get; set; } = string.Empty;
@@ -179,5 +181,7 @@ namespace Veiling.Server.Controllers
         public string Lengte { get; set; } = string.Empty;
         public string Kleur { get; set; } = string.Empty;
         public string Fustcode { get; set; } = string.Empty;
+        public string AantalProductenPerContainer { get; set; } = string.Empty;
+        public string GewichtVanBloemen { get; set; } = string.Empty;
     }
 }
