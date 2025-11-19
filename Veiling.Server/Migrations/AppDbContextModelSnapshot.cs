@@ -120,42 +120,80 @@ namespace Veiling.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Aantal")
+                    b.Property<int>("AantalProductenPerContainer")
                         .HasColumnType("int");
 
-                    b.Property<string>("AfbeeldingUrl")
+                    b.Property<string>("ArtikelKenmerken")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Beschrijving")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Fustcode")
+                    b.Property<string>("Foto")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Kleur")
+                    b.Property<int>("Fustcode")
+                        .HasColumnType("int");
+
+                    b.Property<float>("GekochtPrijs")
+                        .HasColumnType("real");
+
+                    b.Property<int>("GekochteContainers")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GeldPerTickCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Kwaliteit")
+                    b.Property<float>("GewichtVanBloemen")
+                        .HasColumnType("real");
+
+                    b.Property<int>("HoeveelheidContainers")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Karnummer")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Kavelkleur")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Lengte")
+                    b.Property<string>("Keurcode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("LengteVanBloemen")
+                        .HasColumnType("real");
 
                     b.Property<int?>("LeverancierId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("MaximumPrijs")
+                        .HasColumnType("real");
+
+                    b.Property<float>("MinimumPrijs")
+                        .HasColumnType("real");
+
+                    b.Property<int>("Minimumhoeveelheid")
                         .HasColumnType("int");
 
                     b.Property<string>("Naam")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PlaatsVanVerkoop")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("NgsCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1)");
 
-                    b.Property<string>("Stadium")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Rijnummer")
+                        .HasColumnType("int");
 
-                    b.Property<decimal>("StartPrijs")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("StageOfMaturity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("VeilingId")
                         .HasColumnType("int");
@@ -298,7 +336,7 @@ namespace Veiling.Server.Migrations
                     b.HasOne("Veiling.Server.Models.Bedrijf", "Bedrijf")
                         .WithMany()
                         .HasForeignKey("BedrijfId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Bedrijf");
