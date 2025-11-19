@@ -9,15 +9,17 @@ function VerkoperDashboard() {
     const [description, setDescription] = useState<string>('');
     const [imageFile, setImageFile] = useState<string | File | null>();
     const [formData, setFormData] = useState({
-        naam: '',
-        prijs: '',
-        aantal: '',
-        ql: '',
-        plaats: '',
-        stadium: '',
-        lengte: '',
-        kleur: '',
-        fustcode: ''
+    naam: '',
+    prijs: '',
+    aantal: '',
+    ql: '',
+    plaats: '',
+    stadium: '',
+    lengte: '',
+    kleur: '',
+    fustcode: '',
+    aantalPerContainer: '',
+    gewicht: ''
     });
 
     const [isFormValid, setIsFormValid] = useState(false);
@@ -67,17 +69,20 @@ function VerkoperDashboard() {
             }
 
             const payload = {
-                description: description,
-                imageUrl: uploadedImageUrl,
-                naam: formData.naam,
-                prijs: formData.prijs,
+                Naam: formData.naam,
+                Beschrijving: description,
+                Foto: uploadedImageUrl,
+                
+                MinimumPrijs: formData.prijs,
                 aantal: formData.aantal,
                 ql: formData.ql,
-                plaats: formData.plaats,
-                stadium: formData.stadium,
-                lengte: formData.lengte,
-                kleur: formData.kleur,
-                fustcode: formData.fustcode
+                VeilingId: formData.plaats,
+                StageOfMaturity: formData.stadium,
+                LengteVanBloem: formData.lengte,
+                KavelKleur: formData.kleur,
+                Fustcode: formData.fustcode,
+                AantalProductenPerContainer: formData.aantalPerContainer,
+                GewichtVanBloem: formData.gewicht,
             };
 
             console.log('Payload being sent:', payload);

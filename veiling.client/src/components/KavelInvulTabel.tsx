@@ -15,7 +15,9 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     stadium: '',
     lengte: '',
     kleur: '',
-    fustcode: ''
+    fustcode: '',
+    aantalPerContainer: '',
+    gewicht: '',
     });
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -40,7 +42,8 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     const validateForm = (data: typeof formData) => {
         return Object.values(data).every(v => v.trim() !== '') &&
         isWholeNumber(data.aantal) &&
-        isDecimal(data.prijs);
+        isDecimal(data.prijs) &&
+        isWholeNumber(data.aantalPerContainer);
     };
 
     const handleInputChange = (field: string, value: string) => {
@@ -75,13 +78,15 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
 
             {renderInput('Naam', 'naam', 'Naam')}
             {renderInput('Prijs (€)', 'prijs', 'Bijv. 12.50')}
-            {renderInput('Aantal', 'aantal', 'Bijv. 25')}
+            {renderInput('Aantal containers', 'aantal', 'Bijv. 25')}
             {renderInput('Ql', 'ql', 'Kwaliteit van product')}
             {renderInput('Plaats van verkoop', 'plaats', 'Bijv. Aalsmeer')}
             {renderInput('Stadium', 'stadium', 'Stadium')}
-            {renderInput('Lengte x Gewicht', 'lengte', 'Bijv. 70 x 250g')}
             {renderInput('Kleur', 'kleur', 'Kleur')}
             {renderInput('Fustcode', 'fustcode', 'Fustcode')}
+            {renderInput('Producten per container', 'aantalPerContainer', 'Aantal producten per container')}
+            {renderInput('Lengte Van Bloem', 'lengte', 'Bijv. 50cm, avg lengte per bloem')}
+            {renderInput('Gewicht Van Bloem', 'gewicht', 'Bijv. 25g, avg gewicht per bloem')}
         </div>
     );
 }
