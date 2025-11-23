@@ -19,7 +19,7 @@ export interface AppointmentData {
   startHour: number;
   durationHours: number;
   name: string;
-  kavelId?: number;
+  kavelIds: number[];
 }
 
 export interface AppointmentProps {
@@ -35,5 +35,5 @@ export interface AppointmentFormData {
   startTime: string;
   endTime: string;
   name: string;
-  kavelId?: number;
+  kavelIds: number[];
 }

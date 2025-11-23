@@ -74,15 +74,18 @@ namespace Veiling.Server.Controllers
             _context.Veilingen.Add(veiling);
             await _context.SaveChangesAsync();
 
-            // Koppel kavel aan veiling indien geselecteerd
-            if (dto.KavelId.HasValue)
+            // Koppel alle geselecteerde kavels aan deze veiling
+            if (dto.KavelIds != null && dto.KavelIds.Any())
             {
-                var kavel = await _context.Kavels.FindAsync(dto.KavelId.Value);
-                if (kavel != null)
+                foreach (var kavelId in dto.KavelIds)
                 {
-                    kavel.VeilingId = veiling.Id;
-                    await _context.SaveChangesAsync();
+                    var kavel = await _context.Kavels.FindAsync(kavelId);
+                    if (kavel != null)
+                    {
+                        kavel.VeilingId = veiling.Id;
+                    }
                 }
+                await _context.SaveChangesAsync();
             }
 
             return CreatedAtAction(nameof(GetVeiling), new { id = veiling.Id }, veiling);
@@ -137,12 +140,11 @@ namespace Veiling.Server.Controllers
         }
     }
     
-    // DTO class buiten de controller
     public class CreateVeilingDto
     {
         public string Naam { get; set; } = string.Empty;
         public DateTime StartTijd { get; set; }
         public DateTime EndTijd { get; set; }
-        public int? KavelId { get; set; }
+        public List<int> KavelIds { get; set; } = new List<int>();
     }
 }

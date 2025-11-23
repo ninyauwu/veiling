@@ -6,13 +6,14 @@ import type { AppointmentData, AppointmentFormData, Kavel } from "./AppointmentT
 const Scheduler: React.FC = () => {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [kavels, setKavels] = useState<Kavel[]>([]);
-  const [editingAppointment, setEditingAppointment] = useState<AppointmentData | null>(null);
+  const [editingAppointment, setEditingAppointment] =
+    useState<AppointmentData | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [formData, setFormData] = useState<AppointmentFormData>({
     startTime: "",
     endTime: "",
     name: "",
-    kavelId: undefined,
+    kavelIds: [],
   });
 
   const gridRef = useRef<HTMLDivElement>(null);
@@ -82,10 +83,13 @@ const Scheduler: React.FC = () => {
     return hours + minutes / 60;
   };
 
-  const getKavelName = (kavelId?: number): string => {
-    if (!kavelId) return "";
-    const kavel = kavels.find((k) => k.id === kavelId);
-    return kavel ? kavel.naam : "";
+  const getKavelNames = (kavelIds: number[]): string => {
+    if (kavelIds.length === 0) return "";
+    if (kavelIds.length === 1) {
+      const kavel = kavels.find(k => k.id === kavelIds[0]);
+      return kavel ? kavel.naam : "";
+    }
+    return `${kavelIds.length} kavels`;
   };
 
   const handleCellClick = (dayIndex: number, hour: number) => {
@@ -95,7 +99,7 @@ const Scheduler: React.FC = () => {
       startHour: hour,
       durationHours: 1,
       name: "",
-      kavelId: undefined,
+      kavelIds: [],
     };
 
     setEditingAppointment(newAppointment);
@@ -103,7 +107,7 @@ const Scheduler: React.FC = () => {
       startTime: formatTime(hour),
       endTime: formatTime(hour + 1),
       name: "",
-      kavelId: undefined,
+      kavelIds: [],
     });
     setIsPopupOpen(true);
   };
@@ -123,7 +127,7 @@ const Scheduler: React.FC = () => {
       startTime: formatTime(appointment.startHour),
       endTime: formatTime(appointment.startHour + appointment.durationHours),
       name: appointment.name,
-      kavelId: appointment.kavelId,
+      kavelIds: appointment.kavelIds,
     });
     setIsPopupOpen(true);
   };
@@ -133,6 +137,11 @@ const Scheduler: React.FC = () => {
 
     if (!formData.startTime || !formData.endTime) {
       alert("Vul start- en eindtijd in");
+      return;
+    }
+
+    if (formData.kavelIds.length === 0) {
+      alert("Selecteer minimaal 1 kavel");
       return;
     }
 
@@ -151,19 +160,20 @@ const Scheduler: React.FC = () => {
     const endDate = new Date(startDate);
     endDate.setHours(Math.floor(endHour), (endHour % 1) * 60, 0, 0);
 
+    const payload = {
+      naam: formData.name || getKavelNames(formData.kavelIds) || "Ongetiteld",
+      startTijd: startDate.toISOString(),
+      endTijd: endDate.toISOString(),
+      kavelIds: formData.kavelIds
+    };
+
     try {
-      // POST naar backend
-      const response = await fetch("/api/veilingen", {
-        method: "POST",
+      const response = await fetch('/api/veilingen', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          naam: formData.name || getKavelName(formData.kavelId) || "Ongetiteld",
-          startTijd: startDate.toISOString(),
-          endTijd: endDate.toISOString(),
-          kavelId: formData.kavelId,
-        }),
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -175,14 +185,16 @@ const Scheduler: React.FC = () => {
         ...editingAppointment,
         startHour,
         durationHours,
-        name: formData.name || getKavelName(formData.kavelId),
-        kavelId: formData.kavelId,
+        name: formData.name || getKavelNames(formData.kavelIds),
+        kavelIds: formData.kavelIds,
       };
 
       setAppointments((prev) => {
         const existing = prev.find((apt) => apt.id === updatedAppointment.id);
         if (existing) {
-          return prev.map((apt) => (apt.id === updatedAppointment.id ? updatedAppointment : apt));
+          return prev.map((apt) =>
+            apt.id === updatedAppointment.id ? updatedAppointment : apt
+          );
         }
         return [...prev, updatedAppointment];
       });
@@ -190,8 +202,8 @@ const Scheduler: React.FC = () => {
       setIsPopupOpen(false);
       setEditingAppointment(null);
     } catch (error) {
-      console.error("Error creating veiling:", error);
-      alert("Fout bij opslaan veiling. Controleer of de server draait.");
+      console.error('Error creating veiling:', error);
+      alert('Fout bij opslaan veiling. Controleer of de server draait.');
     }
   };
 
@@ -222,22 +234,24 @@ const Scheduler: React.FC = () => {
                         style={{ backgroundColor: `#${kavel.kavelkleur}` }}
                       />
                     </div>
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{kavel.beschrijving}</p>
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      {kavel.beschrijving}
+                    </p>
                     <div className="text-xs space-y-1">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Prijs:</span>
-                        <span className="font-medium">
+                        <span className="font-medium text-gray-900">
                           €{kavel.minimumPrijs.toFixed(2)} - €{kavel.maximumPrijs.toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Containers:</span>
-                        <span className="font-medium">{kavel.hoeveelheidContainers}</span>
+                        <span className="font-medium text-gray-900">{kavel.hoeveelheidContainers}</span>
                       </div>
                       {kavel.leverancier?.bedrijf?.bedrijfsnaam && (
                         <div className="flex justify-between">
                           <span className="text-gray-500">Leverancier:</span>
-                          <span className="font-medium text-xs">
+                          <span className="font-medium text-gray-900 text-xs">
                             {kavel.leverancier.bedrijf.bedrijfsnaam}
                           </span>
                         </div>
@@ -250,7 +264,10 @@ const Scheduler: React.FC = () => {
           </div>
 
           <div className="lg:col-span-3 bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="grid grid-cols-8 border-b-2" style={{ borderColor: "#7A1F3D" }}>
+            <div
+              className="grid grid-cols-8 border-b-2"
+              style={{ borderColor: "#7A1F3D" }}
+            >
               <div className="p-4" style={{ backgroundColor: "#FFFFFF" }} />
               {weekDays.map((day, i) => {
                 const isToday = day.toDateString() === today.toDateString();
@@ -266,7 +283,10 @@ const Scheduler: React.FC = () => {
                     <div className="text-sm">
                       {day.toLocaleDateString("en-US", { weekday: "short" })}
                     </div>
-                    <div className="text-2xl" style={{ color: isToday ? "#FFFFFF" : "#7A1F3D" }}>
+                    <div
+                      className="text-2xl"
+                      style={{ color: isToday ? "#FFFFFF" : "#7A1F3D" }}
+                    >
                       {day.getDate()}
                     </div>
                   </div>
@@ -337,47 +357,68 @@ const Scheduler: React.FC = () => {
       {isPopupOpen && (
         <Popup onClose={() => setIsPopupOpen(false)}>
           <h2 className="text-2xl font-bold mb-4" style={{ color: "#7A1F3D" }}>
-            {editingAppointment && appointments.find((a) => a.id === editingAppointment.id)
+            {editingAppointment &&
+            appointments.find((a) => a.id === editingAppointment.id)
               ? "Bewerk Veiling"
               : "Nieuwe Veiling"}
           </h2>
           <div>
             <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2" style={{ color: "#000000" }}>
-                Selecteer Kavel
-              </label>
-              <select
-                value={formData.kavelId || ""}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    kavelId: e.target.value ? Number(e.target.value) : undefined,
-                    name: e.target.value ? getKavelName(Number(e.target.value)) : prev.name,
-                  }))
-                }
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: "#D9D9D9",
-                  color: "#000000",
-                }}
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "#000000" }}
               >
-                <option value="">Geen kavel geselecteerd</option>
+                Selecteer Kavels ({formData.kavelIds.length} geselecteerd)
+              </label>
+              <div
+                className="border rounded p-3 max-h-48 overflow-y-auto space-y-2"
+                style={{ borderColor: "#D9D9D9" }}
+              >
                 {kavels.map((kavel) => (
-                  <option key={kavel.id} value={kavel.id}>
-                    {kavel.naam} - €{kavel.minimumPrijs.toFixed(2)}
-                  </option>
+                  <label
+                    key={kavel.id}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.kavelIds.includes(kavel.id)}
+                      onChange={(e) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          kavelIds: e.target.checked
+                            ? [...prev.kavelIds, kavel.id]
+                            : prev.kavelIds.filter(id => id !== kavel.id)
+                        }));
+                      }}
+                      className="w-4 h-4"
+                      style={{ accentColor: "#7A1F3D" }}
+                    />
+                    <span className="text-sm flex-1">
+                      {kavel.naam} - €{kavel.minimumPrijs.toFixed(2)}
+                    </span>
+                    <div
+                      className="w-4 h-4 rounded border border-gray-300"
+                      style={{ backgroundColor: `#${kavel.kavelkleur}` }}
+                    />
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2" style={{ color: "#000000" }}>
-                Veilingnaam <span className="text-sm font-normal">(optioneel)</span>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "#000000" }}
+              >
+                Veilingnaam{" "}
+                <span className="text-sm font-normal">(optioneel)</span>
               </label>
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))
+                }
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2"
                 style={{
                   borderColor: "#D9D9D9",
@@ -388,7 +429,10 @@ const Scheduler: React.FC = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "#000000" }}
+              >
                 Start Time
               </label>
               <input
@@ -409,13 +453,18 @@ const Scheduler: React.FC = () => {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "#000000" }}
+              >
                 End Time
               </label>
               <input
                 type="time"
                 value={formData.endTime}
-                onChange={(e) => setFormData((prev) => ({ ...prev, endTime: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, endTime: e.target.value }))
+                }
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2"
                 style={{
                   borderColor: "#D9D9D9",

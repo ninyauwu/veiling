@@ -84,23 +84,23 @@ export default function Popup({
           backgroundColor: "#FFFFFF",
         }}
       >
-          {allowManualClose && onClose && (
-              <button
-                  ref={firstFocusableRef}
-                  onClick={onClose}
-                  className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded transition-colors hover:opacity-80 focus:outline-none focus:ring-2"
-                  style={{
-                      color: "#FFFFFF",
-                      backgroundColor: "#7A1F3D",
-                      fontSize: "28px",
-                      fontWeight: "bold",
-                      lineHeight: "1",
-                  }}
-                  aria-label="Close popup"
-              >
-                  ×
-              </button>
-          )}
+        {allowManualClose && onClose && (
+          <button
+            ref={firstFocusableRef}
+            onClick={onClose}
+            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded transition-colors hover:opacity-80 focus:outline-none focus:ring-2"
+            style={{
+              color: "#FFFFFF",
+              backgroundColor: "#7A1F3D",
+              fontSize: "28px",
+              fontWeight: "bold",
+              lineHeight: "1",
+            }}
+            aria-label="Close popup"
+          >
+            ×
+          </button>
+        )}
         <div className="p-6">{children}</div>
       </div>
     </div>
