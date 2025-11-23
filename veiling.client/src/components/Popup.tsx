@@ -84,27 +84,23 @@ export default function Popup({
           backgroundColor: "#FFFFFF",
         }}
       >
-        {allowManualClose && onClose && (
-          <button
-            ref={firstFocusableRef}
-            onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded hover:bg-opacity-10 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-            style={{
-              color: "#7A1F3D",
-              backgroundColor: "#D9D9D9",
-            }}
-            aria-label="Close popup"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M12 4L4 12M4 4L12 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
-        )}
+          {allowManualClose && onClose && (
+              <button
+                  ref={firstFocusableRef}
+                  onClick={onClose}
+                  className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded transition-colors hover:opacity-80 focus:outline-none focus:ring-2"
+                  style={{
+                      color: "#FFFFFF",
+                      backgroundColor: "#7A1F3D",
+                      fontSize: "28px",
+                      fontWeight: "bold",
+                      lineHeight: "1",
+                  }}
+                  aria-label="Close popup"
+              >
+                  ×
+              </button>
+          )}
         <div className="p-6">{children}</div>
       </div>
     </div>

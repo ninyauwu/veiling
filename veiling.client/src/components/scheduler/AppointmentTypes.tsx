@@ -1,9 +1,25 @@
+export interface Kavel {
+  id: number;
+  naam: string;
+  beschrijving: string;
+  minimumPrijs: number;
+  maximumPrijs: number;
+  hoeveelheidContainers: number;
+  kavelkleur: string;
+  leverancier?: {
+    bedrijf?: {
+      bedrijfsnaam: string;
+    };
+  };
+}
+
 export interface AppointmentData {
   id: string;
   dayIndex: number;
   startHour: number;
   durationHours: number;
   name: string;
+  kavelId?: number;
 }
 
 export interface AppointmentProps {
@@ -19,4 +35,5 @@ export interface AppointmentFormData {
   startTime: string;
   endTime: string;
   name: string;
+  kavelId?: number;
 }

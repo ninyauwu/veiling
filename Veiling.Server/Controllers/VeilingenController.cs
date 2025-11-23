@@ -59,10 +59,31 @@ namespace Veiling.Server.Controllers
 
         // POST: api/veilingen
         [HttpPost]
-        public async Task<ActionResult<Models.Veiling>> CreateVeiling(Models.Veiling veiling)
+        public async Task<ActionResult<Models.Veiling>> CreateVeiling(CreateVeilingDto dto)
         {
+            var veiling = new Models.Veiling
+            {
+                Naam = dto.Naam,
+                StartTijd = dto.StartTijd,
+                EndTijd = dto.EndTijd,
+                KlokId = 1,
+                Klokduur = 1.0f,
+                GeldPerTickCode = 0.01f
+            };
+
             _context.Veilingen.Add(veiling);
             await _context.SaveChangesAsync();
+
+            // Koppel kavel aan veiling indien geselecteerd
+            if (dto.KavelId.HasValue)
+            {
+                var kavel = await _context.Kavels.FindAsync(dto.KavelId.Value);
+                if (kavel != null)
+                {
+                    kavel.VeilingId = veiling.Id;
+                    await _context.SaveChangesAsync();
+                }
+            }
 
             return CreatedAtAction(nameof(GetVeiling), new { id = veiling.Id }, veiling);
         }
@@ -114,5 +135,14 @@ namespace Veiling.Server.Controllers
         {
             return _context.Veilingen.Any(v => v.Id == id);
         }
+    }
+    
+    // DTO class buiten de controller
+    public class CreateVeilingDto
+    {
+        public string Naam { get; set; } = string.Empty;
+        public DateTime StartTijd { get; set; }
+        public DateTime EndTijd { get; set; }
+        public int? KavelId { get; set; }
     }
 }
