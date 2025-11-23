@@ -1,63 +1,175 @@
-
-using Veiling.Server;
+using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
-public static class AppDbSeeder {
-    public static void Seed(AppDbContext context) {
-        if (context.Kavels.Any()) return;
+namespace Veiling.Server
+{
+    public class AppDbSeeder
+    {
+        public static void Seed(AppDbContext context)
+        {
+            // Clear existing data
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
 
-        var royalFlora = new Bedrijf {
-            Bedrijfscode = 0,
-            Bedrijfsnaam = "RoyalFlora BV",
-            KVKnummer = 13414514,
-        };
-        
-        context.Bedrijven.Add(
-            royalFlora
-        );
-        
-        var leverancier = new Leverancier {
-            BedrijfId = 0,
-            Bedrijf = royalFlora,
-            IndexOfReliabilityOfInformation = "A",
-        };
+            var now = DateTime.UtcNow;
 
-        context.Leveranciers.Add(
-            leverancier
-        );
+            // Locaties
+            var amsterdam = new Locatie
+            {
+                Naam = "Amsterdam",
+                KlokId = 1,
+                Actief = true
+            };
 
-        context.Kavels.Add(
-            new Kavel {
-                Id = 0,
-                Naam = "Tulpen",
-                Beschrijving = "In 1962 werd ik aangevallen door beren.<br/>Nu vertrouw ik dus geen beren meer.",
-                MinimumPrijs = 0.22F,
-                MaximumPrijs = 0.97F,
-                Kavelkleur = "87335F",
-                Leverancier = leverancier,
-                LeverancierId = leverancier.Id,
-                StageOfMaturity = "24",
-                Keurcode = "A2",
-                Fustcode = 13914,
-            }
-        );
+            var rotterdam = new Locatie
+            {
+                Naam = "Rotterdam",
+                KlokId = 2,
+                Actief = false
+            };
 
-        context.Kavels.Add(
-            new Kavel {
-                Id = 0,
-                Naam = "Rozen",
-                Beschrijving = "Hey Vsauce, Michael here.",
-                MinimumPrijs = 0.12F,
-                MaximumPrijs = 0.40F,
-                Kavelkleur = "AAFF33",
-                Leverancier = leverancier,
-                LeverancierId = leverancier.Id,
-                StageOfMaturity = "20",
+            var delft = new Locatie
+            {
+                Naam = "Delft",
+                KlokId = 3,
+                Actief = true
+            };
+
+            context.Locaties.AddRange(amsterdam, rotterdam, delft);
+            context.SaveChanges();
+
+            // Bedrijven
+            var bedrijf1 = new Bedrijf
+            {
+                Bedrijfsnaam = "Bloemen BV",
+                KVKnummer = 12345678
+            };
+
+            var bedrijf2 = new Bedrijf
+            {
+                Bedrijfsnaam = "Flora Wholesale",
+                KVKnummer = 87654321
+            };
+
+            context.Bedrijven.AddRange(bedrijf1, bedrijf2);
+            context.SaveChanges();
+
+            // Gebruikers
+            var gebruiker1 = new Gebruiker
+            {
+                Name = "Jan Jansen",
+                EmailAddress = "jan@bloemen.nl",
+                PhoneNumber = 612345678,
+                Bedrijfsbeheerder = true,
+                Geverifieerd = true,
+                BedrijfId = bedrijf1.Bedrijfscode
+            };
+
+            var gebruiker2 = new Gebruiker
+            {
+                Name = "Marie Pieters",
+                EmailAddress = "marie@flora.nl",
+                PhoneNumber = 687654321,
+                Bedrijfsbeheerder = false,
+                Geverifieerd = true,
+                BedrijfId = bedrijf2.Bedrijfscode
+            };
+
+            context.Gebruikers.AddRange(gebruiker1, gebruiker2);
+            context.SaveChanges();
+
+            // Veilingmeesters
+            var veilingmeester1 = new Veilingmeester
+            {
+                GebruikerId = gebruiker1.Id,
+                AantalVeilingenBeheerd = 5
+            };
+
+            context.Veilingmeesters.Add(veilingmeester1);
+            context.SaveChanges();
+
+            // Leveranciers
+            var leverancier1 = new Leverancier
+            {
+                BedrijfId = bedrijf1.Bedrijfscode,
+                Bedrijf = bedrijf1,
+                IndexOfReliabilityOfInformation = "A"
+            };
+
+            context.Leveranciers.Add(leverancier1);
+            context.SaveChanges();
+            
+            // veilingen
+            var amsterdamVeiling = new Models.Veiling
+            {
+                Naam = "Amsterdam Ochtend Veiling",
+                Klokduur = 5.0f,
+                StartTijd = now.AddHours(-1),
+                EndTijd = now.AddHours(2),
+                GeldPerTickCode = 0.5f,
+                VeilingmeesterId = veilingmeester1.Id,
+                LocatieId = amsterdam.Id
+            };
+
+            var rotterdamVeiling1 = new Models.Veiling
+            {
+                Naam = "Rotterdam Middag Veiling",
+                Klokduur = 5.0f,
+                StartTijd = now.AddHours(5),
+                EndTijd = now.AddHours(7),
+                GeldPerTickCode = 0.5f,
+                VeilingmeesterId = veilingmeester1.Id,
+                LocatieId = rotterdam.Id
+            };
+
+            var delftVeiling = new Models.Veiling
+            {
+                Naam = "Delft Avond Veiling",
+                Klokduur = 5.0f,
+                StartTijd = now.AddHours(-2),
+                EndTijd = now.AddMinutes(45),
+                GeldPerTickCode = 0.5f,
+                VeilingmeesterId = veilingmeester1.Id,
+                LocatieId = delft.Id
+            };
+
+            context.Veilingen.AddRange(amsterdamVeiling, rotterdamVeiling1, delftVeiling);
+            context.SaveChanges();
+
+            // Kavels
+            var kavel1 = new Kavel
+            {
+                Naam = "Rode Rozen",
+                Beschrijving = "Premium rode rozen",
+                ArtikelKenmerken = "Lang, sterk",
+                MinimumPrijs = 15.0f,
+                MaximumPrijs = 25.0f,
+                Minimumhoeveelheid = 10,
+                Foto = "/images/rozen.jpg",
+                Kavelkleur = "FF0000",
+                Karnummer = 1,
+                Rijnummer = 1,
+                HoeveelheidContainers = 50,
+                AantalProductenPerContainer = 20,
+                LengteVanBloemen = 60.0f,
+                GewichtVanBloemen = 500.0f,
+                StageOfMaturity = "Bloeiend",
+                NgsCode = 'A',
                 Keurcode = "A1",
-                Fustcode = 12354,
-            }
-        );
+                Fustcode = 123,
+                GeldPerTickCode = "0.5",
+                VeilingId = amsterdamVeiling.Id,
+                LeverancierId = leverancier1.Id
+            };
 
-        context.SaveChanges();
+            context.Kavels.Add(kavel1);
+            context.SaveChanges();
+
+            Console.WriteLine("Database seeded successfully!");
+            Console.WriteLine($"Current time: {now}");
+            Console.WriteLine($"Amsterdam veiling eindigt over: {(amsterdamVeiling.EndTijd - now).TotalHours:F1} uur");
+            Console.WriteLine($"Rotterdam veiling begint over: {(rotterdamVeiling1.StartTijd - now).TotalHours:F1} uur");
+            Console.WriteLine($"Delft veiling eindigt over: {(delftVeiling.EndTijd - now).TotalMinutes:F0} minuten");
+        }
     }
 }

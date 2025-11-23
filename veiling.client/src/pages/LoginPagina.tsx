@@ -1,5 +1,5 @@
-﻿import Header from "./HeaderLoggedout";
-import Login from "./LoginWidget";
+﻿import Header from "../components/HeaderLoggedout";
+import Login from "../components/LoginWidget";
 
 function LoginPagina() {
     return (
