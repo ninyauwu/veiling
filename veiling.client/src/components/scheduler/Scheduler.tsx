@@ -246,8 +246,8 @@ const Scheduler: React.FC = () => {
                 className="block text-sm font-semibold mb-2"
                 style={{ color: "#000000" }}
               >
-                Appointment Name{" "}
-                <span className="text-sm font-normal">(optional)</span>
+                Veilingnaam{" "}
+                <span className="text-sm font-normal">(optioneel)</span>
               </label>
               <input
                 type="text"
@@ -317,7 +317,7 @@ const Scheduler: React.FC = () => {
                 color: "#FFFFFF",
               }}
             >
-              Save Appointment
+              Veiling Opslaan
             </button>
           </div>
         </Popup>
