@@ -15,6 +15,8 @@ const Scheduler: React.FC = () => {
     name: "",
     kavelIds: [],
   });
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const [gridMetrics, setGridMetrics] = useState({ left: 0, columnWidth: 0 });
@@ -130,6 +132,40 @@ const Scheduler: React.FC = () => {
       kavelIds: appointment.kavelIds,
     });
     setIsPopupOpen(true);
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
+      const newKavelIds = [...formData.kavelIds];
+      const draggedItem = newKavelIds[draggedIndex];
+      newKavelIds.splice(draggedIndex, 1);
+      newKavelIds.splice(dragOverIndex, 0, draggedItem);
+
+      setFormData((prev) => ({
+        ...prev,
+        kavelIds: newKavelIds,
+      }));
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleKavelToggle = (kavelId: number, checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      kavelIds: checked
+        ? [...prev.kavelIds, kavelId]
+        : prev.kavelIds.filter(id => id !== kavelId)
+    }));
   };
 
   const handleFormSubmit = async () => {
@@ -374,36 +410,116 @@ const Scheduler: React.FC = () => {
                 className="border rounded p-3 max-h-48 overflow-y-auto space-y-2"
                 style={{ borderColor: "#D9D9D9" }}
               >
-                {kavels.map((kavel) => (
-                  <label
-                    key={kavel.id}
-                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.kavelIds.includes(kavel.id)}
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          kavelIds: e.target.checked
-                            ? [...prev.kavelIds, kavel.id]
-                            : prev.kavelIds.filter(id => id !== kavel.id)
-                        }));
-                      }}
-                      className="w-4 h-4"
-                      style={{ accentColor: "#7A1F3D" }}
-                    />
-                    <span className="text-sm flex-1">
-                      {kavel.naam} - €{kavel.minimumPrijs.toFixed(2)}
-                    </span>
-                    <div
-                      className="w-4 h-4 rounded border border-gray-300"
-                      style={{ backgroundColor: `#${kavel.kavelkleur}` }}
-                    />
-                  </label>
-                ))}
+                {kavels.map((kavel) => {
+                  const isSelected = formData.kavelIds.includes(kavel.id);
+                  return (
+                    <label
+                      key={kavel.id}
+                      className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => handleKavelToggle(kavel.id, e.target.checked)}
+                        className="w-4 h-4"
+                        style={{ accentColor: "#7A1F3D" }}
+                      />
+                      <span className="text-sm flex-1">
+                        {kavel.naam} - €{kavel.minimumPrijs.toFixed(2)}
+                      </span>
+                      <div
+                        className="w-4 h-4 rounded border border-gray-300"
+                        style={{ backgroundColor: `#${kavel.kavelkleur}` }}
+                      />
+                    </label>
+                  );
+                })}
               </div>
             </div>
+
+            {formData.kavelIds.length > 0 && (
+              <div className="mb-4">
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: "#000000" }}
+                >
+                  Volgorde van Kavels (sleep om te herschikken)
+                </label>
+                <div
+                  className="border rounded p-3 space-y-2"
+                  style={{ borderColor: "#D9D9D9", backgroundColor: "#f9f9f9" }}
+                >
+                  {formData.kavelIds.map((kavelId, index) => {
+                    const kavel = kavels.find(k => k.id === kavelId);
+                    if (!kavel) return null;
+
+                    const isDragging = draggedIndex === index;
+                    const isDragOver = dragOverIndex === index;
+
+                    return (
+                      <div
+                        key={`selected-${kavelId}-${index}`}
+                        draggable
+                        onDragStart={() => handleDragStart(index)}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className="flex items-center gap-3 p-3 bg-white border rounded transition-all"
+                        style={{
+                          borderColor: isDragOver ? "#7A1F3D" : "#D9D9D9",
+                          opacity: isDragging ? 0.5 : 1,
+                          cursor: "grab",
+                          borderWidth: isDragOver ? "2px" : "1px",
+                        }}
+                      >
+                        <svg
+                          className="w-5 h-5 text-gray-400 flex-shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-8a2 2 0 1 0-.001-4.001A2 2 0 0 0 13 6zm0 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
+                        </svg>
+
+                        <div
+                          className="w-8 h-8 flex items-center justify-center rounded font-bold text-white flex-shrink-0"
+                          style={{ backgroundColor: "#7A1F3D" }}
+                        >
+                          {index + 1}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-sm truncate">
+                            {kavel.naam}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            €{kavel.minimumPrijs.toFixed(2)} • Duur: 60 sec
+                          </div>
+                        </div>
+
+                        <div
+                          className="w-6 h-6 rounded border border-gray-300 flex-shrink-0"
+                          style={{ backgroundColor: `#${kavel.kavelkleur}` }}
+                        />
+
+                        <button
+                          onClick={() => handleKavelToggle(kavelId, false)}
+                          className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:opacity-80 focus:outline-none focus:ring-2 flex-shrink-0"
+                          style={{
+                            color: "#FFFFFF",
+                            backgroundColor: "#7A1F3D",
+                            fontSize: "24px",
+                            fontWeight: "bold",
+                            lineHeight: "1",
+                          }}
+                          title="Verwijder uit selectie"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="mb-4">
               <label
