@@ -197,10 +197,10 @@ const Scheduler: React.FC = () => {
     endDate.setHours(Math.floor(endHour), (endHour % 1) * 60, 0, 0);
 
     const payload = {
-      naam: formData.name || getKavelNames(formData.kavelIds) || "Ongetiteld",
-      startTijd: startDate.toISOString(),
-      endTijd: endDate.toISOString(),
-      kavelIds: formData.kavelIds
+      Naam: formData.name || getKavelNames(formData.kavelIds) || "Ongetiteld",
+      StartTijd: startDate.toISOString(),
+      EndTijd: endDate.toISOString(),
+      KavelIds: formData.kavelIds
     };
 
     try {
