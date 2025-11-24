@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
 namespace Veiling.Server
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<Gebruiker>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)

@@ -58,8 +58,8 @@ namespace Veiling.Server
             var gebruiker1 = new Gebruiker
             {
                 Name = "Jan Jansen",
-                EmailAddress = "jan@bloemen.nl",
-                PhoneNumber = 612345678,
+                Email = "jan@bloemen.nl",
+                PhoneNumber = "612345678",
                 Bedrijfsbeheerder = true,
                 Geverifieerd = true,
                 BedrijfId = bedrijf1.Bedrijfscode
@@ -68,8 +68,8 @@ namespace Veiling.Server
             var gebruiker2 = new Gebruiker
             {
                 Name = "Marie Pieters",
-                EmailAddress = "marie@flora.nl",
-                PhoneNumber = 687654321,
+                Email = "marie@flora.nl",
+                PhoneNumber = "687654321",
                 Bedrijfsbeheerder = false,
                 Geverifieerd = true,
                 BedrijfId = bedrijf2.Bedrijfscode
