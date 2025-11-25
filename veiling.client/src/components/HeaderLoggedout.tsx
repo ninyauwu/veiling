@@ -33,7 +33,7 @@ function Header({ showLocationDropdown = true }: HeaderProps) {
         <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
           <img
             src={bloomifyLogo}
-            alt="Bloomify"
+            alt="Naar Bloomify hoofdpagina"
             style={{
               height: "80px",
               cursor: "pointer",
@@ -70,4 +70,3 @@ function Header({ showLocationDropdown = true }: HeaderProps) {
 }
 
 export default Header;
-
