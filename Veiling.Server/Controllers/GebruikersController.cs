@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Veiling.Server.Data;
 using Veiling.Server.Models;
 
 namespace Veiling.Server.Controllers
@@ -13,6 +15,43 @@ namespace Veiling.Server.Controllers
         public GebruikersController(AppDbContext context)
         {
             _context = context;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(GebruikerRegistratie dto, [FromServices] UserManager<Gebruiker> userManager)
+        {
+            var user = new Gebruiker
+            {
+                UserName = dto.Email,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Name = dto.FirstName + " " + dto.LastName,
+            };
+
+            var result = await userManager.CreateAsync(user, dto.Password);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return Ok("User registered successfully");
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(GebruikerLogin dto,
+            [FromServices] SignInManager<Gebruiker> signInManager)
+        {
+            var result = await signInManager.PasswordSignInAsync(
+                dto.Email,
+                dto.Password,
+                isPersistent: false,
+                lockoutOnFailure: false);
+
+            if (!result.Succeeded)
+                return Unauthorized("Invalid login.");
+
+            return Ok("Logged in successfully");
         }
 
         // GET: api/gebruikers
