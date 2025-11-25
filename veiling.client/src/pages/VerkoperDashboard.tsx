@@ -124,21 +124,29 @@ function VerkoperDashboard() {
                 display: "flex",
                 flexDirection: "row",
                 gap: "60px",
+                flexWrap: "wrap",        // <—
+                width: "100%",
             }}>
                 <div style={{
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px',
-                    width: '800px',
-                    flexShrink: 0
+                    flex: '1 1 400px',     // <—
+                    maxWidth: '600px',
                 }}>
-                    <div style={{ height: '400px' }}>
-                        <ImageUpload onImageUpload={handleImageUpload}/>
+                    <div style={{
+                        height: '35vh',      // <—
+                        minHeight: '300px'   // <—
+                    }}>
+                        <ImageUpload onImageUpload={handleImageUpload} />
                     </div>
                     <KavelDescription onDescriptionChange={handleDescriptionChange}/>
                 </div>
                 
-                <div style={{ flex: 1 }}>
+                <div style={{
+                    flex: '2 1 500px',     // <—
+                    minWidth: '400px',      // <—
+                }}>
                     <KavelInvulTabel onDataChange={handleTableDataChange} />
                 </div>
                 
@@ -146,8 +154,8 @@ function VerkoperDashboard() {
                     display: 'flex',
                     position: 'fixed',
                     gap: '10px',
-                    right: '40px',               
-                    bottom: '40px'
+                    right: '2vw',          // <—
+                    bottom: '2vh'          // <—
                 }}>
                     {/* UPDATED: Disable button when form is invalid */}
                     <SimpeleKnop 
