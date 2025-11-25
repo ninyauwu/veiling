@@ -6,7 +6,6 @@ import ImageSet from "./ImageSet";
 import NavigationBar from "./NavigationBar";
 import MetadataGrid from "./MetadataGrid";
 import CompanyQuality from "./CompanyQuality";
-import Scheduler from "./scheduler/Scheduler";
 
 // Define the type for data coming from your API
 type KavelInfoResponse = {
@@ -142,7 +141,6 @@ function KavelInfo() {
           return tableRows[selected].Naam;
         }}
       />
-      <Scheduler date={new Date()} />
     </div>
   );
 }
