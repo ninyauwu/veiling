@@ -46,7 +46,7 @@ function KavelInfo() {
         setLoading(false);
         if (data.length > 0) setSelected(0);
       } catch (err) {
-        console.error("Failed to load kavels:", err);
+        console.error("Kon kavels niet laden:", err);
         setLoading(false);
       }
     }
