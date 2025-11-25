@@ -1,0 +1,16 @@
+﻿using System.Text.Json.Serialization;
+
+namespace Veiling.Server.Models
+{
+    public class Locatie
+    {
+        public int Id { get; set; }
+        public string Naam { get; set; } // "Amsterdam", "Rotterdam", "Delft"
+        public int KlokId { get; set; } 
+        public bool Actief { get; set; }
+        
+        // Relaties
+        [JsonIgnore]
+        public ICollection<Veiling> Veilingen { get; set; } = new List<Veiling>();
+    }
+}

@@ -1,61 +1,29 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import "./KavelTabel.css";
 
-export default function KavelTabel({ endpoint, onRowSelect }: KavelTabelProps) {
-  const [rows, setRows] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(0);
+export interface KavelTabelProps {
+  rows: any[];
+  selectedRowIndex?: number | null;
+  onRowSelect?: (row: any, index: number) => void;
+  onSelectedRowChange?: (index: number | null) => void;
+}
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
+const KavelTabel: React.FC<KavelTabelProps> = ({
+  rows,
+  selectedRowIndex,
+  onRowSelect,
+  onSelectedRowChange,
+}) => {
+  const currentIndex = selectedRowIndex ?? null;
 
-      try {
-        // 🔹 Mock test data
-        const data = [
-          {
-            Naam: "Rozen",
-            Prijs: "12c-20c",
-            Aantal: 19,
-            Leverancier: "Kazen NV",
-            Kwaliteit: "B2",
-            QI: "C",
-          },
-          {
-            Naam: "Spaghetti",
-            Prijs: "12c-20c",
-            Aantal: 200,
-            Leverancier: "RoyalTulpen BV",
-            Kwaliteit: "A1",
-            QI: "A",
-          },
-          {
-            Naam: "Ravioli",
-            Prijs: "12c-20c",
-            Aantal: 43,
-            Leverancier: "RoyalTulpen BV",
-            Kwaliteit: "A1",
-            QI: "A",
-          },
-        ];
+  const handleRowSelect = (i: number) => {
+    if (i < 0 || i >= rows.length) return;
+    if (currentIndex === i) return;
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setRows(data);
-      } catch (err) {
-        if (err instanceof Error) setError(err.message);
-        else setError(String(err));
-      } finally {
-        setLoading(false);
-      }
-    }
+    onSelectedRowChange?.(i);
+    onRowSelect?.(rows[i], i);
+  };
 
-    fetchData();
-  }, [endpoint]);
-
-  if (loading) return <p className="text-gray-500">Loading...</p>;
-  if (error) return <p className="text-red-600">Error: {error}</p>;
   if (rows.length === 0) return <p>No data found.</p>;
 
   const columns = Object.keys(rows[0]);
@@ -73,12 +41,8 @@ export default function KavelTabel({ endpoint, onRowSelect }: KavelTabelProps) {
         {rows.map((row, i) => (
           <tr
             key={i}
-            onClick={() => {
-              if (selectedRowIndex == i) return;
-              setSelectedRowIndex(i);
-              if (onRowSelect) onRowSelect(rows[i]);
-            }}
-            className={selectedRowIndex === i ? "kavel-row-selected" : ""}
+            onClick={() => handleRowSelect(i)}
+            className={currentIndex === i ? "kavel-row-selected" : ""}
           >
             {columns.map((col) => (
               <td key={col} className="border border-gray-300 p-2">
@@ -90,9 +54,6 @@ export default function KavelTabel({ endpoint, onRowSelect }: KavelTabelProps) {
       </tbody>
     </table>
   );
-}
+};
 
-interface KavelTabelProps {
-  endpoint: string;
-  onRowSelect?: (row: object) => void;
-}
+export default KavelTabel;

@@ -20,6 +20,7 @@ namespace Veiling.Server.Controllers
         public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetVeilingen()
         {
             return await _context.Veilingen
+                .Include(v => v.Locatie)
                 .Include(v => v.Veilingmeester)
                     .ThenInclude(vm => vm.Gebruiker)
                 .Include(v => v.Kavels)
@@ -31,6 +32,7 @@ namespace Veiling.Server.Controllers
         public async Task<ActionResult<Models.Veiling>> GetVeiling(int id)
         {
             var veiling = await _context.Veilingen
+                .Include(v => v.Locatie)
                 .Include(v => v.Veilingmeester)
                     .ThenInclude(vm => vm.Gebruiker)
                 .Include(v => v.Kavels)
@@ -51,6 +53,20 @@ namespace Veiling.Server.Controllers
             var nu = DateTime.Now;
             return await _context.Veilingen
                 .Where(v => v.StartTijd <= nu && v.EndTijd >= nu)
+                .Include(v => v.Locatie)
+                .Include(v => v.Veilingmeester)
+                    .ThenInclude(vm => vm.Gebruiker)
+                .Include(v => v.Kavels)
+                .ToListAsync();
+        }
+
+        // GET: api/veilingen/locatie/5
+        [HttpGet("locatie/{locatieId}")]
+        public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetVeilingenByLocatie(int locatieId)
+        {
+            return await _context.Veilingen
+                .Where(v => v.LocatieId == locatieId)
+                .Include(v => v.Locatie)
                 .Include(v => v.Veilingmeester)
                     .ThenInclude(vm => vm.Gebruiker)
                 .Include(v => v.Kavels)
