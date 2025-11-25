@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
 namespace Veiling.Server
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<Gebruiker>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -12,6 +13,7 @@ namespace Veiling.Server
 
         // DbSets
         public DbSet<Bedrijf> Bedrijven { get; set; }
+        public DbSet<Locatie> Locaties { get; set; }
         public DbSet<Gebruiker> Gebruikers { get; set; }
         public DbSet<Veilingmeester> Veilingmeesters { get; set; }
         public DbSet<Leverancier> Leveranciers { get; set; }
@@ -85,6 +87,15 @@ namespace Veiling.Server
             
             modelBuilder.Entity<Bod>()
                 .HasKey(b => b.Id);
+            
+            modelBuilder.Entity<Locatie>()
+                .HasKey(l => l.Id);
+
+            modelBuilder.Entity<Locatie>()
+                .HasMany(l => l.Veilingen)
+                .WithOne(v => v.Locatie)
+                .HasForeignKey(v => v.LocatieId)
+                .OnDelete(DeleteBehavior.SetNull);
             
         }
     }
