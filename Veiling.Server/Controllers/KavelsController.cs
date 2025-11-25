@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Veiling.Server.Controllers
 {
@@ -9,27 +10,81 @@ namespace Veiling.Server.Controllers
     public class KavelsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _environment;
+        private readonly ILogger<KavelsController> _logger;
 
-        public KavelsController(AppDbContext context)
+        public KavelsController(AppDbContext context, IWebHostEnvironment environment, ILogger<KavelsController> logger)
         {
             _context = context;
+            _environment = environment;
+            _logger = logger;
         }
 
-        // GET: api/kavels
+        [HttpPost("upload-image")]
+        public async Task<ActionResult<object>> UploadImage(IFormFile image)
+        {
+            if (image == null || image.Length == 0)
+                return BadRequest(new { error = "Geen afbeelding opgegeven" });
+
+            const int maxFileSize = 5 * 1024 * 1024;
+            if (image.Length > maxFileSize)
+                return BadRequest(new { error = "Afbeelding mag maximaal 5MB zijn" });
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            
+            if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension))
+                return BadRequest(new { error = "Ongeldig bestandstype" });
+
+            var allowedContentTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+            if (!allowedContentTypes.Contains(image.ContentType.ToLowerInvariant()))
+                return BadRequest(new { error = "Ongeldig content-type" });
+
+            try
+            {
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "kavels");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = $"{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    await image.CopyToAsync(fileStream);
+
+                var imageUrl = $"/uploads/kavels/{uniqueFileName}";
+                return Ok(new { imageUrl });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fout bij uploaden afbeelding");
+                return StatusCode(500, new { error = "Uploaden mislukt" });
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Kavel>>> GetKavels()
         {
-            return await _context.Kavels
-                .Include(k => k.Veiling)
-                .Include(k => k.Leverancier)
-                .Include(k => k.Boden)
-                .ToListAsync();
+            try
+            {
+                return await _context.Kavels
+                    .Include(k => k.Veiling)
+                    .Include(k => k.Leverancier)
+                    .Include(k => k.Boden)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fout bij ophalen kavels");
+                return StatusCode(500, new { error = "Fout bij ophalen kavels" });
+            }
         }
 
-        // GET: api/kavels/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Kavel>> GetKavel(int id)
         {
+            if (id <= 0)
+                return BadRequest(new { error = "Ongeldig kavel ID" });
+
             var kavel = await _context.Kavels
                 .Include(k => k.Veiling)
                 .Include(k => k.Leverancier)
@@ -37,14 +92,11 @@ namespace Veiling.Server.Controllers
                 .FirstOrDefaultAsync(k => k.Id == id);
 
             if (kavel == null)
-            {
-                return NotFound();
-            }
+                return NotFound(new { error = $"Kavel met ID {id} niet gevonden" });
 
             return kavel;
         }
 
-        // GET: api/kavels/veiling/5
         [HttpGet("veiling/{veilingId}")]
         public async Task<ActionResult<IEnumerable<Kavel>>> GetKavelsByVeiling(int veilingId)
         {
@@ -55,52 +107,113 @@ namespace Veiling.Server.Controllers
                 .ToListAsync();
         }
 
-        // POST: api/kavels
         [HttpPost]
-        public async Task<ActionResult<Kavel>> CreateKavel(Kavel kavel)
+        public async Task<ActionResult<Kavel>> CreateKavel([FromBody] CreateKavelDto dto)
         {
-            _context.Kavels.Add(kavel);
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return BadRequest(new { error = "Validatie mislukt", details = errors });
+            }
 
-            return CreatedAtAction(nameof(GetKavel), new { id = kavel.Id }, kavel);
+            if (!float.TryParse(dto.MinimumPrijs, out float minimumPrijs))
+                return BadRequest(new { error = "Prijs moet een geldig getal zijn" });
+
+            if (!int.TryParse(dto.Aantal, out int aantal))
+                return BadRequest(new { error = "Aantal moet een geheel getal zijn" });
+
+            if (!int.TryParse(dto.Plaats, out int veilingId))
+                return BadRequest(new { error = "Plaats moet een geldig ID zijn" });
+
+            if (!float.TryParse(dto.Lengte, out float lengte))
+                return BadRequest(new { error = "Lengte moet een geldig getal zijn" });
+
+            if (!int.TryParse(dto.Fustcode, out int fustcode))
+                return BadRequest(new { error = "Fustcode moet een geheel getal zijn" });
+
+            if (!int.TryParse(dto.AantalProductenPerContainer, out int aantalPerContainer))
+                return BadRequest(new { error = "Aantal per container moet een geheel getal zijn" });
+
+            if (!float.TryParse(dto.GewichtVanBloemen, out float gewicht))
+                return BadRequest(new { error = "Gewicht moet een geldig getal zijn" });
+
+            if (minimumPrijs <= 0 || aantal <= 0)
+                return BadRequest(new { error = "Prijs en aantal moeten groter dan 0 zijn" });
+
+            var veilingExists = await _context.Veilingen.AnyAsync(v => v.Id == veilingId);
+            if (!veilingExists)
+                return BadRequest(new { error = $"Veiling met ID {veilingId} bestaat niet" });
+
+            try
+            {
+                var kavel = new Kavel
+                {
+                    Naam = dto.Naam,
+                    Beschrijving = dto.Description,
+                    Foto = dto.ImageUrl ?? string.Empty,
+                    MinimumPrijs = minimumPrijs,
+                    HoeveelheidContainers = aantal,
+                    Keurcode = dto.Ql,
+                    VeilingId = veilingId,
+                    StageOfMaturity = dto.Stadium,
+                    LengteVanBloemen = lengte,
+                    Kavelkleur = dto.Kleur,
+                    Fustcode = fustcode,
+                    AantalProductenPerContainer = aantalPerContainer,
+                    GewichtVanBloemen = gewicht,
+                    ArtikelKenmerken = string.Empty,
+                    MaximumPrijs = minimumPrijs * 1.5f,
+                    GekochtPrijs = 0,
+                    GekochteContainers = 0,
+                    Minimumhoeveelheid = 1,
+                    Karnummer = 0,
+                    Rijnummer = 0,
+                    NgsCode = 'A',
+                    GeldPerTickCode = string.Empty
+                };
+
+                _context.Kavels.Add(kavel);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetKavel), new { id = kavel.Id }, kavel);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Database fout bij aanmaken kavel");
+                return StatusCode(500, new { error = "Database fout" });
+            }
         }
 
-        // PUT: api/kavels/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateKavel(int id, Kavel kavel)
         {
             if (id != kavel.Id)
-            {
-                return BadRequest();
-            }
+                return BadRequest(new { error = "ID mismatch" });
+
+            if (kavel.MinimumPrijs <= 0)
+                return BadRequest(new { error = "Minimum prijs moet groter dan 0 zijn" });
 
             _context.Entry(kavel).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                return NoContent();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!KavelExists(id))
-                {
+                if (!await KavelExists(id))
                     return NotFound();
-                }
                 throw;
             }
-
-            return NoContent();
         }
 
-        // DELETE: api/kavels/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteKavel(int id)
         {
             var kavel = await _context.Kavels.FindAsync(id);
             if (kavel == null)
-            {
                 return NotFound();
-            }
 
             _context.Kavels.Remove(kavel);
             await _context.SaveChangesAsync();
@@ -108,9 +221,53 @@ namespace Veiling.Server.Controllers
             return NoContent();
         }
 
-        private bool KavelExists(int id)
+        private async Task<bool> KavelExists(int id)
         {
-            return _context.Kavels.Any(k => k.Id == id);
+            return await _context.Kavels.AnyAsync(k => k.Id == id);
         }
+    }
+
+    public class CreateKavelDto
+    {
+        [Required(ErrorMessage = "Naam is verplicht")]
+        public string Naam { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Beschrijving is verplicht")]
+        public string Description { get; set; } = string.Empty;
+
+        public string? ImageUrl { get; set; }
+
+        [Required(ErrorMessage = "Prijs is verplicht")]
+        [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "Geldig decimaal astublieft")]
+        public string MinimumPrijs { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Aantal is verplicht")]
+        [RegularExpression(@"^[0-9]+$", ErrorMessage = "Geheel getal")]
+        public string Aantal { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Ql is verplicht")]
+        public string Ql { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Plaats is verplicht")]
+        public string Plaats { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Stadium is verplicht")]
+        public string Stadium { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Lengte is verplicht")]
+        public string Lengte { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Kleur is verplicht")]
+        public string Kleur { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Fustcode is verplicht")]
+        public string Fustcode { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Aantal per container is verplicht")]
+        [RegularExpression(@"^[0-9]+$", ErrorMessage = "Geheel getal")]
+        public string AantalProductenPerContainer { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Gewicht is verplicht")]
+        public string GewichtVanBloemen { get; set; } = string.Empty;
     }
 }
