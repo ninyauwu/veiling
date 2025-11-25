@@ -50,7 +50,7 @@ const KavelTabel: React.FC<KavelTabelProps> = ({
               }
             }}
             className={currentIndex === i ? "kavel-row-selected" : ""}
-            role={currentIndex === i ? null : "button"}
+            role={currentIndex === i ? undefined : "button"}
           >
             {columns.map((col) => (
               <td key={col} className="border border-gray-300 p-2">
