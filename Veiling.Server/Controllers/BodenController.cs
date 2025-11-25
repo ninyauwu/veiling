@@ -55,7 +55,7 @@ namespace Veiling.Server.Controllers
 
         // GET: api/boden/gebruiker/5
         [HttpGet("gebruiker/{gebruikerId}")]
-        public async Task<ActionResult<IEnumerable<Bod>>> GetBodenByGebruiker(int gebruikerId)
+        public async Task<ActionResult<IEnumerable<Bod>>> GetBodenByGebruiker(string gebruikerId)
         {
             return await _context.Boden
                 .Where(b => b.GebruikerId == gebruikerId)

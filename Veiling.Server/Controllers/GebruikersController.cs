@@ -27,7 +27,7 @@ namespace Veiling.Server.Controllers
 
         // GET: api/gebruikers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Gebruiker>> GetGebruiker(int id)
+        public async Task<ActionResult<Gebruiker>> GetGebruiker(string id)
         {
             var gebruiker = await _context.Gebruikers
                 .Include(g => g.Bedrijf)
@@ -65,7 +65,7 @@ namespace Veiling.Server.Controllers
 
         // PUT: api/gebruikers/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateGebruiker(int id, Gebruiker gebruiker)
+        public async Task<IActionResult> UpdateGebruiker(string id, Gebruiker gebruiker)
         {
             if (id != gebruiker.Id)
             {
@@ -106,7 +106,7 @@ namespace Veiling.Server.Controllers
             return NoContent();
         }
 
-        private bool GebruikerExists(int id)
+        private bool GebruikerExists(string id)
         {
             return _context.Gebruikers.Any(g => g.Id == id);
         }

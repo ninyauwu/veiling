@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 using Veiling.Server;
+using Microsoft.AspNetCore.Identity;
+using Veiling.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +37,14 @@ builder.Services.AddControllersWithViews();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Identity framework
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+
+builder.Services.AddIdentityCore<Gebruiker>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddApiEndpoints();
 
 builder.Services.AddDbContext<AppDbContext>(options => 
         options.UseSqlServer(connectionString));
