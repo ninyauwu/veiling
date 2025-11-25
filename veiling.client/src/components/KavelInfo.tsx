@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import KavelTabel from "./KavelTabel";
 import "./KavelInfo.css";
 import Spacer from "./Spacer";
@@ -10,6 +10,7 @@ import CompanyQuality from "./CompanyQuality";
 // Define the type for data coming from your API
 type KavelInfoResponse = {
   kavel: {
+    id: number;
     naam: string;
     beschrijving: string;
     stageOfMaturity: string;
@@ -17,6 +18,7 @@ type KavelInfoResponse = {
     kavelkleur: string;
     keurcode: string;
     fustcode: number;
+    approval: boolean | null | undefined;
   };
   leverancier: {
     indexOfReliabilityOfInformation: string;
@@ -26,7 +28,7 @@ type KavelInfoResponse = {
   };
 };
 
-function KavelInfo() {
+function KavelInfo({ sortOnApproval = false, onKavelFetched }: KavelInfoProps) {
   const imagePaths = [
     "https://picsum.photos/400/400?random=1",
     "https://picsum.photos/400/400?random=2",
@@ -40,18 +42,36 @@ function KavelInfo() {
   useEffect(() => {
     async function fetchKavels() {
       try {
-        const res = await fetch("/api/KavelInfo/0");
-        const data: KavelInfoResponse[] = await res.json();
-        setKavels(data);
-        setLoading(false);
-        if (data.length > 0) setSelected(0);
+        if (sortOnApproval) {
+          const res = await fetch("/api/kavels?lookForPending=true")
+          const data: KavelInfoResponse[] = await res.json();
+          console.log('API Response:', data);
+          setKavels(data);
+          setLoading(false);
+          if (data.length > 0) setSelected(0);
+          if (onKavelFetched) {
+            onKavelFetched(data[0].kavel.id);
+          }
+        } else {
+          const res = await fetch("/api/KavelInfo/0");
+          const data: KavelInfoResponse[] = await res.json();
+          setKavels(data);
+          setLoading(false);
+          if (data.length > 0) setSelected(0);
+        }
       } catch (err) {
         console.error("Failed to load kavels:", err);
         setLoading(false);
       }
-    }
+    } 
     fetchKavels();
   }, []);
+
+  useEffect(() => {
+  if (onKavelFetched && selected !== null && kavels.length > 0) {
+    onKavelFetched(kavels[selected].kavel.id);
+  }
+}, [selected, kavels, onKavelFetched]); // Runs whenever selected changes
 
   const handleNext = () => {
     if (selected === null) return;
@@ -148,12 +168,17 @@ function KavelInfo() {
 // In a separate utils file
 export const formatKavelData = (kavels: KavelInfoResponse[]) => {
   return kavels.map((kavel) => ({
-    Naam: kavel.kavel.naam,
-    "Max Prijs": `€${kavel.kavel.minimumPrijs.toLocaleString()}`,
-    Leverancier: kavel.leverancier.bedrijf.bedrijfsnaam,
-    QI: kavel.leverancier.indexOfReliabilityOfInformation,
-    Kwaliteit: kavel.kavel.keurcode,
+    Naam: kavel?.kavel?.naam ?? "NA",
+    "Max Prijs": `€${kavel?.kavel?.minimumPrijs?.toLocaleString() ?? "N/A"}`,
+    Leverancier: kavel?.leverancier?.bedrijf?.bedrijfsnaam ?? "N/A",
+    QI: kavel?.leverancier?.indexOfReliabilityOfInformation ?? "N/A",
+    Kwaliteit: kavel?.kavel?.keurcode ?? "N/A",
   }));
 };
+
+interface KavelInfoProps {
+  sortOnApproval?: boolean;
+  onKavelFetched?: (kavelId: number) => void;
+}
 
 export default KavelInfo;

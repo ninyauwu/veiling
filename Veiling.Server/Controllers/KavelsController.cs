@@ -17,25 +17,39 @@ namespace Veiling.Server.Controllers
 
         // GET: api/kavels
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Kavel>>> GetKavels()
+        public async Task<ActionResult<IEnumerable<Kavel>>> GetKavels(bool lookForPending = false)
         {
+            if (lookForPending) 
+            {
             return await _context.Kavels
                 .Include(k => k.Veiling)
                 .Include(k => k.Leverancier)
                 .Include(k => k.Boden)
+                .Where(k => k.Approved == null)
                 .ToListAsync();
+            } else
+            {
+                return await _context.Kavels
+                .Include(k => k.Veiling)
+                .Include(k => k.Leverancier)
+                .Include(k => k.Boden)
+                .ToListAsync();
+            }
         }
 
         // GET: api/kavels/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Kavel>> GetKavel(int id)
         {
-            var kavel = await _context.Kavels
-                .Include(k => k.Veiling)
-                .Include(k => k.Leverancier)
-                .Include(k => k.Boden)
-                .FirstOrDefaultAsync(k => k.Id == id);
 
+
+            
+                var kavel = await _context.Kavels
+                    .Include(k => k.Veiling)
+                    .Include(k => k.Leverancier)
+                    .Include(k => k.Boden)
+                    .FirstOrDefaultAsync(k => k.Id == id);
+            
             if (kavel == null)
             {
                 return NotFound();
@@ -43,6 +57,8 @@ namespace Veiling.Server.Controllers
 
             return kavel;
         }
+
+
 
         // GET: api/kavels/veiling/5
         [HttpGet("veiling/{veilingId}")]
@@ -108,9 +124,38 @@ namespace Veiling.Server.Controllers
             return NoContent();
         }
 
+        [HttpPatch("{id}/approve")]
+    public async Task<IActionResult> ApproveKavel(int id, [FromBody] ApprovalDto approvalDto)
+    {
+        // Find the kavel
+        var kavel = await _context.Kavels.FindAsync(id);
+        
+        if (kavel == null)
+            return NotFound(new { message = "Kavel not found" });
+
+        // Update the approval status
+        kavel.Approved = approvalDto.Approval;
+        
+        // Optionally store the reasoning if you have a field for it
+        // kavel.ApprovalReasoning = approvalDto.Reasoning;
+
+        await _context.SaveChangesAsync();
+        
+        return Ok(new { 
+            message = "Kavel approval updated successfully",
+            kavelId = id,
+            approval = kavel.Approved
+        });
+    }
+
         private bool KavelExists(int id)
         {
             return _context.Kavels.Any(k => k.Id == id);
         }
     }
+}
+    public class ApprovalDto
+{
+    public bool Approval { get; set; }
+    public string? Reasoning { get; set; }
 }
