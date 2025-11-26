@@ -69,14 +69,14 @@ export default function Popup({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 pt-30 pb-4"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
     >
       <div
         ref={popupRef}
-        className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-auto"
+        className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[calc(100vh-120px)] overflow-auto"
         onKeyDown={handleKeyDown}
         tabIndex={-1}
         style={{
