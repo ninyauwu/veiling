@@ -43,14 +43,15 @@ function KavelInfo({ sortOnApproval = false, onKavelFetched }: KavelInfoProps) {
     async function fetchKavels() {
       try {
         if (sortOnApproval) {
-          const res = await fetch("/api/kavels?lookForPending=true")
+          const res = await fetch("/api/KavelInfo/pending");
           const data: KavelInfoResponse[] = await res.json();
-          console.log('API Response:', data);
           setKavels(data);
           setLoading(false);
-          if (data.length > 0) setSelected(0);
-          if (onKavelFetched) {
-            onKavelFetched(data[0].kavel.id);
+          if (data.length > 0) {
+            setSelected(0);
+            if (onKavelFetched) {
+              onKavelFetched(data[0].kavel.id);
+            }
           }
         } else {
           const res = await fetch("/api/KavelInfo/0");

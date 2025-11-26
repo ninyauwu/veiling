@@ -17,24 +17,13 @@ namespace Veiling.Server.Controllers
 
         // GET: api/kavels
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Kavel>>> GetKavels(bool lookForPending = false)
+        public async Task<ActionResult<IEnumerable<Kavel>>> GetKavels()
         {
-            if (lookForPending) 
-            {
             return await _context.Kavels
-                .Include(k => k.Veiling)
-                .Include(k => k.Leverancier)
-                .Include(k => k.Boden)
-                .Where(k => k.Approved == null)
-                .ToListAsync();
-            } else
-            {
-                return await _context.Kavels
-                .Include(k => k.Veiling)
-                .Include(k => k.Leverancier)
-                .Include(k => k.Boden)
-                .ToListAsync();
-            }
+            .Include(k => k.Veiling)
+            .Include(k => k.Leverancier)
+            .Include(k => k.Boden)
+            .ToListAsync();
         }
 
         // GET: api/kavels/5
