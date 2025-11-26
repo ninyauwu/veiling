@@ -3,6 +3,7 @@ import Appointment from "./Appointment";
 import type {
   AppointmentData,
   AppointmentFormData,
+  DragState,
   Kavel,
 } from "./AppointmentTypes";
 import AppointmentFormPopup from "./AppointmentFormPopup";
@@ -19,6 +20,7 @@ export default function Scheduler() {
     name: "",
     kavelIds: [],
   });
+  const [dragState, setDragState] = useState<DragState | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const [gridMetrics, setGridMetrics] = useState({ left: 0, columnWidth: 0 });
@@ -46,6 +48,18 @@ export default function Scheduler() {
         setKavels(data);
       } catch (error) {
         console.error("Error fetching kavels:", error);
+        // Mock data for demo
+        setKavels([
+          {
+            id: 1,
+            naam: "Kavel A",
+            beschrijving: "Test kavel",
+            minimumPrijs: 100,
+            maximumPrijs: 200,
+            hoeveelheidContainers: 5,
+            kavelkleur: "FF5733",
+          },
+        ]);
       }
     };
 
@@ -75,6 +89,99 @@ export default function Scheduler() {
       clearTimeout(timeout);
     };
   }, []);
+
+  // Drag handling
+  useEffect(() => {
+    if (!dragState) return;
+
+    const snapToQuarterHour = (hour: number): number => {
+      return Math.round(hour * 4) / 4;
+    };
+
+    const getDayIndexFromX = (clientX: number): number => {
+      if (gridMetrics.columnWidth === 0 || gridMetrics.left === 0) {
+        return dragState.originalDayIndex;
+      }
+      const relativeX = clientX - gridMetrics.left;
+      const dayIndex = Math.floor(relativeX / gridMetrics.columnWidth);
+      return Math.max(0, Math.min(6, dayIndex));
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaY = e.clientY - dragState.startY;
+      const deltaHours = deltaY / hourHeight;
+
+      if (dragState.type === "move") {
+        const newDayIndex = getDayIndexFromX(e.clientX);
+        const rawNewStartHour = dragState.originalStartHour + deltaHours;
+        const newStartHour = Math.max(
+          0,
+          Math.min(23.75, snapToQuarterHour(rawNewStartHour)),
+        );
+
+        setAppointments((prev) =>
+          prev.map((apt) =>
+            apt.id === dragState.appointmentId
+              ? { ...apt, startHour: newStartHour, dayIndex: newDayIndex }
+              : apt,
+          ),
+        );
+      } else if (dragState.type === "resize-top") {
+        const quarterHourDelta = Math.round(deltaHours * 4) / 4;
+        const newStartHour = Math.max(
+          0,
+          Math.min(23.75, dragState.originalStartHour + quarterHourDelta),
+        );
+        const deltaStart = newStartHour - dragState.originalStartHour;
+        const newDuration = Math.max(
+          0.25,
+          dragState.originalDuration - deltaStart,
+        );
+
+        if (newStartHour + newDuration <= 24) {
+          setAppointments((prev) =>
+            prev.map((apt) =>
+              apt.id === dragState.appointmentId
+                ? {
+                    ...apt,
+                    startHour: newStartHour,
+                    durationHours: newDuration,
+                  }
+                : apt,
+            ),
+          );
+        }
+      } else if (dragState.type === "resize-bottom") {
+        const quarterHourDelta = Math.round(deltaHours * 4) / 4;
+        const newDuration = Math.max(
+          0.25,
+          dragState.originalDuration + quarterHourDelta,
+        );
+
+        if (dragState.originalStartHour + newDuration <= 24) {
+          setAppointments((prev) =>
+            prev.map((apt) =>
+              apt.id === dragState.appointmentId
+                ? { ...apt, durationHours: newDuration }
+                : apt,
+            ),
+          );
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setDragState(null);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [dragState, hourHeight, gridMetrics]);
 
   const formatTime = (hour: number): string => {
     const h = Math.floor(hour);
@@ -116,13 +223,23 @@ export default function Scheduler() {
     setIsPopupOpen(true);
   };
 
-  const handleAppointmentUpdate = (
-    id: string,
-    updates: Partial<AppointmentData>,
+  const handleAppointmentMouseDown = (
+    e: React.MouseEvent,
+    appointment: AppointmentData,
+    type: "move" | "resize-top" | "resize-bottom",
   ) => {
-    setAppointments((prev) =>
-      prev.map((apt) => (apt.id === id ? { ...apt, ...updates } : apt)),
-    );
+    e.preventDefault();
+    e.stopPropagation();
+
+    setDragState({
+      appointmentId: appointment.id,
+      type,
+      startX: e.clientX,
+      startY: e.clientY,
+      originalStartHour: appointment.startHour,
+      originalDuration: appointment.durationHours,
+      originalDayIndex: appointment.dayIndex,
+    });
   };
 
   const handleAppointmentDoubleClick = (appointment: AppointmentData) => {
@@ -375,11 +492,19 @@ export default function Scheduler() {
                       <Appointment
                         key={apt.id}
                         appointment={apt}
-                        onUpdate={handleAppointmentUpdate}
+                        onMouseDown={(e, type) =>
+                          handleAppointmentMouseDown(e, apt, type)
+                        }
                         onDoubleClick={handleAppointmentDoubleClick}
                         hourHeight={hourHeight}
-                        columnWidth={gridMetrics.columnWidth}
-                        gridLeft={gridMetrics.left}
+                        isDragging={
+                          dragState?.appointmentId === apt.id &&
+                          dragState.type === "move"
+                        }
+                        isResizing={
+                          dragState?.appointmentId === apt.id &&
+                          dragState.type !== "move"
+                        }
                       />
                     ))}
                 </div>
@@ -402,4 +527,3 @@ export default function Scheduler() {
     </div>
   );
 }
-

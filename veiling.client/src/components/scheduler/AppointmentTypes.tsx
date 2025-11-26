@@ -1,3 +1,19 @@
+export interface AppointmentData {
+  id: string;
+  dayIndex: number;
+  startHour: number;
+  durationHours: number;
+  name: string;
+  kavelIds: number[];
+}
+
+export interface AppointmentFormData {
+  startTime: string;
+  endTime: string;
+  name: string;
+  kavelIds: number[];
+}
+
 export interface Kavel {
   id: number;
   naam: string;
@@ -13,27 +29,25 @@ export interface Kavel {
   };
 }
 
-export interface AppointmentData {
-  id: string;
-  dayIndex: number;
-  startHour: number;
-  durationHours: number;
-  name: string;
-  kavelIds: number[];
-}
-
 export interface AppointmentProps {
   appointment: AppointmentData;
-  onUpdate: (id: string, updates: Partial<AppointmentData>) => void;
+  onMouseDown: (
+    e: React.MouseEvent,
+    type: "move" | "resize-top" | "resize-bottom",
+  ) => void;
   onDoubleClick: (appointment: AppointmentData) => void;
   hourHeight: number;
-  columnWidth: number;
-  gridLeft: number;
+  isDragging: boolean;
+  isResizing: boolean;
 }
 
-export interface AppointmentFormData {
-  startTime: string;
-  endTime: string;
-  name: string;
-  kavelIds: number[];
+export interface DragState {
+  appointmentId: string;
+  type: "move" | "resize-top" | "resize-bottom";
+  startX: number;
+  startY: number;
+  originalStartHour: number;
+  originalDuration: number;
+  originalDayIndex: number;
 }
+
