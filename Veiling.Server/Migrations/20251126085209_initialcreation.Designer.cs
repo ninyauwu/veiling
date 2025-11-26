@@ -12,8 +12,8 @@ using Veiling.Server;
 namespace Veiling.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251124114745_initialcreate")]
-    partial class initialcreate
+    [Migration("20251126085209_initialcreation")]
+    partial class initialcreation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

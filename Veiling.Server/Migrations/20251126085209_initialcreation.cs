@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Veiling.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class initialcreate : Migration
+    public partial class initialcreation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
