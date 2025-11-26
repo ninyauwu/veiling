@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Veiling.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class schedulerMigrations : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -56,7 +56,7 @@ namespace Veiling.Server.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IndexOfReliabilityOfInformation = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BedrijfId = table.Column<int>(type: "int", nullable: false)
+                    BedrijfId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -66,7 +66,7 @@ namespace Veiling.Server.Migrations
                         column: x => x.BedrijfId,
                         principalTable: "Bedrijven",
                         principalColumn: "Bedrijfscode",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -110,7 +110,8 @@ namespace Veiling.Server.Migrations
                         name: "FK_Veilingen_Veilingmeesters_VeilingmeesterId",
                         column: x => x.VeilingmeesterId,
                         principalTable: "Veilingmeesters",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
