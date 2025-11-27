@@ -41,32 +41,46 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
   const [kavels, setKavels] = useState<KavelInfoResponse[]>([]);
   const [selected, setSelected] = useState<number | null>(0);
   const [loading, setLoading] = useState(true);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     async function fetchKavels() {
       try {
+        setLoading(true); // start loading
+        let res: Response;
         if (sortOnApproval) {
-          const res = await fetch("/api/KavelInfo/pending");
-          const data: KavelInfoResponse[] = await res.json();
-          setKavels(data);
-          setLoading(false);
-          if (data.length > 0) {
-            setSelected(0);
+          res = await fetch("/api/KavelInfo/pending");
+        } else {
+          res = await fetch("/api/KavelInfo/0");
+        }
+
+        if (!res.ok) {
+          // Handle non-2xx responses
+          if (res.status === 404) {
+            console.log("No kavels found");
+            setKavels([]); // explicitly empty array
+          } else {
+            throw new Error(`HTTP error! status: ${res.status}`);
           }
         } else {
-          const res = await fetch("/api/KavelInfo/0");
           const data: KavelInfoResponse[] = await res.json();
           setKavels(data);
-          setLoading(false);
           if (data.length > 0) setSelected(0);
         }
       } catch (err) {
         console.error("Failed to load kavels:", err);
+        setKavels([]); // ensure kavels is empty on error
+      } finally {
         setLoading(false);
       }
     }
+
     fetchKavels();
-  }, []);
+  }, [sortOnApproval, reload]);
+
+  if (kavels.length < 1) {
+    return <div>Geen kavels gevonden</div>;
+  }
 
   const handleNext = () => {
     if (selected === null) return;
@@ -89,7 +103,18 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
   const tableRows = formatKavelData(kavels);
 
   const bonusWidget = sortOnApproval ? (
-    <ApproveOrDeny currentKavelId={kavel.id} />
+    <ApproveOrDeny
+      currentKavelId={kavel.id}
+      onApprovalResponse={() => {
+        console.log("Icky shticky");
+        if (selected) {
+          if (selected == kavels.length) {
+            setSelected(selected - 1);
+          }
+        }
+        setReload(reload + 1);
+      }}
+    />
   ) : (
     <AuctionCountdown price={kavel.maximumPrijs} />
   );

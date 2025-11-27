@@ -4,9 +4,13 @@ import "./ApproveOrDenyTextBox.css";
 
 interface ApproveOrDenyProps {
   currentKavelId: number;
+  onApprovalResponse?: (kavelId: number) => void;
 }
 
-export default function ApproveOrDeny({ currentKavelId }: ApproveOrDenyProps) {
+export default function ApproveOrDeny({
+  currentKavelId,
+  onApprovalResponse,
+}: ApproveOrDenyProps) {
   const [reasoning, setReasoning] = useState("");
   const [approval, setApproval] = useState(Boolean);
 
@@ -37,6 +41,9 @@ export default function ApproveOrDeny({ currentKavelId }: ApproveOrDenyProps) {
       if (response.ok) {
         const data = await response.json();
         console.log("Success:", data);
+        if (onApprovalResponse) {
+          onApprovalResponse(currentKavelId);
+        }
       } else {
         console.error("Failed to update approval");
       }
@@ -86,4 +93,3 @@ export default function ApproveOrDeny({ currentKavelId }: ApproveOrDenyProps) {
     </div>
   );
 }
-
