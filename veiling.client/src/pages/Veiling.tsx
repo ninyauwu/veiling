@@ -1,7 +1,6 @@
 import "../components/KavelInfo.css";
 import KavelInfo from "../components/KavelInfo";
 import HeaderLoggedout from "../components/HeaderLoggedout";
-import AuctionCountdown from "../components/AuctionCountdown";
 
 function Veiling() {
   return (
@@ -12,16 +11,7 @@ function Veiling() {
           height: "96px",
         }}
       />
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: "60px",
-        }}
-      >
-        <KavelInfo />
-        <AuctionCountdown />
-      </div>
+      <KavelInfo />
     </div>
   );
 }

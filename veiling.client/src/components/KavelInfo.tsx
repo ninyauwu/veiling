@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import KavelTabel from "./KavelTabel";
 import "./KavelInfo.css";
 import Spacer from "./Spacer";
@@ -6,6 +6,8 @@ import ImageSet from "./ImageSet";
 import NavigationBar from "./NavigationBar";
 import MetadataGrid from "./MetadataGrid";
 import CompanyQuality from "./CompanyQuality";
+import AuctionCountdown from "./AuctionCountdown";
+import ApproveOrDeny from "./AproveOrDenyTextBox";
 
 // Define the type for data coming from your API
 type KavelInfoResponse = {
@@ -15,6 +17,7 @@ type KavelInfoResponse = {
     beschrijving: string;
     stageOfMaturity: string;
     minimumPrijs: number;
+    maximumPrijs: number;
     kavelkleur: string;
     keurcode: string;
     fustcode: number;
@@ -28,7 +31,7 @@ type KavelInfoResponse = {
   };
 };
 
-function KavelInfo({ sortOnApproval = false, onKavelFetched }: KavelInfoProps) {
+function KavelInfo({ sortOnApproval }: KavelInfoProps) {
   const imagePaths = [
     "https://picsum.photos/400/400?random=1",
     "https://picsum.photos/400/400?random=2",
@@ -49,9 +52,6 @@ function KavelInfo({ sortOnApproval = false, onKavelFetched }: KavelInfoProps) {
           setLoading(false);
           if (data.length > 0) {
             setSelected(0);
-            if (onKavelFetched) {
-              onKavelFetched(data[0].kavel.id);
-            }
           }
         } else {
           const res = await fetch("/api/KavelInfo/0");
@@ -64,15 +64,9 @@ function KavelInfo({ sortOnApproval = false, onKavelFetched }: KavelInfoProps) {
         console.error("Failed to load kavels:", err);
         setLoading(false);
       }
-    } 
+    }
     fetchKavels();
   }, []);
-
-  useEffect(() => {
-  if (onKavelFetched && selected !== null && kavels.length > 0) {
-    onKavelFetched(kavels[selected].kavel.id);
-  }
-}, [selected, kavels, onKavelFetched]); // Runs whenever selected changes
 
   const handleNext = () => {
     if (selected === null) return;
@@ -94,79 +88,93 @@ function KavelInfo({ sortOnApproval = false, onKavelFetched }: KavelInfoProps) {
 
   const tableRows = formatKavelData(kavels);
 
+  const bonusWidget = sortOnApproval ? (
+    <ApproveOrDeny currentKavelId={kavel.id} />
+  ) : (
+    <AuctionCountdown price={kavel.maximumPrijs} />
+  );
+
   return (
-    <div className="flex-column">
-      <h1 className="hidden">Veilingpagina</h1>
-      <h2 className="hidden">Kaveltabel</h2>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        gap: "60px",
+      }}
+    >
+      <div className="flex-column">
+        <h1 className="hidden">Veilingpagina</h1>
+        <h2 className="hidden">Kaveltabel</h2>
 
-      <KavelTabel
-        rows={tableRows}
-        selectedRowIndex={selected}
-        onSelectedRowChange={setSelected}
-        onRowSelect={(row, index) => {
-          setSelected(index);
-          console.log(row);
-        }}
-      />
+        <KavelTabel
+          rows={tableRows}
+          selectedRowIndex={selected}
+          onSelectedRowChange={setSelected}
+          onRowSelect={(row, index) => {
+            setSelected(index);
+            console.log(row);
+          }}
+        />
 
-      <Spacer color="#00000000" />
-      <NavigationBar
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        getSelectedItemString={() => {
-          if (selected === null) return "Geen naam";
-          return tableRows[selected].Naam;
-        }}
-      />
-      <Spacer />
+        <Spacer color="#00000000" />
+        <NavigationBar
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          getSelectedItemString={() => {
+            if (selected === null) return "Geen naam";
+            return tableRows[selected].Naam;
+          }}
+        />
+        <Spacer />
 
-      <span>
-        <div className="flex-row-justify">
-          <h2>{kavel.naam}</h2>
-          <CompanyQuality
-            naam={leverancier.bedrijf.bedrijfsnaam}
-            qi={leverancier.indexOfReliabilityOfInformation}
-            kwaliteit={kavel.keurcode}
-          />
-        </div>
+        <span>
+          <div className="flex-row-justify">
+            <h2>{kavel.naam}</h2>
+            <CompanyQuality
+              naam={leverancier.bedrijf.bedrijfsnaam}
+              qi={leverancier.indexOfReliabilityOfInformation}
+              kwaliteit={kavel.keurcode}
+            />
+          </div>
 
-        <p>{kavel.beschrijving}</p>
-      </span>
+          <p>{kavel.beschrijving}</p>
+        </span>
 
-      <ImageSet images={imagePaths} />
-      <MetadataGrid
-        items={[
-          { key: "Stadium", value: kavel.stageOfMaturity },
-          { key: "Fustcode", value: kavel.fustcode },
-          {
-            key: "Kleur",
-            value: (
-              <div
-                style={{
-                  backgroundColor: "#" + kavel.kavelkleur,
-                  width: "24px",
-                  height: "24px",
-                }}
-              />
-            ),
-          },
-        ]}
-      />
+        <ImageSet images={imagePaths} />
+        <MetadataGrid
+          items={[
+            { key: "Stadium", value: kavel.stageOfMaturity },
+            { key: "Fustcode", value: kavel.fustcode },
+            {
+              key: "Kleur",
+              value: (
+                <div
+                  style={{
+                    backgroundColor: "#" + kavel.kavelkleur,
+                    width: "24px",
+                    height: "24px",
+                  }}
+                />
+              ),
+            },
+          ]}
+        />
 
-      <Spacer />
-      <NavigationBar
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        getSelectedItemString={() => {
-          if (selected === null) return "Geen naam";
-          return tableRows[selected].Naam;
-        }}
-      />
+        <Spacer />
+        <NavigationBar
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          getSelectedItemString={() => {
+            if (selected === null) return "Geen naam";
+            return tableRows[selected].Naam;
+          }}
+        />
+      </div>
+      {bonusWidget}
     </div>
   );
 }
 
-// In a separate utils file
 export const formatKavelData = (kavels: KavelInfoResponse[]) => {
   return kavels.map((kavel) => ({
     Naam: kavel?.kavel?.naam ?? "NA",
@@ -179,7 +187,6 @@ export const formatKavelData = (kavels: KavelInfoResponse[]) => {
 
 interface KavelInfoProps {
   sortOnApproval?: boolean;
-  onKavelFetched?: (kavelId: number) => void;
 }
 
 export default KavelInfo;
