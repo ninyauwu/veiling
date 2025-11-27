@@ -62,7 +62,7 @@ export default function ApproveOrDeny({
     <div className="min-h-screen bg-white-100 p-8">
       <div className="max-w-2xl mx-auto bg-white rounded-sm shadow-lg overflow-hidden">
         <div className="bg-gray-200 px-6 py-4">
-          <h1 className="text-3xl font-bold text-gray-800">Approve or Deny</h1>
+          <h2>Approve or Deny</h2>
         </div>
 
         <div className="p-6">
