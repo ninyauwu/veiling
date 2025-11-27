@@ -9,7 +9,7 @@
         public bool Betaald { get; set; }
         
         // Foreign Keys
-        public int? GebruikerId { get; set; }
+        public string? GebruikerId { get; set; }
         public int? KavelId { get; set; }
         
         // Relaties

@@ -65,6 +65,10 @@ export default defineConfig({
         target,
         secure: false,
       },
+      "^/api": {  
+        target,
+        secure: false,      
+      },
     },
     port: 32274,
     https: {

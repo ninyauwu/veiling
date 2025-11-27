@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 using Veiling.Server;
+using Microsoft.AspNetCore.Identity;
+using Veiling.Server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,8 +38,19 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// DbContext
 builder.Services.AddDbContext<AppDbContext>(options => 
         options.UseSqlServer(connectionString));
+
+// Identity framework
+builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+builder.Services.AddAuthorization();
+
+builder.Services.AddIdentityCore<Gebruiker>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddSignInManager()
+    .AddApiEndpoints();
 
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -78,6 +91,21 @@ using (var scope = app.Services.CreateScope())
     if (app.Environment.IsDevelopment())
     {
         AppDbSeeder.Seed(db);
+    }
+}
+
+static async Task SeedRoles(IServiceProvider provider)
+{
+    var roleManager = provider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    string[] roles = { "Gebruiker", "Leverancierslid", "Bedrijfsvertegenwoordiger", "Veilingmeester", "Admin" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
     }
 }
 
