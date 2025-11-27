@@ -139,7 +139,7 @@ namespace Veiling.Server
             // Kavels
             var kavel1 = new Kavel
             {
-                Naam = "Rode Rozen",
+                Naam = "Nederlandse Rode Rozen",
                 Beschrijving = "Premium rode rozen",
                 ArtikelKenmerken = "Lang, sterk",
                 MinimumPrijs = 15.0f,
@@ -162,7 +162,33 @@ namespace Veiling.Server
                 LeverancierId = leverancier1.Id
             };
 
+            var kavel2 = new Kavel
+            {
+                Naam = "Paarse Franse Tulpen",
+                Beschrijving = "Matige Franse tulpen met de neiging om tot stof uit elkaar te vallen, extra goedkoop",
+                ArtikelKenmerken = "Lang, sterk",
+                MinimumPrijs = 0.1f,
+                MaximumPrijs = 0.8f,
+                Minimumhoeveelheid = 20,
+                Foto = "/images/rozen.jpg",
+                Kavelkleur = "FF0000",
+                Karnummer = 1,
+                Rijnummer = 1,
+                HoeveelheidContainers = 50,
+                AantalProductenPerContainer = 24,
+                LengteVanBloemen = 60.0f,
+                GewichtVanBloemen = 500.0f,
+                StageOfMaturity = "Bloeiend",
+                NgsCode = 'A',
+                Keurcode = "A1",
+                Fustcode = 123,
+                GeldPerTickCode = "0.5",
+                VeilingId = amsterdamVeiling.Id,
+                LeverancierId = leverancier1.Id
+            };
+
             context.Kavels.Add(kavel1);
+            context.Kavels.Add(kavel2);
             context.SaveChanges();
 
             Console.WriteLine("Database seeded successfully!");
