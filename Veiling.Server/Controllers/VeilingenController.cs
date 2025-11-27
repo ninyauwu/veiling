@@ -82,7 +82,6 @@ namespace Veiling.Server.Controllers
                 Naam = dto.Naam,
                 StartTijd = dto.StartTijd,
                 EndTijd = dto.EndTijd,
-                KlokId = 1,
                 Klokduur = 1.0f,
                 GeldPerTickCode = 0.01f
             };
