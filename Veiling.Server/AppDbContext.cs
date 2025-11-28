@@ -25,6 +25,8 @@ namespace Veiling.Server
         {
             base.OnModelCreating(modelBuilder);
             
+            modelBuilder.HasDefaultSchema("identity");
+
             modelBuilder.Entity<Bedrijf>()
                 .HasKey(b => b.Bedrijfscode);
 

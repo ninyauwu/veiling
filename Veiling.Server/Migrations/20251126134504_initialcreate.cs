@@ -6,13 +6,17 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Veiling.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class Identity : Migration
+    public partial class initialcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "identity");
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -27,6 +31,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Bedrijven",
+                schema: "identity",
                 columns: table => new
                 {
                     Bedrijfscode = table.Column<int>(type: "int", nullable: false)
@@ -41,6 +46,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Locaties",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -56,6 +62,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -70,6 +77,7 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
+                        principalSchema: "identity",
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -77,6 +85,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUsers",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -105,6 +114,7 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUsers_Bedrijven_BedrijfId",
                         column: x => x.BedrijfId,
+                        principalSchema: "identity",
                         principalTable: "Bedrijven",
                         principalColumn: "Bedrijfscode",
                         onDelete: ReferentialAction.SetNull);
@@ -112,6 +122,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Leveranciers",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -125,6 +136,7 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_Leveranciers_Bedrijven_BedrijfId",
                         column: x => x.BedrijfId,
+                        principalSchema: "identity",
                         principalTable: "Bedrijven",
                         principalColumn: "Bedrijfscode",
                         onDelete: ReferentialAction.Cascade);
@@ -132,6 +144,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -146,6 +159,7 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -153,6 +167,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserLogins",
+                schema: "identity",
                 columns: table => new
                 {
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -166,6 +181,7 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserLogins_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -173,6 +189,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserRoles",
+                schema: "identity",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -184,12 +201,14 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
                         column: x => x.RoleId,
+                        principalSchema: "identity",
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -197,6 +216,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
+                schema: "identity",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -210,6 +230,7 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -217,6 +238,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Veilingmeesters",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -230,6 +252,7 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_Veilingmeesters_AspNetUsers_GebruikerId",
                         column: x => x.GebruikerId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -237,6 +260,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Veilingen",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -255,18 +279,21 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_Veilingen_Locaties_LocatieId",
                         column: x => x.LocatieId,
+                        principalSchema: "identity",
                         principalTable: "Locaties",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Veilingen_Veilingmeesters_VeilingmeesterId",
                         column: x => x.VeilingmeesterId,
+                        principalSchema: "identity",
                         principalTable: "Veilingmeesters",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Kavels",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -301,12 +328,14 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_Kavels_Leveranciers_LeverancierId",
                         column: x => x.LeverancierId,
+                        principalSchema: "identity",
                         principalTable: "Leveranciers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Kavels_Veilingen_VeilingId",
                         column: x => x.VeilingId,
+                        principalSchema: "identity",
                         principalTable: "Veilingen",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
@@ -314,6 +343,7 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Boden",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -331,12 +361,14 @@ namespace Veiling.Server.Migrations
                     table.ForeignKey(
                         name: "FK_Boden_AspNetUsers_GebruikerId",
                         column: x => x.GebruikerId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Boden_Kavels_KavelId",
                         column: x => x.KavelId,
+                        principalSchema: "identity",
                         principalTable: "Kavels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -344,11 +376,13 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
+                schema: "identity",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
+                schema: "identity",
                 table: "AspNetRoles",
                 column: "NormalizedName",
                 unique: true,
@@ -356,31 +390,37 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
+                schema: "identity",
                 table: "AspNetUserClaims",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserLogins_UserId",
+                schema: "identity",
                 table: "AspNetUserLogins",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserRoles_RoleId",
+                schema: "identity",
                 table: "AspNetUserRoles",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
+                schema: "identity",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUsers_BedrijfId",
+                schema: "identity",
                 table: "AspNetUsers",
                 column: "BedrijfId");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
+                schema: "identity",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true,
@@ -388,41 +428,49 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Boden_GebruikerId",
+                schema: "identity",
                 table: "Boden",
                 column: "GebruikerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Boden_KavelId",
+                schema: "identity",
                 table: "Boden",
                 column: "KavelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Kavels_LeverancierId",
+                schema: "identity",
                 table: "Kavels",
                 column: "LeverancierId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Kavels_VeilingId",
+                schema: "identity",
                 table: "Kavels",
                 column: "VeilingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Leveranciers_BedrijfId",
+                schema: "identity",
                 table: "Leveranciers",
                 column: "BedrijfId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Veilingen_LocatieId",
+                schema: "identity",
                 table: "Veilingen",
                 column: "LocatieId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Veilingen_VeilingmeesterId",
+                schema: "identity",
                 table: "Veilingen",
                 column: "VeilingmeesterId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Veilingmeesters_GebruikerId",
+                schema: "identity",
                 table: "Veilingmeesters",
                 column: "GebruikerId");
         }
@@ -431,46 +479,60 @@ namespace Veiling.Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AspNetRoleClaims");
+                name: "AspNetRoleClaims",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserClaims");
+                name: "AspNetUserClaims",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserLogins");
+                name: "AspNetUserLogins",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserRoles");
+                name: "AspNetUserRoles",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserTokens");
+                name: "AspNetUserTokens",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Boden");
+                name: "Boden",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "AspNetRoles",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Kavels");
+                name: "Kavels",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Leveranciers");
+                name: "Leveranciers",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Veilingen");
+                name: "Veilingen",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Locaties");
+                name: "Locaties",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Veilingmeesters");
+                name: "Veilingmeesters",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "AspNetUsers",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Bedrijven");
+                name: "Bedrijven",
+                schema: "identity");
         }
     }
 }
