@@ -1,7 +1,7 @@
 export interface AppointmentData {
   id: string;
-  dayIndex: number;
   startHour: number;
+  date: Date;
   durationHours: number;
   name: string;
   kavelIds: number[];
@@ -39,6 +39,7 @@ export interface AppointmentProps {
   hourHeight: number;
   isDragging: boolean;
   isResizing: boolean;
+  isDisabled: boolean;
 }
 
 export interface DragState {
@@ -50,4 +51,3 @@ export interface DragState {
   originalDuration: number;
   originalDayIndex: number;
 }
-

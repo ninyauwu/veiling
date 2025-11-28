@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Appointment from "./Appointment";
 import type {
   AppointmentData,
@@ -7,6 +8,17 @@ import type {
   Kavel,
 } from "./AppointmentTypes";
 import AppointmentFormPopup from "./AppointmentFormPopup";
+import {
+  formatTime,
+  parseTime,
+  getCurrentMinuteTime,
+  getWeekDays,
+  getNextValidStartTime,
+  isPastHourBlock,
+  snapToValidTime,
+  isAppointmentInPast,
+  isSameDate,
+} from "./SchedulerUtil";
 
 export default function Scheduler() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
@@ -21,6 +33,7 @@ export default function Scheduler() {
     kavelIds: [],
   });
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const [weekOffset, setWeekOffset] = useState(0);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const [gridMetrics, setGridMetrics] = useState({ left: 0, columnWidth: 0 });
@@ -28,16 +41,8 @@ export default function Scheduler() {
   const hourHeight = 60;
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
-  // Get current week
   const today = new Date();
-  const weekStart = new Date(today);
-  weekStart.setDate(today.getDate() - today.getDay());
-
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const day = new Date(weekStart);
-    day.setDate(weekStart.getDate() + i);
-    return day;
-  });
+  const weekDays = getWeekDays(weekOffset);
 
   useEffect(() => {
     const fetchKavels = async () => {
@@ -48,7 +53,6 @@ export default function Scheduler() {
         setKavels(data);
       } catch (error) {
         console.error("Error fetching kavels:", error);
-        // Mock data for demo
         setKavels([
           {
             id: 1,
@@ -90,7 +94,6 @@ export default function Scheduler() {
     };
   }, []);
 
-  // Drag handling
   useEffect(() => {
     if (!dragState) return;
 
@@ -114,24 +117,33 @@ export default function Scheduler() {
       if (dragState.type === "move") {
         const newDayIndex = getDayIndexFromX(e.clientX);
         const rawNewStartHour = dragState.originalStartHour + deltaHours;
-        const newStartHour = Math.max(
+        const snappedHour = Math.max(
           0,
           Math.min(23.75, snapToQuarterHour(rawNewStartHour)),
+        );
+        const newStartHour = snapToValidTime(
+          weekDays[newDayIndex],
+          snappedHour,
         );
 
         setAppointments((prev) =>
           prev.map((apt) =>
             apt.id === dragState.appointmentId
-              ? { ...apt, startHour: newStartHour, dayIndex: newDayIndex }
+              ? { ...apt, startHour: newStartHour, date: weekDays[newDayIndex] }
               : apt,
           ),
         );
       } else if (dragState.type === "resize-top") {
         const quarterHourDelta = Math.round(deltaHours * 4) / 4;
-        const newStartHour = Math.max(
-          0,
-          Math.min(23.75, dragState.originalStartHour + quarterHourDelta),
-        );
+        const rawNewStartHour = dragState.originalStartHour + quarterHourDelta;
+        const clampedHour = Math.max(0, Math.min(23.75, rawNewStartHour));
+        const originalDate = appointments.find(
+          (apt) => apt.id === dragState.appointmentId,
+        )?.date;
+
+        if (!originalDate) return;
+
+        const newStartHour = snapToValidTime(originalDate, clampedHour);
         const deltaStart = newStartHour - dragState.originalStartHour;
         const newDuration = Math.max(
           0.25,
@@ -181,18 +193,7 @@ export default function Scheduler() {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [dragState, hourHeight, gridMetrics]);
-
-  const formatTime = (hour: number): string => {
-    const h = Math.floor(hour);
-    const m = Math.round((hour - h) * 60);
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-  };
-
-  const parseTime = (timeString: string): number => {
-    const [hours, minutes] = timeString.split(":").map(Number);
-    return hours + minutes / 60;
-  };
+  }, [dragState, hourHeight, gridMetrics, weekDays, appointments]);
 
   const getKavelNames = (kavelIds: number[]): string => {
     if (kavelIds.length === 0) return "";
@@ -204,10 +205,18 @@ export default function Scheduler() {
   };
 
   const handleCellClick = (dayIndex: number, hour: number) => {
+    const cellDate = weekDays[dayIndex];
+
+    if (isPastHourBlock(cellDate, hour)) {
+      return;
+    }
+
+    const validStartHour = getNextValidStartTime(cellDate, hour);
+
     const newAppointment: AppointmentData = {
       id: `apt-${Date.now()}`,
-      dayIndex,
-      startHour: hour,
+      date: cellDate,
+      startHour: validStartHour,
       durationHours: 1,
       name: "",
       kavelIds: [],
@@ -215,8 +224,8 @@ export default function Scheduler() {
 
     setEditingAppointment(newAppointment);
     setFormData({
-      startTime: formatTime(hour),
-      endTime: formatTime(hour + 1),
+      startTime: formatTime(validStartHour),
+      endTime: formatTime(validStartHour + 1),
       name: "",
       kavelIds: [],
     });
@@ -231,6 +240,10 @@ export default function Scheduler() {
     e.preventDefault();
     e.stopPropagation();
 
+    const dayIndex = weekDays.findIndex((day) =>
+      isSameDate(day, appointment.date),
+    );
+
     setDragState({
       appointmentId: appointment.id,
       type,
@@ -238,7 +251,7 @@ export default function Scheduler() {
       startY: e.clientY,
       originalStartHour: appointment.startHour,
       originalDuration: appointment.durationHours,
-      originalDayIndex: appointment.dayIndex,
+      originalDayIndex: dayIndex,
     });
   };
 
@@ -275,11 +288,18 @@ export default function Scheduler() {
       return;
     }
 
-    const startDate = new Date(weekDays[editingAppointment.dayIndex]);
+    const startDate = new Date(editingAppointment.date);
     startDate.setHours(Math.floor(startHour), (startHour % 1) * 60, 0, 0);
 
     const endDate = new Date(startDate);
     endDate.setHours(Math.floor(endHour), (endHour % 1) * 60, 0, 0);
+
+    const now = getCurrentMinuteTime();
+
+    if (startDate < now) {
+      alert("Kan geen veiling in het verleden aanmaken");
+      return;
+    }
 
     const payload = {
       Naam: formData.name || getKavelNames(formData.kavelIds) || "Ongetiteld",
@@ -326,6 +346,14 @@ export default function Scheduler() {
       console.error("Error creating veiling:", error);
       alert("Fout bij opslaan veiling. Controleer of de server draait.");
     }
+  };
+
+  const handlePreviousWeek = () => {
+    setWeekOffset((prev) => prev - 1);
+  };
+
+  const handleNextWeek = () => {
+    setWeekOffset((prev) => prev + 1);
   };
 
   return (
@@ -403,10 +431,28 @@ export default function Scheduler() {
               role="row"
             >
               <div
-                className="p-4"
+                className="p-4 flex items-center justify-center"
                 style={{ backgroundColor: "#FFFFFF" }}
-                aria-hidden="true"
-              />
+              >
+                <div className="flex gap-2">
+                  <button
+                    onClick={handlePreviousWeek}
+                    className="p-2 rounded hover:bg-gray-100 transition-colors"
+                    aria-label="Vorige week"
+                    style={{ color: "#7A1F3D" }}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button
+                    onClick={handleNextWeek}
+                    className="p-2 rounded hover:bg-gray-100 transition-colors"
+                    aria-label="Volgende week"
+                    style={{ color: "#7A1F3D" }}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                </div>
+              </div>
               {weekDays.map((day, i) => {
                 const isToday = day.toDateString() === today.toDateString();
                 return (
@@ -452,61 +498,77 @@ export default function Scheduler() {
                   </div>
                 ))}
               </div>
-              {weekDays.map((_, dayIndex) => (
+              {weekDays.map((day, dayIndex) => (
                 <div
                   key={dayIndex}
                   className="relative border-l"
                   style={{ borderColor: "#D9D9D9" }}
                   role="gridcell"
                 >
-                  {hours.map((hour) => (
-                    <div
-                      key={hour}
-                      className="border-t cursor-pointer hover:bg-opacity-50"
-                      style={{
-                        height: `${hourHeight}px`,
-                        borderColor: "#D9D9D9",
-                        backgroundColor: "#FFFFFF",
-                      }}
-                      onClick={() => handleCellClick(dayIndex, hour)}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#D9D9D9";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "#FFFFFF";
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`Maak afspraak op ${weekDays[dayIndex].toLocaleDateString("nl-NL")} om ${hour.toString().padStart(2, "0")}:00`}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          handleCellClick(dayIndex, hour);
-                        }
-                      }}
-                    />
-                  ))}
-                  {appointments
-                    .filter((apt) => apt.dayIndex === dayIndex)
-                    .map((apt) => (
-                      <Appointment
-                        key={apt.id}
-                        appointment={apt}
-                        onMouseDown={(e, type) =>
-                          handleAppointmentMouseDown(e, apt, type)
-                        }
-                        onDoubleClick={handleAppointmentDoubleClick}
-                        hourHeight={hourHeight}
-                        isDragging={
-                          dragState?.appointmentId === apt.id &&
-                          dragState.type === "move"
-                        }
-                        isResizing={
-                          dragState?.appointmentId === apt.id &&
-                          dragState.type !== "move"
-                        }
+                  {hours.map((hour) => {
+                    const isPast = isPastHourBlock(day, hour);
+                    return (
+                      <div
+                        key={hour}
+                        className={`border-t ${isPast ? "cursor-not-allowed" : "cursor-pointer hover:bg-opacity-50"}`}
+                        style={{
+                          height: `${hourHeight}px`,
+                          borderColor: "#D9D9D9",
+                          backgroundColor: isPast ? "#F5F5F5" : "#FFFFFF",
+                        }}
+                        onClick={() => handleCellClick(dayIndex, hour)}
+                        onMouseEnter={(e) => {
+                          if (!isPast) {
+                            e.currentTarget.style.backgroundColor = "#D9D9D9";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isPast) {
+                            e.currentTarget.style.backgroundColor = "#FFFFFF";
+                          }
+                        }}
+                        role="button"
+                        tabIndex={isPast ? -1 : 0}
+                        aria-label={`Maak afspraak op ${day.toLocaleDateString("nl-NL")} om ${hour.toString().padStart(2, "0")}:00`}
+                        aria-disabled={isPast}
+                        onKeyDown={(e) => {
+                          if (!isPast && (e.key === "Enter" || e.key === " ")) {
+                            e.preventDefault();
+                            handleCellClick(dayIndex, hour);
+                          }
+                        }}
                       />
-                    ))}
+                    );
+                  })}
+                  {appointments
+                    .filter((apt) => isSameDate(apt.date, day))
+                    .map((apt) => {
+                      const isPast = isAppointmentInPast(
+                        apt.date,
+                        apt.startHour,
+                        apt.durationHours,
+                      );
+                      return (
+                        <Appointment
+                          key={apt.id}
+                          appointment={apt}
+                          onMouseDown={(e, type) =>
+                            handleAppointmentMouseDown(e, apt, type)
+                          }
+                          onDoubleClick={handleAppointmentDoubleClick}
+                          hourHeight={hourHeight}
+                          isDragging={
+                            dragState?.appointmentId === apt.id &&
+                            dragState.type === "move"
+                          }
+                          isResizing={
+                            dragState?.appointmentId === apt.id &&
+                            dragState.type !== "move"
+                          }
+                          isDisabled={isPast}
+                        />
+                      );
+                    })}
                 </div>
               ))}
             </div>
