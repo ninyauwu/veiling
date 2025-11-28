@@ -4,6 +4,8 @@ using Veiling.Server;
 using Microsoft.AspNetCore.Identity;
 using Veiling.Server.Models;
 using Microsoft.OpenApi.Models;
+using System.Xml.Serialization;
+using Veiling.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -137,25 +139,10 @@ using (var scope = app.Services.CreateScope())
 
     if (app.Environment.IsDevelopment())
     {
-        AppDbSeeder.Seed(db);
-    }
-    
-    // Seed roles
-    await SeedRoles(scope.ServiceProvider);
-}
-
-static async Task SeedRoles(IServiceProvider provider)
-{
-    var roleManager = provider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    string[] roles = { "Gebruiker", "Leverancierslid", "Bedrijfsvertegenwoordiger", "Veilingmeester", "Admin" };
-
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Gebruiker>>(); 
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(); 
+        
+        await AppDbSeeder.Seed(db, userManager, roleManager); 
     }
 }
 
