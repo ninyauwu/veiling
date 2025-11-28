@@ -81,7 +81,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Verkoper) + ", " +
+        nameof(Role.Leverancier) + ", " +
         nameof(Role.Gebruiker)
         )]
         [HttpGet("{id}")]
@@ -133,7 +133,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Verkoper) + ", " +
+        nameof(Role.Leverancier) + ", " +
         nameof(Role.Gebruiker)
         )]
         [HttpPut("{id}")]
@@ -169,7 +169,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Verkoper) + ", " +
+        nameof(Role.Leverancier) + ", " +
         nameof(Role.Gebruiker)
         )]
         [HttpDelete("{id}")]

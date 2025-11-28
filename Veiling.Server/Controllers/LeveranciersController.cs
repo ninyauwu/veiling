@@ -36,7 +36,7 @@ namespace Veiling.Server.Controllers
         [Authorize(Roles = 
         nameof(Role.Administrator) + ", " + 
         nameof(Role.Veilingmeester) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Leverancier>> GetLeverancier(int id)

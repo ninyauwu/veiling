@@ -33,7 +33,7 @@ namespace Veiling.Server.Controllers
 
 //TODO: Bv1 en Vk2 moeten alleen hun eigen bedrijf kunnen opvragen 
         // GET: api/bedrijven/5
-        [Authorize(Roles = nameof(Role.Bedrijfsvertegenwoordiger) + ", " + nameof(Role.Veilingmeester) + ", " + nameof(Role.Verkoper) + ", " + nameof(Role.Administrator))]
+        [Authorize(Roles = nameof(Role.Bedrijfsvertegenwoordiger) + ", " + nameof(Role.Veilingmeester) + ", " + nameof(Role.Leverancier) + ", " + nameof(Role.Administrator))]
         [HttpGet("{id}")]
         public async Task<ActionResult<Bedrijf>> GetBedrijf(int id)
         {

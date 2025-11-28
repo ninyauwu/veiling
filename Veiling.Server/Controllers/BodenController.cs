@@ -23,7 +23,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Administrator) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Bod>>> GetBoden()
@@ -57,7 +57,7 @@ namespace Veiling.Server.Controllers
         // GET: api/boden/kavel/5
         [Authorize(Roles = nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.Administrator) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         [HttpGet("kavel/{kavelId}")]
         public async Task<ActionResult<IEnumerable<Bod>>> GetBodenByKavel(int kavelId)
@@ -107,7 +107,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Administrator) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         [HttpPost]
         public async Task<ActionResult<Bod>> CreateBod(Bod bod)

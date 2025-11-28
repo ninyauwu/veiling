@@ -63,7 +63,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetActieveVeilingen()
         {

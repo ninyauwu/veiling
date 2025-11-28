@@ -60,7 +60,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         [HttpGet("veiling/{veilingId}")]
         public async Task<ActionResult<IEnumerable<Kavel>>> GetKavelsByVeiling(int veilingId)
@@ -75,7 +75,7 @@ namespace Veiling.Server.Controllers
         // POST: api/kavels
         [Authorize(Roles = 
         nameof(Role.Administrator) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         [HttpPost]
         public async Task<ActionResult<Kavel>> CreateKavel(Kavel kavel)
@@ -90,7 +90,7 @@ namespace Veiling.Server.Controllers
         [Authorize(Roles = 
         nameof(Role.Administrator) + ", " + 
         nameof(Role.Veilingmeester) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateKavel(int id, Kavel kavel)
@@ -121,7 +121,7 @@ namespace Veiling.Server.Controllers
         // DELETE: api/kavels/5
         [Authorize(Roles = 
         nameof(Role.Administrator) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteKavel(int id)

@@ -3,7 +3,7 @@ enum Role
     Gebruiker,
     Bedrijfsvertegenwoordiger,
     BedrijfManager,
-    Verkoper,
+    Leverancier,
     Veilingmeester,
     Administrator,
 }

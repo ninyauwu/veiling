@@ -19,7 +19,7 @@ public class KavelInfoController : ControllerBase {
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Verkoper)
+        nameof(Role.Leverancier)
         )]
     [HttpGet("{veilingId}")]
     public ActionResult<IEnumerable<KavelLeverancier>> GetKavels(int veilingId) {
