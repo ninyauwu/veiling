@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Veiling.Server.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class KavelInfoController : ControllerBase {
     private readonly AppDbContext _context;
@@ -12,6 +14,13 @@ public class KavelInfoController : ControllerBase {
         _context = context;
     }
 
+[Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Verkoper)
+        )]
     [HttpGet("{veilingId}")]
     public ActionResult<IEnumerable<KavelLeverancier>> GetKavels(int veilingId) {
         var kavels = _context.Kavels

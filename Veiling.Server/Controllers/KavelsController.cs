@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
 namespace Veiling.Server.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class KavelsController : ControllerBase
     {
@@ -16,6 +18,10 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/kavels
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Kavel>>> GetKavels()
         {
@@ -27,6 +33,10 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/kavels/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Kavel>> GetKavel(int id)
         {
@@ -45,6 +55,13 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/kavels/veiling/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Verkoper)
+        )]
         [HttpGet("veiling/{veilingId}")]
         public async Task<ActionResult<IEnumerable<Kavel>>> GetKavelsByVeiling(int veilingId)
         {
@@ -56,6 +73,10 @@ namespace Veiling.Server.Controllers
         }
 
         // POST: api/kavels
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Verkoper)
+        )]
         [HttpPost]
         public async Task<ActionResult<Kavel>> CreateKavel(Kavel kavel)
         {
@@ -64,8 +85,13 @@ namespace Veiling.Server.Controllers
 
             return CreatedAtAction(nameof(GetKavel), new { id = kavel.Id }, kavel);
         }
-
+//TODO: verkoper alleen zijn eigen kavels verranderen
         // PUT: api/kavels/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.Verkoper)
+        )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateKavel(int id, Kavel kavel)
         {
@@ -93,6 +119,10 @@ namespace Veiling.Server.Controllers
         }
 
         // DELETE: api/kavels/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Verkoper)
+        )]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteKavel(int id)
         {
