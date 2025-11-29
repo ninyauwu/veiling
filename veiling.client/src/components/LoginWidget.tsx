@@ -10,9 +10,44 @@ function Login() {
     const [rememberMe, setRememberMe] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Login submitted:', { email, password, rememberMe });
-    };
+    e.preventDefault();
+
+    try {
+            const response = await fetch("/login?useCookies=false&useSessionCookies=false", {
+
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email,
+                password
+            })
+        });
+
+        if (!response.ok) {
+            alert("Invalid email or password");
+            return;
+        }
+
+        const data = await response.json();
+        console.log("Login success:", data);
+
+        // Store token
+        localStorage.setItem("access_token", data.accessToken);
+
+        // Optional: refresh token
+        if (data.refreshToken) {
+            localStorage.setItem("refresh_token", data.refreshToken);
+        }
+
+        // Redirect user
+        window.location.href = "/locaties";
+
+    } catch (error) {
+        console.error("Login error:", error);
+    }
+};
 
     return (
         <div className="login-container">
