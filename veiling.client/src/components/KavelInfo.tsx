@@ -6,6 +6,7 @@ import ImageSet from "./ImageSet";
 import NavigationBar from "./NavigationBar";
 import MetadataGrid from "./MetadataGrid";
 import CompanyQuality from "./CompanyQuality";
+import { authFetch } from "../utils/AuthFetch";
 
 // Define the type for data coming from your API
 type KavelInfoResponse = {
@@ -38,20 +39,21 @@ function KavelInfo() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchKavels() {
-      try {
-        const res = await fetch("/api/KavelInfo/0");
-        const data: KavelInfoResponse[] = await res.json();
-        setKavels(data);
-        setLoading(false);
-        if (data.length > 0) setSelected(0);
-      } catch (err) {
-        console.error("Kon kavels niet laden:", err);
-        setLoading(false);
-      }
+  async function fetchKavels() {
+    try {
+      // USE authFetch instead of fetch
+      const res = await authFetch("/api/KavelInfo/0");
+      const data: KavelInfoResponse[] = await res.json();
+      setKavels(data);
+      setLoading(false);
+      if (data.length > 0) setSelected(0);
+    } catch (err) {
+      console.error("Kon kavels niet laden:", err);
+      setLoading(false);
     }
-    fetchKavels();
-  }, []);
+  }
+  fetchKavels();
+}, []);
 
   const handleNext = () => {
     if (selected === null) return;
