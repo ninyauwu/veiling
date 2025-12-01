@@ -71,6 +71,76 @@ export default function Scheduler() {
   }, []);
 
   useEffect(() => {
+    const fetchVeilingen = async () => {
+      try {
+        const response = await fetch("/api/veilingen");
+        if (!response.ok) throw new Error("Failed to fetch veilingen");
+        const data = await response.json();
+
+        // veilingen naar appointments
+        const fetchedAppointments: AppointmentData[] = data.map((veiling: any) => {
+          const startDate = new Date(veiling.startTijd);
+          const endDate = new Date(veiling.endTijd);
+
+          const startHour = startDate.getHours() + startDate.getMinutes() / 60;
+          const endHour = endDate.getHours() + endDate.getMinutes() / 60;
+          const durationHours = endHour - startHour;
+
+          return {
+            id: `veiling-${veiling.id}`,
+            date: startDate,
+            startHour: startHour,
+            durationHours: durationHours,
+            name: veiling.naam,
+            kavelIds: veiling.kavels?.map((k: any) => k.id) || [],
+          };
+        });
+
+        setAppointments(fetchedAppointments);
+      } catch (error) {
+        console.error("Error fetching veilingen:", error);
+      }
+    };
+
+    fetchVeilingen();
+  }, []);
+
+  // refresh veilingen wanneer de week verandert
+  useEffect(() => {
+    const fetchVeilingenForWeek = async () => {
+      try {
+        const response = await fetch("/api/veilingen");
+        if (!response.ok) throw new Error("Failed to fetch veilingen");
+        const data = await response.json();
+
+        const fetchedAppointments: AppointmentData[] = data.map((veiling: any) => {
+          const startDate = new Date(veiling.startTijd);
+          const endDate = new Date(veiling.endTijd);
+
+          const startHour = startDate.getHours() + startDate.getMinutes() / 60;
+          const endHour = endDate.getHours() + endDate.getMinutes() / 60;
+          const durationHours = endHour - startHour;
+
+          return {
+            id: `veiling-${veiling.id}`,
+            date: startDate,
+            startHour: startHour,
+            durationHours: durationHours,
+            name: veiling.naam,
+            kavelIds: veiling.kavels?.map((k: any) => k.id) || [],
+          };
+        });
+
+        setAppointments(fetchedAppointments);
+      } catch (error) {
+        console.error("Error fetching veilingen:", error);
+      }
+    };
+
+    fetchVeilingenForWeek();
+  }, [weekOffset]);
+
+  useEffect(() => {
     const updateGridMetrics = () => {
       if (gridRef.current) {
         const firstColumn = gridRef.current.children[1] as HTMLElement;
