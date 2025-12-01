@@ -253,6 +253,16 @@ export default function Scheduler() {
     };
 
     const handleMouseUp = () => {
+      // als appointment verplaatst, update database
+      if (dragState) {
+        const updatedAppointment = appointments.find(
+          (apt) => apt.id === dragState.appointmentId
+        );
+        if (updatedAppointment) {
+          updateVeilingInDatabase(updatedAppointment);
+        }
+      }
+
       setDragState(null);
     };
 
@@ -415,6 +425,61 @@ export default function Scheduler() {
     } catch (error) {
       console.error("Error creating veiling:", error);
       alert("Fout bij opslaan veiling. Controleer of de server draait.");
+    }
+  };
+
+  const updateVeilingInDatabase = async (appointment: AppointmentData) => {
+    if (!appointment.id.startsWith("veiling-")) {
+      return;
+    }
+
+    const veilingId = parseInt(appointment.id.split("-")[1]);
+
+    const startDate = new Date(appointment.date);
+    startDate.setHours(
+      Math.floor(appointment.startHour),
+      (appointment.startHour % 1) * 60,
+      0,
+      0
+    );
+
+    const endDate = new Date(startDate);
+    endDate.setHours(
+      Math.floor(appointment.startHour + appointment.durationHours),
+      ((appointment.startHour + appointment.durationHours) % 1) * 60,
+      0,
+      0
+    );
+
+    const payload = {
+      Id: veilingId,
+      Naam: appointment.name,
+      StartTijd: startDate.toISOString(),
+      EndTijd: endDate.toISOString(),
+      Klokduur: 1.0,
+      GeldPerTickCode: 0.01,
+      VeilingmeesterId: null,
+      LocatieId: null,
+    };
+
+    try {
+      const response = await fetch(`/api/veilingen/${veilingId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Veiling updaten mislukt: ${errorText}`);
+      }
+
+      console.log("Veiling succesvol geüpdatet in database");
+    } catch (error) {
+      console.error("Error updating veiling:", error);
+      alert("Fout bij updaten veiling in database");
     }
   };
 

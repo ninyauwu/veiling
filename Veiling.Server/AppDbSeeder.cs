@@ -7,9 +7,16 @@ namespace Veiling.Server
     {
         public static void Seed(AppDbContext context)
         {
-            // Clear existing data
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
+            //clear db
+            context.Boden.RemoveRange(context.Boden);
+            context.Kavels.RemoveRange(context.Kavels);
+            context.Veilingen.RemoveRange(context.Veilingen);
+            context.Veilingmeesters.RemoveRange(context.Veilingmeesters);
+            context.Leveranciers.RemoveRange(context.Leveranciers);
+            context.Gebruikers.RemoveRange(context.Gebruikers);
+            context.Bedrijven.RemoveRange(context.Bedrijven);
+            context.Locaties.RemoveRange(context.Locaties);
+            context.SaveChanges();
 
             var now = DateTime.UtcNow;
 
