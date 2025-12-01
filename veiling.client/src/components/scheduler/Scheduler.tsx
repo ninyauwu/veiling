@@ -77,10 +77,13 @@ export default function Scheduler() {
         if (!response.ok) throw new Error("Failed to fetch veilingen");
         const data = await response.json();
 
-        // veilingen naar appointments
         const fetchedAppointments: AppointmentData[] = data.map((veiling: any) => {
-          const startDate = new Date(veiling.startTijd);
-          const endDate = new Date(veiling.endTijd);
+          // UTC tijden
+          const startDateString = veiling.startTijd.endsWith('Z') ? veiling.startTijd : veiling.startTijd + 'Z';
+          const endDateString = veiling.endTijd.endsWith('Z') ? veiling.endTijd : veiling.endTijd + 'Z';
+
+          const startDate = new Date(startDateString);
+          const endDate = new Date(endDateString);
 
           const startHour = startDate.getHours() + startDate.getMinutes() / 60;
           const endHour = endDate.getHours() + endDate.getMinutes() / 60;
@@ -114,8 +117,12 @@ export default function Scheduler() {
         const data = await response.json();
 
         const fetchedAppointments: AppointmentData[] = data.map((veiling: any) => {
-          const startDate = new Date(veiling.startTijd);
-          const endDate = new Date(veiling.endTijd);
+          // UTC tijden
+          const startDateString = veiling.startTijd.endsWith('Z') ? veiling.startTijd : veiling.startTijd + 'Z';
+          const endDateString = veiling.endTijd.endsWith('Z') ? veiling.endTijd : veiling.endTijd + 'Z';
+
+          const startDate = new Date(startDateString);
+          const endDate = new Date(endDateString);
 
           const startHour = startDate.getHours() + startDate.getMinutes() / 60;
           const endHour = endDate.getHours() + endDate.getMinutes() / 60;
