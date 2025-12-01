@@ -106,7 +106,7 @@ namespace Veiling.Server
 
 
             //Give roles
-            await userManager.AddToRoleAsync(gebruiker1, nameof(Role.Veilingmeester));
+            await userManager.AddToRoleAsync(gebruiker1, nameof(Role.Gebruiker));
             await userManager.AddToRoleAsync(gebruiker2, nameof(Role.Administrator));
 
 
