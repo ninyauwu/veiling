@@ -27,7 +27,7 @@ namespace Veiling.Server.Controllers
         {
             var user = new Gebruiker
             {
-                UserName = dto.FirstName,
+                UserName = dto.Email,
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
                 Name = dto.FirstName + " " + dto.LastName,
