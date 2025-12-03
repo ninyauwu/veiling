@@ -25,6 +25,10 @@ jobs:
           sudo dotnet dev-certs https --export-path /https/veiling.client.pfx -p $CERT_PASSWORD
           echo "CERT_PATH=/https" >> $GITHUB_ENV
 
+      - name: Build and run tests
+        run: |
+          dotnet test Veiling.Server.Test
+
       - name: Build Docker images
         run: |
           docker compose -f docker-compose.yml build \
