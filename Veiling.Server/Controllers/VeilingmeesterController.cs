@@ -8,9 +8,9 @@ namespace Veiling.Server.Controllers
     [Route("api/[controller]")]
     public class VeilingmeestersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public VeilingmeestersController(AppDbContext context)
+        public VeilingmeestersController(IAppDbContext context)
         {
             _context = context;
         }

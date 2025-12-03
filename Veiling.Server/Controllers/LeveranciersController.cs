@@ -8,9 +8,9 @@ namespace Veiling.Server.Controllers
     [Route("api/[controller]")]
     public class LeveranciersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public LeveranciersController(AppDbContext context)
+        public LeveranciersController(IAppDbContext context)
         {
             _context = context;
         }

@@ -8,9 +8,9 @@ namespace Veiling.Server.Controllers
     [Route("api/[controller]")]
     public class KavelsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public KavelsController(AppDbContext context)
+        public KavelsController(IAppDbContext context)
         {
             _context = context;
         }

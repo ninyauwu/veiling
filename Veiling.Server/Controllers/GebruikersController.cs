@@ -10,9 +10,9 @@ namespace Veiling.Server.Controllers
     [Route("api/[controller]")]
     public class GebruikersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public GebruikersController(AppDbContext context)
+        public GebruikersController(IAppDbContext context)
         {
             _context = context;
         }
