@@ -7,9 +7,16 @@ namespace Veiling.Server
     {
         public static void Seed(AppDbContext context)
         {
-            // Clear existing data
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
+            //clear db
+            context.Boden.RemoveRange(context.Boden);
+            context.Kavels.RemoveRange(context.Kavels);
+            context.Veilingen.RemoveRange(context.Veilingen);
+            context.Veilingmeesters.RemoveRange(context.Veilingmeesters);
+            context.Leveranciers.RemoveRange(context.Leveranciers);
+            context.Gebruikers.RemoveRange(context.Gebruikers);
+            context.Bedrijven.RemoveRange(context.Bedrijven);
+            context.Locaties.RemoveRange(context.Locaties);
+            context.SaveChanges();
 
             var now = DateTime.UtcNow;
 
@@ -99,13 +106,15 @@ namespace Veiling.Server
             context.Leveranciers.Add(leverancier1);
             context.SaveChanges();
             
+            var today = DateTime.Today;
+            
             // veilingen
             var amsterdamVeiling = new Models.Veiling
             {
                 Naam = "Amsterdam Ochtend Veiling",
                 Klokduur = 5.0f,
-                StartTijd = now.AddHours(-1),
-                EndTijd = now.AddHours(2),
+                StartTijd = today.AddHours(9), // start 9 uur sochtends
+                EndTijd = today.AddHours(11), // eindigd 11 uur sochtends
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
                 LocatieId = amsterdam.Id
@@ -115,8 +124,8 @@ namespace Veiling.Server
             {
                 Naam = "Rotterdam Middag Veiling",
                 Klokduur = 5.0f,
-                StartTijd = now.AddHours(5),
-                EndTijd = now.AddHours(7),
+                StartTijd = today.AddHours(14), // start 14:00
+                EndTijd = today.AddHours(15), // eindigd 15:00
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
                 LocatieId = rotterdam.Id
@@ -126,8 +135,8 @@ namespace Veiling.Server
             {
                 Naam = "Delft Avond Veiling",
                 Klokduur = 5.0f,
-                StartTijd = now.AddHours(-2),
-                EndTijd = now.AddMinutes(45),
+                StartTijd = today.AddHours(18), // start 18:00
+                EndTijd = today.AddMinutes(45).AddHours(18), // eindigd 18:45
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
                 LocatieId = delft.Id
