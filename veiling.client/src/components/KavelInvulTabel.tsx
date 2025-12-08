@@ -30,6 +30,8 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
 
   const isWholeNumber = (value: string) => /^[0-9]+$/.test(value);
   const isDecimal = (value: string) => /^\d+(\.\d{1,2})?$/.test(value);
+  const isHexColor = (value: string) =>
+  /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/.test(value);
 
   const validateField = (field: string, value: string): string => {
     if (!value.trim()) return 'Dit veld is verplicht.';
@@ -39,9 +41,13 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     }
 
     if (['prijs', 'gewicht', 'lengte'].includes(field) && !isDecimal(value)) {
-      return 'Geldig decimaal astublieft (bijv. 12.50).';
+      return 'Geldig decimaal (bijv. 12.50).';
     }
 
+    if (field === 'kleur' && !isHexColor(value)) {
+      return 'Ongeldige kleur — gebruik een hexcode zoals #7A1F3D.';
+    }
+    
     return '';
   };
 
@@ -113,8 +119,8 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
       {renderInput('Kleur', 'kleur', 'Kleur')}
       {renderInput('Fustcode', 'fustcode', 'Fustcode')}
       {renderInput('Producten per container', 'aantalPerContainer', 'Aantal producten per container')}
-      {renderInput('Lengte Van Bloem', 'lengte', 'Bijv. 50cm, avg lengte per bloem')}
-      {renderInput('Gewicht Van Bloem', 'gewicht', 'Bijv. 25g, avg gewicht per bloem')}
+      {renderInput('Lengte Van Bloem', 'lengte', 'Bijv. 50, avg lengte per bloem in cm')}
+      {renderInput('Gewicht Van Bloem', 'gewicht', 'Bijv. 25, avg gewicht per bloem in g')}
     </div>
   );
 }
