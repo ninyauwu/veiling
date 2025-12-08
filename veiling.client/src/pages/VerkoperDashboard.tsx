@@ -63,27 +63,26 @@ function VerkoperDashboard() {
 
     const handleSubmit = async () => {
         try {
-            let uploadedImageUrl = null;
-            if (imageFile) {
-                uploadedImageUrl = await uploadImageToServer();
-            }
+          let uploadedImageUrl = null;
+          if (imageFile) {
+            uploadedImageUrl = await uploadImageToServer();
+          }
 
-            const payload = {
-                Naam: formData.naam,
-                Beschrijving: description,
-                Foto: uploadedImageUrl,
-                
-                MinimumPrijs: formData.prijs,
-                aantal: formData.aantal,
-                ql: formData.ql,
-                VeilingId: formData.plaats,
-                StageOfMaturity: formData.stadium,
-                LengteVanBloem: formData.lengte,
-                KavelKleur: formData.kleur,
-                Fustcode: formData.fustcode,
-                AantalProductenPerContainer: formData.aantalPerContainer,
-                GewichtVanBloem: formData.gewicht,
-            };
+          const payload = {
+            Naam: formData.naam,
+            Description: description,
+            ImageUrl: uploadedImageUrl, 
+            MinimumPrijs: formData.prijs,
+            Aantal: formData.aantal, 
+            Ql: formData.ql, 
+            Plaats: formData.plaats, 
+            Stadium: formData.stadium, 
+            Lengte: formData.lengte, 
+            Kleur: formData.kleur,
+            Fustcode: formData.fustcode,
+            AantalProductenPerContainer: formData.aantalPerContainer,
+            GewichtVanBloemen: formData.gewicht 
+          };
 
             console.log('Payload being sent:', payload);
 
@@ -124,19 +123,19 @@ function VerkoperDashboard() {
                 display: "flex",
                 flexDirection: "row",
                 gap: "60px",
-                flexWrap: "wrap",        // <—
+                flexWrap: "wrap",
                 width: "100%",
             }}>
                 <div style={{
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px',
-                    flex: '1 1 400px',     // <—
+                    flex: '1 1 400px',
                     maxWidth: '600px',
                 }}>
                     <div style={{
-                        height: '35vh',      // <—
-                        minHeight: '300px'   // <—
+                        height: '35vh',
+                        minHeight: '300px'
                     }}>
                         <ImageUpload onImageUpload={handleImageUpload} />
                     </div>
@@ -144,8 +143,8 @@ function VerkoperDashboard() {
                 </div>
                 
                 <div style={{
-                    flex: '2 1 500px',     // <—
-                    minWidth: '400px',      // <—
+                    flex: '2 1 500px',
+                    minWidth: '400px',
                 }}>
                     <KavelInvulTabel onDataChange={handleTableDataChange} />
                 </div>
@@ -154,10 +153,9 @@ function VerkoperDashboard() {
                     display: 'flex',
                     position: 'fixed',
                     gap: '10px',
-                    right: '2vw',          // <—
-                    bottom: '2vh'          // <—
+                    right: '2vw',
+                    bottom: '2vh'
                 }}>
-                    {/* UPDATED: Disable button when form is invalid */}
                     <SimpeleKnop 
                         label="Submit"
                         appearance="primary"
