@@ -95,6 +95,10 @@ namespace Veiling.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Kavel>> CreateKavel([FromBody] CreateKavelDto dto)
         {
+            if (!IsValidHexColor(dto.Kleur))
+            {
+                return BadRequest(new { error = "Invalid hex color format. Use #RGB or #RRGGBB." });
+            }
             var kavel = new Kavel
             {
                 Naam = dto.Naam,
@@ -165,23 +169,18 @@ namespace Veiling.Server.Controllers
         {
             return _context.Kavels.Any(k => k.Id == id);
         }
-    }
 
-    // NEW: DTO class for receiving JSON data
-    public class CreateKavelDto
-    {
-        public string Description { get; set; } = string.Empty;
-        public string? ImageUrl { get; set; }
-        public string Naam { get; set; } = string.Empty;
-        public string MinimumPrijs { get; set; } = string.Empty;
-        public string Aantal { get; set; } = string.Empty;
-        public string Ql { get; set; } = string.Empty;
-        public string Plaats { get; set; } = string.Empty;
-        public string Stadium { get; set; } = string.Empty;
-        public string Lengte { get; set; } = string.Empty;
-        public string Kleur { get; set; } = string.Empty;
-        public string Fustcode { get; set; } = string.Empty;
-        public string AantalProductenPerContainer { get; set; } = string.Empty;
-        public string GewichtVanBloemen { get; set; } = string.Empty;
+        private bool IsValidHexColor(string? color)
+        {
+            if (string.IsNullOrWhiteSpace(color))
+                return false;
+
+            // Regex: #RGB, #RRGGBB, #ARGB, #AARRGGBB
+            return System.Text.RegularExpressions.Regex.IsMatch(
+                color,
+                @"^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$"
+            );
+        }
+
     }
 }
