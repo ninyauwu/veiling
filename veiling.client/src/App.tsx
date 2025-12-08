@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingsPagina from './pages/LandingsPagina';
 import LoginPagina from './pages/LoginPagina';
 import Veiling from './pages/Veiling';
-import VerkoperDashboard from './pages/VerkoperDashboard';
 import LocatiePagina from './pages/Locatie.tsx';
 
 
