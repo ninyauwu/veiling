@@ -116,33 +116,9 @@ namespace Veiling.Server.Controllers
                 return BadRequest(new { error = "Validatie mislukt", details = errors });
             }
 
-            if (!float.TryParse(dto.MinimumPrijs, out float minimumPrijs))
-                return BadRequest(new { error = "Prijs moet een geldig getal zijn" });
-
-            if (!int.TryParse(dto.Aantal, out int aantal))
-                return BadRequest(new { error = "Aantal moet een geheel getal zijn" });
-
-            if (!int.TryParse(dto.Plaats, out int veilingId))
-                return BadRequest(new { error = "Plaats moet een geldig ID zijn" });
-
-            if (!float.TryParse(dto.Lengte, out float lengte))
-                return BadRequest(new { error = "Lengte moet een geldig getal zijn" });
-
-            if (!int.TryParse(dto.Fustcode, out int fustcode))
-                return BadRequest(new { error = "Fustcode moet een geheel getal zijn" });
-
-            if (!int.TryParse(dto.AantalProductenPerContainer, out int aantalPerContainer))
-                return BadRequest(new { error = "Aantal per container moet een geheel getal zijn" });
-
-            if (!float.TryParse(dto.GewichtVanBloemen, out float gewicht))
-                return BadRequest(new { error = "Gewicht moet een geldig getal zijn" });
-
-            if (minimumPrijs <= 0 || aantal <= 0)
-                return BadRequest(new { error = "Prijs en aantal moeten groter dan 0 zijn" });
-
-            var veilingExists = await _context.Veilingen.AnyAsync(v => v.Id == veilingId);
+            var veilingExists = await _context.Veilingen.AnyAsync(v => v.Id == dto.VeilingId);
             if (!veilingExists)
-                return BadRequest(new { error = $"Veiling met ID {veilingId} bestaat niet" });
+                return BadRequest(new { error = $"Veiling met ID {dto.VeilingId} bestaat niet" });
 
             try
             {
@@ -151,18 +127,18 @@ namespace Veiling.Server.Controllers
                     Naam = dto.Naam,
                     Beschrijving = dto.Description,
                     Foto = dto.ImageUrl ?? string.Empty,
-                    MinimumPrijs = minimumPrijs,
-                    HoeveelheidContainers = aantal,
+                    MinimumPrijs = dto.MinimumPrijs,
+                    HoeveelheidContainers = dto.Aantal,
                     Keurcode = dto.Ql,
-                    VeilingId = veilingId,
+                    VeilingId = dto.VeilingId,
                     StageOfMaturity = dto.Stadium,
-                    LengteVanBloemen = lengte,
+                    LengteVanBloemen = dto.Lengte,
                     Kavelkleur = dto.Kleur,
-                    Fustcode = fustcode,
-                    AantalProductenPerContainer = aantalPerContainer,
-                    GewichtVanBloemen = gewicht,
+                    Fustcode = dto.Fustcode,
+                    AantalProductenPerContainer = dto.AantalProductenPerContainer,
+                    GewichtVanBloemen = dto.GewichtVanBloemen,
                     ArtikelKenmerken = string.Empty,
-                    MaximumPrijs = minimumPrijs * 1.5f,
+                    MaximumPrijs = dto.MinimumPrijs * 5f,
                     GekochtPrijs = 0,
                     GekochteContainers = 0,
                     Minimumhoeveelheid = 1,
@@ -183,7 +159,7 @@ namespace Veiling.Server.Controllers
                 return StatusCode(500, new { error = "Database fout" });
             }
         }
-
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateKavel(int id, Kavel kavel)
         {
@@ -238,36 +214,38 @@ namespace Veiling.Server.Controllers
         public string? ImageUrl { get; set; }
 
         [Required(ErrorMessage = "Prijs is verplicht")]
-        [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "Geldig decimaal astublieft")]
-        public string MinimumPrijs { get; set; } = string.Empty;
+        [Range(0.01, double.MaxValue, ErrorMessage = "Prijs moet groter dan 0 zijn")]
+        public float MinimumPrijs { get; set; }
 
         [Required(ErrorMessage = "Aantal is verplicht")]
-        [RegularExpression(@"^[0-9]+$", ErrorMessage = "Geheel getal")]
-        public string Aantal { get; set; } = string.Empty;
+        [Range(1, int.MaxValue, ErrorMessage = "Aantal moet groter dan 0 zijn")]
+        public int Aantal { get; set; }
 
         [Required(ErrorMessage = "Ql is verplicht")]
         public string Ql { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Plaats is verplicht")]
-        public string Plaats { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Veiling ID is verplicht")]
+        public int VeilingId { get; set; }
 
         [Required(ErrorMessage = "Stadium is verplicht")]
         public string Stadium { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Lengte is verplicht")]
-        public string Lengte { get; set; } = string.Empty;
+        [Range(0.01, float.MaxValue, ErrorMessage = "Lengte moet groter dan 0 zijn")]
+        public float Lengte { get; set; }
 
         [Required(ErrorMessage = "Kleur is verplicht")]
         public string Kleur { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Fustcode is verplicht")]
-        public string Fustcode { get; set; } = string.Empty;
+        public int Fustcode { get; set; }
 
         [Required(ErrorMessage = "Aantal per container is verplicht")]
-        [RegularExpression(@"^[0-9]+$", ErrorMessage = "Geheel getal")]
-        public string AantalProductenPerContainer { get; set; } = string.Empty;
+        [Range(1, int.MaxValue, ErrorMessage = "Aantal per container moet groter dan 0 zijn")]
+        public int AantalProductenPerContainer { get; set; }
 
         [Required(ErrorMessage = "Gewicht is verplicht")]
-        public string GewichtVanBloemen { get; set; } = string.Empty;
+        [Range(0.01, float.MaxValue, ErrorMessage = "Gewicht moet groter dan 0 zijn")]
+        public float GewichtVanBloemen { get; set; }
     }
 }
