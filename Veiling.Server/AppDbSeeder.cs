@@ -1,3 +1,4 @@
+using Veiling.Server;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
