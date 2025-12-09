@@ -38,9 +38,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// DbContext
-builder.Services.AddDbContext<IAppDbContext, AppDbContext>(options => 
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDbContext<IAppDbContext, AppDbContext>(options => 
         options.UseSqlServer(connectionString));
+}
 
 // Identity framework
 builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
@@ -74,27 +76,30 @@ app.MapControllers();
 app.MapFallbackToFile("/index.html");
 
 if (!app.Environment.IsEnvironment("Testing"))
-
-    using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
 
-    try
-    {
-        var canConnect = await db.Database.ExecuteSqlRawAsync("SELECT 1");
-        app.Logger.LogInformation("Successfully connected to database and executed test query.");
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "Failed to connect to database or execute query.");
-    }
+        try
+        {
+            var canConnect = await db.Database.ExecuteSqlRawAsync("SELECT 1");
+            app.Logger.LogInformation("Successfully connected to database and executed test query.");
+        }
+        catch (Exception ex)
+        {
+            app.Logger.LogError(ex, "Failed to connect to database or execute query.");
+        }
 
-    if (app.Environment.IsDevelopment())
-    {
-        AppDbSeeder.Seed(db);
+        if (app.Environment.IsDevelopment())
+        {
+            AppDbSeeder.Seed(db);
+        }
     }
 }
+
+app.Run();
 
 static async Task SeedRoles(IServiceProvider provider)
 {
@@ -110,7 +115,5 @@ static async Task SeedRoles(IServiceProvider provider)
         }
     }
 }
-
-app.Run();
 
 public partial class Program { }
