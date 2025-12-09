@@ -28,6 +28,15 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     { id: '3', name: 'Delft' }
   ];
 
+  const QI = [
+    {id: '1', name: 'A1'},
+    {id: '2', name: 'A2'},
+    {id: '3', name: 'B1'},
+    {id: '4', name: 'B2'},
+    {id: '5', name: 'C1'},
+    {id: '6', name: 'C2'},
+  ]
+
   const isWholeNumber = (value: string) => /^[0-9]+$/.test(value);
   const isDecimal = (value: string) => /^\d+(\.\d{1,2})?$/.test(value);
   const isHexColor = (value: string) =>
@@ -87,7 +96,11 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     </div>
   );
 
-  const renderDropdown = (label: string, field: keyof typeof formData) => (
+  const renderDropdown = (
+    label: string, 
+    field: keyof typeof formData, 
+    information: Array<{ id: string; name: string }>
+  ) => (
     <div className="kavel-invul-row">
       <div className="kavel-invul-label">{label}</div>
       <select
@@ -95,8 +108,8 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
         value={formData[field]}
         onChange={(e) => handleInputChange(field, e.target.value)}
       >
-        <option value="">Selecteer locatie</option>
-        {locations.map(loc => (
+        <option value="">Selecteer</option>
+        {information.map(loc => (
           <option key={loc.id} value={loc.id}>
             {loc.name}
           </option>
@@ -113,8 +126,8 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
       {renderInput('Naam', 'naam', 'Naam')}
       {renderInput('Prijs (€)', 'prijs', 'Bijv. 12.50')}
       {renderInput('Aantal containers', 'aantal', 'Bijv. 25')}
-      {renderInput('Ql', 'ql', 'Kwaliteit van product')}
-      {renderDropdown('Plaats van verkoop', 'plaats')}
+      {renderDropdown('Ql', 'ql', QI)}
+      {renderDropdown('Plaats van verkoop', 'plaats', locations)}
       {renderInput('Stadium', 'stadium', 'Stadium')}
       {renderInput('Kleur', 'kleur', 'Kleur')}
       {renderInput('Fustcode', 'fustcode', 'Fustcode')}
