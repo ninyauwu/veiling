@@ -1,0 +1,107 @@
+﻿using System.Net;
+using System.Net.Http.Json;
+using Veiling.Server.Models;
+using Xunit;
+
+namespace Veiling.Server.Test.Controllers
+{
+    public class KavelInfoControllerTests : IClassFixture<CustomWebApplicationFactory>
+    {
+        private readonly HttpClient _client;
+
+        public KavelInfoControllerTests(CustomWebApplicationFactory factory)
+        {
+            _client = factory.CreateClient();
+        }
+
+        [Fact]
+        public async Task GetKavels_WithKavelsInDatabase_ReturnsOkWithData()
+        {
+            // test data
+            var bedrijf = new Bedrijf
+            {
+                Bedrijfsnaam = "Test BV",
+                KVKnummer = Random.Shared.Next(10000000, 99999999)
+            };
+            var bedrijfResponse = await _client.PostAsJsonAsync("/api/bedrijven", bedrijf);
+            var createdBedrijf = await bedrijfResponse.Content.ReadFromJsonAsync<Bedrijf>();
+
+            var leverancier = new Leverancier
+            {
+                BedrijfId = createdBedrijf!.Bedrijfscode,
+                IndexOfReliabilityOfInformation = "A",
+                Bedrijf = null
+            };
+            var levResponse = await _client.PostAsJsonAsync("/api/leveranciers", leverancier);
+            var createdLev = await levResponse.Content.ReadFromJsonAsync<Leverancier>();
+
+            var veiling = new Models.Veiling
+            {
+                Naam = "Test Veiling",
+                Klokduur = 5.0f,
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                GeldPerTickCode = 0.5f
+            };
+            var veilingResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
+            var createdVeiling = await veilingResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+
+            var kavel = new Kavel
+            {
+                Naam = "Test Kavel",
+                Beschrijving = "Test",
+                ArtikelKenmerken = "Test",
+                MinimumPrijs = 10.0f,
+                MaximumPrijs = 20.0f,
+                Minimumhoeveelheid = 5,
+                Foto = "/test.jpg",
+                Kavelkleur = "FFFFFF",
+                Karnummer = 1,
+                Rijnummer = 1,
+                HoeveelheidContainers = 50,
+                AantalProductenPerContainer = 20,
+                LengteVanBloemen = 60.0f,
+                GewichtVanBloemen = 500.0f,
+                StageOfMaturity = "Test",
+                NgsCode = 'A',
+                Keurcode = "A1",
+                Fustcode = 123,
+                GeldPerTickCode = "0.5",
+                LeverancierId = createdLev!.Id,
+                VeilingId = createdVeiling!.Id
+            };
+            await _client.PostAsJsonAsync("/api/kavels", kavel);
+
+            var response = await _client.GetAsync($"/api/kavelinfo/{createdVeiling.Id}");
+            var result = await response.Content.ReadFromJsonAsync<List<KavelLeverancier>>();
+
+            // kavels found
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(result);
+            Assert.NotEmpty(result);
+        }
+
+        [Fact]
+        public async Task GetKavels_WithNoKavelsInDatabase_ReturnsNotFound()
+        {
+            // Clean database
+            var existingKavels = await _client.GetAsync("/api/kavels");
+            if (existingKavels.IsSuccessStatusCode)
+            {
+                var kavels = await existingKavels.Content.ReadFromJsonAsync<List<Kavel>>();
+                if (kavels != null)
+                {
+                    foreach (var k in kavels)
+                    {
+                        await _client.DeleteAsync($"/api/kavels/{k.Id}");
+                    }
+                }
+            }
+
+            var response = await _client.GetAsync("/api/kavelinfo/99999");
+            
+            //no kavels
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+    }
+}

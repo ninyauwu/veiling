@@ -15,6 +15,7 @@ public class KavelInfoController : ControllerBase {
     [HttpGet("{veilingId}")]
     public ActionResult<IEnumerable<KavelLeverancier>> GetKavels(int veilingId) {
         var kavels = _context.Kavels
+            .Where(k => k.VeilingId == veilingId)
             .Include(k => k.Leverancier)
             .Include(k => k.Veiling)
             .Include(k => k.Leverancier.Bedrijf)
