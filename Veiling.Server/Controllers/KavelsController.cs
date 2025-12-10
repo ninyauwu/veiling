@@ -183,7 +183,7 @@ namespace Veiling.Server.Controllers
         kavel.Approved = approvalDto.Approval;
         
         // Optionally store the reasoning if you have a field for it
-        // kavel.ApprovalReasoning = approvalDto.Reasoning;
+        kavel.Reasoning = approvalDto.Reasoning;
 
         await _context.SaveChangesAsync();
         
