@@ -24,6 +24,8 @@
         public string Keurcode { get; set; } = string.Empty;
         public int Fustcode { get; set; }
         public string GeldPerTickCode { get; set; } = string.Empty;
+        public bool? Approved { get; set; } = null;
+        public string? Reasoning { get; set; } = null;
         
         // Foreign Keys
         public int? VeilingId { get; set; }

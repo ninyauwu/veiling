@@ -44,6 +44,7 @@ export default function AuctionCountdown({
   })();
 
   const [time, setTime] = useState(() => getTimePartsUntil(resolvedTarget));
+  const formattedPrice = "€" + price?.toFixed(2).toString();
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -81,7 +82,7 @@ export default function AuctionCountdown({
       <div className="auc-field">
         <div className="auc-label">Startprijs</div>
         <div className="auc-price">
-          <span className="auc-price__main">{price}</span>
+          <span className="auc-price__main">{formattedPrice}</span>
         </div>
       </div>
 

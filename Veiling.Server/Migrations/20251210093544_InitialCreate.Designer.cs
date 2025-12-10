@@ -12,7 +12,7 @@ using Veiling.Server;
 namespace Veiling.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251209103201_InitialCreate")]
+    [Migration("20251210093544_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -304,6 +304,9 @@ namespace Veiling.Server.Migrations
                     b.Property<int>("AantalProductenPerContainer")
                         .HasColumnType("int");
 
+                    b.Property<bool?>("Approved")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ArtikelKenmerken")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -368,6 +371,9 @@ namespace Veiling.Server.Migrations
                     b.Property<string>("NgsCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(1)");
+
+                    b.Property<string>("Reasoning")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Rijnummer")
                         .HasColumnType("int");
