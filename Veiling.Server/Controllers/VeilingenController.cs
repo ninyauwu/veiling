@@ -50,7 +50,7 @@ namespace Veiling.Server.Controllers
         [HttpGet("actief")]
         public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetActieveVeilingen()
         {
-            var nu = DateTime.Now;
+            var nu = DateTime.UtcNow;
             return await _context.Veilingen
                 .Where(v => v.StartTijd <= nu && v.EndTijd >= nu)
                 .Include(v => v.Locatie)

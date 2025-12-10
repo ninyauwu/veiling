@@ -97,5 +97,92 @@ namespace Veiling.Server.Test.Controllers
             // compare
             Assert.True(Math.Abs((updated!.EndTijd - newEndTime).TotalMinutes) < 1);
         }
+        
+        [Fact]
+        public async Task CreateVeiling_WithEndTimeBeforeStartTime_ReturnsBadRequest()
+        {
+            // eindtijd moet na starttijd zijn
+            var veiling = new Models.Veiling
+            {
+                Naam = "Invalid Veiling",
+                Klokduur = 5.0f,
+                StartTijd = DateTime.UtcNow.AddHours(2),
+                EndTijd = DateTime.UtcNow.AddHours(1),
+                GeldPerTickCode = 0.5f
+            };
+
+            var response = await _client.PostAsJsonAsync("/api/veilingen", veiling);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetActieveVeilingen_OnlyReturnsCurrentlyActiveOnes()
+        {
+            // Test dat de time-based filtering werkt
+            var now = DateTime.UtcNow;
+            
+            // Actieve veiling
+            var actief = new Models.Veiling
+            {
+                Naam = "Actief Nu",
+                Klokduur = 5.0f,
+                StartTijd = now.AddHours(-1),
+                EndTijd = now.AddHours(1),
+                GeldPerTickCode = 0.5f
+            };
+            await _client.PostAsJsonAsync("/api/veilingen", actief);
+            
+            // Toekomstige veiling
+            var toekomst = new Models.Veiling
+            {
+                Naam = "Toekomst",
+                Klokduur = 5.0f,
+                StartTijd = now.AddHours(2),
+                EndTijd = now.AddHours(4),
+                GeldPerTickCode = 0.5f
+            };
+            await _client.PostAsJsonAsync("/api/veilingen", toekomst);
+            
+            // Afgelopen veiling
+            var verleden = new Models.Veiling
+            {
+                Naam = "Verleden",
+                Klokduur = 5.0f,
+                StartTijd = now.AddHours(-3),
+                EndTijd = now.AddHours(-1),
+                GeldPerTickCode = 0.5f
+            };
+            await _client.PostAsJsonAsync("/api/veilingen", verleden);
+
+            var response = await _client.GetAsync("/api/veilingen/actief");
+            var actieveVeilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
+
+            // Alleen "Actief Nu" zou terug moeten komen
+            Assert.NotNull(actieveVeilingen);
+            Assert.Single(actieveVeilingen);
+            Assert.Equal("Actief Nu", actieveVeilingen[0].Naam);
+        }
+
+        [Fact]
+        public async Task UpdateVeiling_ToInvalidTimeRange_ReturnsBadRequest()
+        {
+            // Maak geldige veiling
+            var veiling = new Models.Veiling
+            {
+                Naam = "Test",
+                Klokduur = 5.0f,
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                GeldPerTickCode = 0.5f
+            };
+            var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
+            var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+
+            // Update naar ongeldige tijden
+            created!.EndTijd = created.StartTijd.AddHours(-1);
+            var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
+
+            Assert.Equal(HttpStatusCode.BadRequest, updateResponse.StatusCode);
+        }
     }
 }
