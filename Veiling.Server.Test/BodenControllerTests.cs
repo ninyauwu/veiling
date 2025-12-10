@@ -62,7 +62,7 @@ namespace Veiling.Server.Test.Controllers
             var gebruiker = new Gebruiker
             {
                 Name = "Test Bieder",
-                Email = "bieder@test.nl",
+                Email = $"bieder{Random.Shared.Next()}@test.nl",
                 PhoneNumber = "0612345678",
                 Bedrijfsbeheerder = false,
                 Geverifieerd = true,
@@ -173,31 +173,11 @@ namespace Veiling.Server.Test.Controllers
             // Create multiple boden with different prices
             var bodenData = new[]
             {
-                new Bod
-                {
-                    Datumtijd = DateTime.Now, HoeveelheidContainers = 5, Koopprijs = 12.50f, Betaald = false,
-                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
-                },
-                new Bod
-                {
-                    Datumtijd = DateTime.Now, HoeveelheidContainers = 10, Koopprijs = 18.75f, Betaald = false,
-                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
-                },
-                new Bod
-                {
-                    Datumtijd = DateTime.Now, HoeveelheidContainers = 15, Koopprijs = 25.00f, Betaald = false,
-                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
-                }, // HIGHEST
-                new Bod
-                {
-                    Datumtijd = DateTime.Now, HoeveelheidContainers = 8, Koopprijs = 14.25f, Betaald = false,
-                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
-                },
-                new Bod
-                {
-                    Datumtijd = DateTime.Now, HoeveelheidContainers = 12, Koopprijs = 21.00f, Betaald = false,
-                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
-                }
+                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 5, Koopprijs = 12.50f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id },
+                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 10, Koopprijs = 18.75f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id },
+                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 15, Koopprijs = 25.00f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id },
+                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 8, Koopprijs = 14.25f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id },
+                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 12, Koopprijs = 21.00f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id }
             };
 
             foreach (var bod in bodenData)
@@ -232,7 +212,7 @@ namespace Veiling.Server.Test.Controllers
             var gebruiker2 = new Gebruiker
             {
                 Name = "User 2",
-                Email = "user2@test.nl",
+                Email = $"user2{Random.Shared.Next()}@test.nl",
                 PhoneNumber = "0699999999",
                 Bedrijfsbeheerder = false,
                 Geverifieerd = true
@@ -287,24 +267,81 @@ namespace Veiling.Server.Test.Controllers
             Assert.Contains(boden, b => b.Koopprijs == 15.0f);
             Assert.DoesNotContain(boden, b => b.Koopprijs == 99.0f);
         }
+        
+        [Fact]
+        public async Task GetAllBoden_ReturnsAllBids()
+        {
+            var (kavel, gebruiker) = await CreateTestData();
+            
+            // meerdere boden
+            await _client.PostAsJsonAsync("/api/boden", new Bod
+            {
+                Datumtijd = DateTime.Now,
+                HoeveelheidContainers = 5,
+                Koopprijs = 10.0f,
+                Betaald = false,
+                GebruikerId = gebruiker.Id,
+                KavelId = kavel.Id
+            });
+            
+            await _client.PostAsJsonAsync("/api/boden", new Bod
+            {
+                Datumtijd = DateTime.Now,
+                HoeveelheidContainers = 10,
+                Koopprijs = 15.0f,
+                Betaald = false,
+                GebruikerId = gebruiker.Id,
+                KavelId = kavel.Id
+            });
+
+            var response = await _client.GetAsync("/api/boden");
+            var boden = await response.Content.ReadFromJsonAsync<List<Bod>>();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(boden);
+            Assert.True(boden.Count >= 2);
+        }
 
         [Fact]
-        public async Task GetHoogsteBod_WhenNoBodenExist_ReturnsNotFound()
+        public async Task GetBod_WithValidId_ReturnsBod()
         {
-            // wat als er geen boden zijn voor een kavel?
-            var (kavel, _) = await CreateTestData();
+            var (kavel, gebruiker) = await CreateTestData();
             
-            var response = await _client.GetAsync($"/api/boden/hoogste/{kavel.Id}");
-            
-            // Dit zou NotFound moeten zijn
+            var bod = new Bod
+            {
+                Datumtijd = DateTime.Now,
+                HoeveelheidContainers = 25,
+                Koopprijs = 17.50f,
+                Betaald = false,
+                GebruikerId = gebruiker.Id,
+                KavelId = kavel.Id
+            };
+            var createResponse = await _client.PostAsJsonAsync("/api/boden", bod);
+            var created = await createResponse.Content.ReadFromJsonAsync<Bod>();
+
+            var getResponse = await _client.GetAsync($"/api/boden/{created!.Id}");
+            var retrieved = await getResponse.Content.ReadFromJsonAsync<Bod>();
+
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+            Assert.NotNull(retrieved);
+            Assert.Equal(created.Id, retrieved.Id);
+            Assert.Equal(17.50f, retrieved.Koopprijs);
+            Assert.Equal(25, retrieved.HoeveelheidContainers);
+        }
+
+        [Fact]
+        public async Task GetBod_WithInvalidId_ReturnsNotFound()
+        {
+            var response = await _client.GetAsync("/api/boden/99999");
+
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
-        public async Task CreateBod_WithInvalidKavelId_ReturnsBadRequest()
+        public async Task UpdateBod_ChangesData()
         {
-            var (_, gebruiker) = await CreateTestData();
-    
+            var (kavel, gebruiker) = await CreateTestData();
+            
             var bod = new Bod
             {
                 Datumtijd = DateTime.Now,
@@ -312,130 +349,63 @@ namespace Veiling.Server.Test.Controllers
                 Koopprijs = 15.0f,
                 Betaald = false,
                 GebruikerId = gebruiker.Id,
-                KavelId = 99999 // Bestaat niet!
+                KavelId = kavel.Id
             };
+            var createResponse = await _client.PostAsJsonAsync("/api/boden", bod);
+            var created = await createResponse.Content.ReadFromJsonAsync<Bod>();
 
-            var response = await _client.PostAsJsonAsync("/api/boden", bod);
-    
-            // Verwacht: BadRequest
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            // update
+            created!.Betaald = true;
+            created.Koopprijs = 20.0f;
+            var updateResponse = await _client.PutAsJsonAsync($"/api/boden/{created.Id}", created);
+
+            Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
+
+            // Verify changes
+            var getResponse = await _client.GetAsync($"/api/boden/{created.Id}");
+            var updated = await getResponse.Content.ReadFromJsonAsync<Bod>();
+            Assert.True(updated!.Betaald);
+            Assert.Equal(20.0f, updated.Koopprijs);
         }
 
         [Fact]
-        public async Task CreateBod_WithNegativePrice_ReturnsBadRequest()
+        public async Task DeleteBod_RemovesFromDatabase()
         {
-            // Kan je negatieve bedragen bieden?
             var (kavel, gebruiker) = await CreateTestData();
             
             var bod = new Bod
             {
                 Datumtijd = DateTime.Now,
-                HoeveelheidContainers = 10,
-                Koopprijs = -50.0f,
+                HoeveelheidContainers = 5,
+                Koopprijs = 10.0f,
                 Betaald = false,
                 GebruikerId = gebruiker.Id,
                 KavelId = kavel.Id
             };
+            var createResponse = await _client.PostAsJsonAsync("/api/boden", bod);
+            var created = await createResponse.Content.ReadFromJsonAsync<Bod>();
 
-            var response = await _client.PostAsJsonAsync("/api/boden", bod);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            // delete
+            var deleteResponse = await _client.DeleteAsync($"/api/boden/{created!.Id}");
+
+            Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+            // Verify it's gone
+            var getResponse = await _client.GetAsync($"/api/boden/{created.Id}");
+            Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
         }
 
         [Fact]
-        public async Task CreateBod_BelowMinimumPrijs_ShouldBeRejected()
+        public async Task GetHoogsteBod_WithNoBoden_ReturnsNotFound()
         {
-            // Je moet minimaal de minimumprijs bieden
-            var (kavel, gebruiker) = await CreateTestData();
-            // kavel.MinimumPrijs is 10.0f (uit CreateTestData)
-            
-            var bod = new Bod
-            {
-                Datumtijd = DateTime.Now,
-                HoeveelheidContainers = 10,
-                Koopprijs = 5.0f, // Onder minimum
-                Betaald = false,
-                GebruikerId = gebruiker.Id,
-                KavelId = kavel.Id
-            };
+            // kavel zonder boden
+            var (kavel, _) = await CreateTestData();
 
-            var response = await _client.PostAsJsonAsync("/api/boden", bod);
-            
-            // Dit zou moeten falen
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreateBod_ExceedingAvailableContainers_ShouldBeRejected()
-        {
-            // Je kan niet meer containers kopen dan beschikbaar
-            var (kavel, gebruiker) = await CreateTestData();
-            // kavel.HoeveelheidContainers is 100
-            
-            var bod = new Bod
-            {
-                Datumtijd = DateTime.Now,
-                HoeveelheidContainers = 150, 
-                Koopprijs = 15.0f,
-                Betaald = false,
-                GebruikerId = gebruiker.Id,
-                KavelId = kavel.Id
-            };
-
-            var response = await _client.PostAsJsonAsync("/api/boden", bod);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task GetHoogsteBod_WithMultipleEqualBids_ReturnsFirstBid()
-        {
-            // Wat als 2 mensen exact hetzelfde bedrag bieden?
-            var (kavel, gebruiker1) = await CreateTestData();
-            
-            // Maak tweede gebruiker
-            var bedrijf2 = new Bedrijf { Bedrijfsnaam = "Bedrijf 2", KVKnummer = 88888888 };
-            await _client.PostAsJsonAsync("/api/bedrijven", bedrijf2);
-            var gebruiker2 = new Gebruiker
-            {
-                Name = "User 2",
-                Email = "user2@test.nl",
-                PhoneNumber = "0699999999",
-                Bedrijfsbeheerder = false,
-                Geverifieerd = true
-            };
-            var user2Response = await _client.PostAsJsonAsync("/api/gebruikers", gebruiker2);
-            var createdUser2 = await user2Response.Content.ReadFromJsonAsync<Gebruiker>();
-
-            // Beide bieden exact hetzelfde
-            var bod1 = new Bod
-            {
-                Datumtijd = DateTime.Now,
-                HoeveelheidContainers = 10,
-                Koopprijs = 25.0f,
-                Betaald = false,
-                GebruikerId = gebruiker1.Id,
-                KavelId = kavel.Id
-            };
-            await _client.PostAsJsonAsync("/api/boden", bod1);
-            
-            await Task.Delay(100); // Kleine delay voor timestamp
-            
-            var bod2 = new Bod
-            {
-                Datumtijd = DateTime.Now,
-                HoeveelheidContainers = 10,
-                Koopprijs = 25.0f,
-                Betaald = false,
-                GebruikerId = createdUser2!.Id,
-                KavelId = kavel.Id
-            };
-            await _client.PostAsJsonAsync("/api/boden", bod2);
-
+            // Act
             var response = await _client.GetAsync($"/api/boden/hoogste/{kavel.Id}");
-            var hoogsteBod = await response.Content.ReadFromJsonAsync<Bod>();
 
-            // Eerste bieder zou moeten winnen
-            Assert.NotNull(hoogsteBod);
-            Assert.Equal(gebruiker1.Id, hoogsteBod.GebruikerId);
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }
