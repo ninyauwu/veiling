@@ -32,6 +32,7 @@ export default function NavigationBar({
         direction="left"
         onClick={handlePrevious}
         disabled={previousDisabled}
+        aria-label="vorige kavel"
       >
         Vorige
       </SimpeleKnopPijl>
@@ -42,6 +43,7 @@ export default function NavigationBar({
         direction="right"
         onClick={handleNext}
         disabled={nextDisabled}
+        aria-label="volgende kavel"
       >
         Volgende
       </SimpeleKnopPijl>

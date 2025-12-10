@@ -1,13 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using Microsoft.AspNetCore.Identity;
+using System.Text.Json.Serialization;
 
 namespace Veiling.Server.Models
 {
-    public class Gebruiker
+    public class Gebruiker : IdentityUser
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public int? PhoneNumber { get; set; }
-        public string EmailAddress { get; set; } = string.Empty;
         public bool Bedrijfsbeheerder { get; set; }
         public bool Geverifieerd { get; set; }
         
