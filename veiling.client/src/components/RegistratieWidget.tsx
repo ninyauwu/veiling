@@ -15,7 +15,6 @@ function Registratie() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -45,27 +44,45 @@ function Registratie() {
         }),
       });
 
-      // Log de response voor debugging
-      console.log('Response status:', response.status);
-      const responseText = await response.text();
-      console.log('Response body:', responseText);
-
       if (!response.ok) {
-        // Probeer JSON te parsen, anders toon de raw text
-        try {
-          const errorData = JSON.parse(responseText);
-          console.log('Error data:', errorData);
-          throw new Error(errorData.message || JSON.stringify(errorData));
-        } catch {
-          throw new Error(responseText || 'Registratie mislukt');
+        const errorData = await response.json();
+
+        console.log('Error data:', errorData);
+
+        if (Array.isArray(errorData)) {
+          const errorMessages = errorData.map((err: any) => {
+            switch (err.code) {
+              case 'PasswordRequiresNonAlphanumeric':
+                return '• Wachtwoord moet minimaal één speciaal teken bevatten (!@#$%^&*)';
+              case 'PasswordRequiresDigit':
+                return '• Wachtwoord moet minimaal één cijfer bevatten (0-9)';
+              case 'PasswordRequiresUpper':
+                return '• Wachtwoord moet minimaal één hoofdletter bevatten (A-Z)';
+              case 'PasswordRequiresLower':
+                return '• Wachtwoord moet minimaal één kleine letter bevatten (a-z)';
+              case 'PasswordTooShort':
+                return '• Wachtwoord is te kort (minimaal 6 tekens)';
+              case 'DuplicateUserName':
+              case 'DuplicateEmail':
+                return '• Dit email adres is al in gebruik';
+              default:
+                return `• ${err.description || 'Onbekende fout'}`;
+            }
+          });
+
+          setError('Wachtwoord voldoet niet aan de eisen:\n' + errorMessages.join('\n'));
+          return;
         }
+
+        setError(errorData.message || 'Registratie mislukt');
+        return;
       }
 
       alert('Registratie succesvol! Je kunt nu inloggen.');
       navigate('/login');
     } catch (err) {
       console.error('Registratie fout:', err);
-      setError(err instanceof Error ? err.message : 'Er is een fout opgetreden');
+      setError(err instanceof Error ? err.message : 'Er is een fout opgetreden bij de registratie');
     }
   };
 
