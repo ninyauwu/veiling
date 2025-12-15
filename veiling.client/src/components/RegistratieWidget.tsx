@@ -15,6 +15,7 @@ function Registratie() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -44,9 +45,20 @@ function Registratie() {
         }),
       });
 
+      // Log de response voor debugging
+      console.log('Response status:', response.status);
+      const responseText = await response.text();
+      console.log('Response body:', responseText);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registratie mislukt');
+        // Probeer JSON te parsen, anders toon de raw text
+        try {
+          const errorData = JSON.parse(responseText);
+          console.log('Error data:', errorData);
+          throw new Error(errorData.message || JSON.stringify(errorData));
+        } catch {
+          throw new Error(responseText || 'Registratie mislukt');
+        }
       }
 
       alert('Registratie succesvol! Je kunt nu inloggen.');
