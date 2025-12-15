@@ -12,12 +12,13 @@ public class KavelInfoController : ControllerBase {
         _context = context;
     }
 
-    [HttpGet("{veilingId}")]
-    public ActionResult<IEnumerable<KavelLeverancier>> GetKavels(int veilingId) {
+    [HttpGet("{locatieId}")]
+    public ActionResult<IEnumerable<KavelLeverancier>> GetKavels(int locatieId) {
         var kavels = _context.Kavels
             .Include(k => k.Leverancier)
             .Include(k => k.Veiling)
             .Include(k => k.Leverancier.Bedrijf)
+            .Where(k => k.Veiling != null && k.Veiling.Locatie != null && k.Veiling.Locatie.Id == locatieId)
             .Select(k => new KavelLeverancier(k, k.Leverancier));
 
         if (kavels == null || kavels.Count() < 1) {

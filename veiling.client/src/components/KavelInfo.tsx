@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import * as signalR from "@microsoft/signalr";
 import KavelTabel from "./KavelTabel";
 import "./KavelInfo.css";
 import Spacer from "./Spacer";
@@ -8,8 +9,8 @@ import MetadataGrid from "./MetadataGrid";
 import CompanyQuality from "./CompanyQuality";
 import AuctionCountdown from "./AuctionCountdown";
 import ApproveOrDeny from "./AproveOrDenyTextBox";
+import type { VeilingStartMessage } from "./PriceBar";
 
-// Define the type for data coming from your API
 type KavelInfoResponse = {
   kavel: {
     id: number;
@@ -31,7 +32,12 @@ type KavelInfoResponse = {
   };
 };
 
-function KavelInfo({ sortOnApproval }: KavelInfoProps) {
+interface KavelInfoProps {
+  locatieId?: number;
+  sortOnApproval?: boolean;
+}
+
+function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
   const imagePaths = [
     "https://picsum.photos/400/400?random=1",
     "https://picsum.photos/400/400?random=2",
@@ -42,23 +48,26 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
   const [selected, setSelected] = useState<number | null>(0);
   const [loading, setLoading] = useState(true);
   const [reload, setReload] = useState(0);
+  const [startMessage, setStartMessage] = useState<VeilingStartMessage | null>(
+    null,
+  );
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
     async function fetchKavels() {
       try {
-        setLoading(true); // start loading
+        setLoading(true);
         let res: Response;
         if (sortOnApproval) {
           res = await fetch("/api/KavelInfo/pending");
         } else {
-          res = await fetch("/api/KavelInfo/0");
+          res = await fetch(`/api/KavelInfo/${locatieId}`);
         }
 
         if (!res.ok) {
-          // Handle non-2xx responses
           if (res.status === 404) {
             console.log("No kavels found");
-            setKavels([]); // explicitly empty array
+            setKavels([]);
           } else {
             throw new Error(`HTTP error! status: ${res.status}`);
           }
@@ -69,18 +78,53 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
         }
       } catch (err) {
         console.error("Failed to load kavels:", err);
-        setKavels([]); // ensure kavels is empty on error
+        setKavels([]);
       } finally {
         setLoading(false);
       }
     }
 
     fetchKavels();
-  }, [sortOnApproval, reload]);
+  }, [sortOnApproval, reload, locatieId]);
 
-  if (kavels.length < 1) {
-    return <div>Geen kavels gevonden</div>;
-  }
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("https://localhost:32274/hubs/veiling")
+      .withAutomaticReconnect()
+      .build();
+
+    connectionRef.current = connection;
+
+    connection.on(
+      "VeilingStart",
+      (
+        startingPrice: number,
+        minimumPrice: number,
+        durationMs: number,
+        startTime: string,
+      ) => {
+        setStartMessage({
+          startingPrice,
+          minimumPrice,
+          durationMs,
+          startTime: new Date(startTime),
+        });
+
+        console.log(
+          "SignalR message received for " + new Date(startTime).toString(),
+        );
+      },
+    );
+
+    connection.start().catch((err) => console.error("SignalR error:", err));
+
+    return () => {
+      connection.stop();
+    };
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (kavels.length === 0) return <div>Geen kavels gevonden</div>;
 
   const handleNext = () => {
     if (selected === null) return;
@@ -94,9 +138,6 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
     setSelected((prev) => (prev! - 1 < 0 ? 0 : prev! - 1));
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (kavels.length === 0) return <div>No kavels found.</div>;
-
   const currentKavel = selected !== null ? kavels[selected] : kavels[0];
   const { kavel, leverancier } = currentKavel;
 
@@ -108,7 +149,7 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
       onApprovalResponse={() => {
         console.log("Icky shticky");
         if (selected) {
-          if (selected == kavels.length) {
+          if (selected === kavels.length) {
             setSelected(selected - 1);
           }
         }
@@ -116,7 +157,11 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
       }}
     />
   ) : (
-    <AuctionCountdown price={kavel.maximumPrijs} />
+    <AuctionCountdown
+      price={kavel.maximumPrijs}
+      startMessage={startMessage}
+      connection={connectionRef.current}
+    />
   );
 
   return (
@@ -150,7 +195,6 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
             return tableRows[selected].Naam;
           }}
         />
-        <Spacer />
 
         <span>
           <div className="flex-row-justify">
@@ -161,30 +205,29 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
               kwaliteit={kavel.keurcode}
             />
           </div>
-
+          <Spacer />
+          <MetadataGrid
+            items={[
+              { key: "Stadium", value: kavel.stageOfMaturity },
+              { key: "Fustcode", value: kavel.fustcode },
+              {
+                key: "Kleur",
+                value: (
+                  <div
+                    style={{
+                      backgroundColor: "#" + kavel.kavelkleur,
+                      width: "24px",
+                      height: "24px",
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
           <p>{kavel.beschrijving}</p>
         </span>
 
         <ImageSet images={imagePaths} />
-        <MetadataGrid
-          items={[
-            { key: "Stadium", value: kavel.stageOfMaturity },
-            { key: "Fustcode", value: kavel.fustcode },
-            {
-              key: "Kleur",
-              value: (
-                <div
-                  style={{
-                    backgroundColor: "#" + kavel.kavelkleur,
-                    width: "24px",
-                    height: "24px",
-                  }}
-                />
-              ),
-            },
-          ]}
-        />
-
         <Spacer />
         <NavigationBar
           onPrevious={handlePrevious}
@@ -200,7 +243,7 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
   );
 }
 
-export const formatKavelData = (kavels: KavelInfoResponse[]) => {
+const formatKavelData = (kavels: KavelInfoResponse[]) => {
   return kavels.map((kavel) => ({
     Naam: kavel?.kavel?.naam ?? "NA",
     "Max Prijs": `€${kavel?.kavel?.minimumPrijs?.toLocaleString() ?? "N/A"}`,
@@ -209,9 +252,5 @@ export const formatKavelData = (kavels: KavelInfoResponse[]) => {
     Kwaliteit: kavel?.kavel?.keurcode ?? "N/A",
   }));
 };
-
-interface KavelInfoProps {
-  sortOnApproval?: boolean;
-}
 
 export default KavelInfo;

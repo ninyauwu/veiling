@@ -46,6 +46,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
 builder.Services.AddAuthorization();
 
+// Networking
+builder.Services.AddCors();
+builder.Services.AddSignalR();
+
 builder.Services.AddIdentityCore<Gebruiker>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -70,6 +74,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<VeilingHub>("/hubs/veiling");
 
 app.MapFallbackToFile("/index.html");
 
