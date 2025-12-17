@@ -11,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingsPagina />} />
         <Route path="/login" element={<LoginPagina />} />
-        <Route path="/veiling" element={<Veiling />} />
+        <Route path="/veiling/:locatieId" element={<Veiling />} />
         <Route path="/locaties" element={<LocatiePagina />} />
         <Route path="/judgement" element={<KavelJudgement />} />
       </Routes>

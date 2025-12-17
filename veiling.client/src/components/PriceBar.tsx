@@ -34,20 +34,31 @@ interface PriceInterpolatorProps {
   startMessage: VeilingStartMessage | null;
   shouldInterrupt: boolean;
   onChange?: (newPrice: number) => void;
+  serverReceivedTime?: Date | null;
 }
 
 export default function PriceInterpolator({
   startMessage,
   shouldInterrupt,
   onChange,
+  serverReceivedTime,
 }: PriceInterpolatorProps) {
-  const [currentValue, setCurrentValue] = useState<number>(0);
+  const [, setCurrentValue] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
   const [remaining, setRemaining] = useState<number | undefined>(0);
-
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const previousMessageRef = useRef<VeilingStartMessage | null>(null);
+  const timeOffsetRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (serverReceivedTime && startMessage) {
+      const clientTime = Date.now();
+      const serverTime = serverReceivedTime.getTime();
+      const offset = serverTime - clientTime;
+      timeOffsetRef.current = offset;
+    }
+  }, [serverReceivedTime, startMessage]);
 
   useEffect(() => {
     if (!startMessage || startMessage === previousMessageRef.current) {
@@ -55,6 +66,7 @@ export default function PriceInterpolator({
     }
 
     previousMessageRef.current = startMessage;
+
     const { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
 
     if (animationFrameRef.current !== null) {
@@ -64,10 +76,10 @@ export default function PriceInterpolator({
     startTimeRef.current = null;
 
     const animate = (timestamp: number) => {
-      const now = Date.now();
+      const adjustedNow = Date.now() + timeOffsetRef.current;
       const startTimestamp = startTime.getTime();
 
-      if (now < startTimestamp) {
+      if (adjustedNow < startTimestamp) {
         animationFrameRef.current = requestAnimationFrame(animate);
         return;
       }
@@ -76,19 +88,19 @@ export default function PriceInterpolator({
         startTimeRef.current = timestamp;
       }
 
-      const elapsed = timestamp - startTimeRef.current;
+      const elapsed = adjustedNow - startTimestamp;
       const progressValue = Math.min(elapsed / durationMs, 1);
       const remainingValue = Math.max((durationMs - elapsed) / 1000, 0);
+
       const priceValue = Math.max(
-        (1 - progressValue) * (startMessage.startingPrice - minimumPrice) +
-          minimumPrice,
+        (1 - progressValue) * (startingPrice - minimumPrice) + minimumPrice,
         minimumPrice,
         0,
       );
 
       const interpolatedValue =
         startingPrice - (startingPrice - minimumPrice) * progressValue;
-      setCurrentValue(currentValue);
+
       setCurrentValue(interpolatedValue);
       setProgress(progressValue);
       setRemaining(remainingValue);
@@ -105,7 +117,7 @@ export default function PriceInterpolator({
     };
 
     animationFrameRef.current = requestAnimationFrame(animate);
-  }, [startMessage]);
+  }, [startMessage, onChange]);
 
   useEffect(() => {
     if (shouldInterrupt && animationFrameRef.current !== null) {

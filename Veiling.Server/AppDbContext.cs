@@ -19,6 +19,7 @@ namespace Veiling.Server
         public DbSet<Leverancier> Leveranciers { get; set; }
         public DbSet<Models.Veiling> Veilingen { get; set; }
         public DbSet<Kavel> Kavels { get; set; }
+        public DbSet<KavelVeiling> KavelVeilingen { get; set; }
         public DbSet<Bod> Boden { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -83,6 +84,19 @@ namespace Veiling.Server
                 .HasMany(k => k.Boden)
                 .WithOne(b => b.Kavel)
                 .HasForeignKey(b => b.KavelId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Kavel>()
+                .HasMany(k => k.KavelVeilingen)
+                .WithOne(k => k.Kavel);
+
+            modelBuilder.Entity<KavelVeiling>()
+                .HasKey(kv => kv.Id);
+
+            modelBuilder.Entity<KavelVeiling>()
+                .HasOne(kv => kv.Kavel)
+                .WithMany(k => k.KavelVeilingen)
+                .HasForeignKey(kv => kv.KavelId)
                 .OnDelete(DeleteBehavior.Cascade);
             
             modelBuilder.Entity<Bod>()

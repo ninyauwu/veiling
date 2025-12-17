@@ -161,6 +161,7 @@ function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
       price={kavel.maximumPrijs}
       startMessage={startMessage}
       connection={connectionRef.current}
+      kavelId={kavel.id}
     />
   );
 

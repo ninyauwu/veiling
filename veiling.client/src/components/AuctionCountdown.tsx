@@ -33,6 +33,18 @@ interface AuctionCountdownProps {
   targetDate?: Date | null;
   startMessage: VeilingStartMessage | null;
   connection: signalR.HubConnection | null;
+  kavelId: number;
+}
+
+interface GeplaatstBod {
+  HoeveelheidContainers: number | null;
+  GebruikerId: string;
+  KavelId: number;
+}
+
+interface BodResponse {
+  Accepted: boolean;
+  ReceivedAt: string;
 }
 
 export default function AuctionCountdown({
@@ -42,10 +54,16 @@ export default function AuctionCountdown({
   targetDate,
   startMessage,
   connection,
+  kavelId,
 }: AuctionCountdownProps) {
   const [shouldInterrupt, setShouldInterrupt] = useState(false);
   const [isCountdown, setIsCountdown] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(price ?? 0);
+  const [, setBidResponse] = useState<BodResponse | null>(null);
+  const [isSubmittingBid, setIsSubmittingBid] = useState(false);
+  const [serverReceivedTime, setServerReceivedTime] = useState<Date | null>(
+    null,
+  );
 
   const resolvedTarget = (() => {
     if (targetDate === null) return getNextNov15();
@@ -88,8 +106,38 @@ export default function AuctionCountdown({
     setShouldInterrupt(false);
   };
 
-  const interruptCountdown = () => {
+  const placeBid = async () => {
+    setIsSubmittingBid(true);
     setShouldInterrupt(true);
+
+    try {
+      const bod: GeplaatstBod = {
+        HoeveelheidContainers: containers ?? null,
+        GebruikerId: "",
+        KavelId: kavelId,
+      };
+
+      const response = await fetch("/api/Bod", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bod),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: BodResponse = await response.json();
+      setBidResponse(data);
+      setServerReceivedTime(new Date(data.ReceivedAt));
+      console.log("Bid response:", data);
+    } catch (err) {
+      console.error("Failed to place bid:", err);
+    } finally {
+      setIsSubmittingBid(false);
+    }
   };
 
   const countdown = (
@@ -135,10 +183,15 @@ export default function AuctionCountdown({
       <PriceInterpolator
         startMessage={startMessage}
         shouldInterrupt={shouldInterrupt}
+        serverReceivedTime={serverReceivedTime}
       />
       <div className="button-container">
-        <SimpeleKnop onClick={interruptCountdown} appearance="primary">
-          Bied je hypotheek
+        <SimpeleKnop
+          onClick={placeBid}
+          appearance="primary"
+          disabled={isSubmittingBid}
+        >
+          {isSubmittingBid ? "Bezig..." : "Bied je hypotheek"}
         </SimpeleKnop>
         <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
           Start veiling
@@ -156,6 +209,7 @@ export default function AuctionCountdown({
         startMessage={startMessage}
         shouldInterrupt={shouldInterrupt}
         onChange={(pr) => setCurrentPrice(pr)}
+        serverReceivedTime={serverReceivedTime}
       />
       <Spacer />
       <div className="auc-field">
@@ -166,8 +220,12 @@ export default function AuctionCountdown({
       </div>
       <Spacer />
       <div className="button-container">
-        <SimpeleKnop onClick={interruptCountdown} appearance="primary">
-          Bied je hypotheek
+        <SimpeleKnop
+          onClick={placeBid}
+          appearance="primary"
+          disabled={isSubmittingBid}
+        >
+          {isSubmittingBid ? "Bezig..." : "Bied je hypotheek"}
         </SimpeleKnop>
         <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
           Start veiling

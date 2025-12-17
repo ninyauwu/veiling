@@ -344,6 +344,25 @@ namespace Veiling.Server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "KavelVeilingen",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    KavelId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KavelVeilingen", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KavelVeilingen_Kavels_KavelId",
+                        column: x => x.KavelId,
+                        principalTable: "Kavels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -409,6 +428,11 @@ namespace Veiling.Server.Migrations
                 column: "VeilingId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_KavelVeilingen_KavelId",
+                table: "KavelVeilingen",
+                column: "KavelId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Leveranciers_BedrijfId",
                 table: "Leveranciers",
                 column: "BedrijfId");
@@ -449,6 +473,9 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Boden");
+
+            migrationBuilder.DropTable(
+                name: "KavelVeilingen");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
