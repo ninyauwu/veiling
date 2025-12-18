@@ -12,7 +12,7 @@ using Veiling.Server;
 namespace Veiling.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251217202407_InitialCreate")]
+    [Migration("20251218102518_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -402,8 +402,14 @@ namespace Veiling.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("DurationMs")
+                        .HasColumnType("int");
+
                     b.Property<int>("KavelId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

@@ -100,7 +100,7 @@ export default function AuctionCountdown({
     startTime.setSeconds(startTime.getSeconds() + 1);
 
     connection
-      .invoke("SendVeilingStart", 0.8, 0.3, 5000, startTime)
+      .invoke("SendVeilingStart", kavelId, 0.8, 0.3, 5000, startTime)
       .catch((err) => console.error("Failed to send message:", err));
 
     setShouldInterrupt(false);

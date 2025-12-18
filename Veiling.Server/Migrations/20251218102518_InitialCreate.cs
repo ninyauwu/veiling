@@ -350,6 +350,8 @@ namespace Veiling.Server.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Start = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DurationMs = table.Column<int>(type: "int", nullable: false),
                     KavelId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

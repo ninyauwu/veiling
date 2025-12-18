@@ -29,14 +29,18 @@ public class BodController : ControllerBase
         if (kavel == null) {
             return BadRequest("No Kavel with that ID exists");
         }
+
+        var now = DateTime.Now;
+
         var kavelVerkoop = await _context.KavelVeilingen
             .Include(kv => kv.Kavel)
-            .FirstOrDefaultAsync(kv => kv.KavelId == bod.KavelId);
-        if (kavelVerkoop == null
-                || kavelVerkoop.Start > DateTime.Now
-                || kavelVerkoop.Start.AddMilliseconds(kavelVerkoop.DurationMs) < DateTime.Now) {
-            return BadRequest("Kavel is not currently being auctioned.");
-        }
+            .FirstOrDefaultAsync(kv => kv.KavelId == bod.KavelId 
+                    && kv.Start < DateTime.Now
+                    && kv.Start.AddMilliseconds(kv.DurationMs) > now);
+
+        if (kavelVerkoop == null) {
+            return BadRequest("Kavel is not currently being auctioned at " + DateTime.Now);
+        }    
 
         var timespan = DateTime.Now - kavelVerkoop.Start;
         var priceFactor = timespan.TotalMilliseconds / (double)kavelVerkoop.DurationMs;
@@ -59,15 +63,17 @@ public class BodController : ControllerBase
 
         await _context.Boden.AddAsync(databaseBod);
 
-        return Ok(new BodResponse(firstBid, databaseBod.Datumtijd));
+        return Ok(new BodResponse(firstBid, price, databaseBod.Datumtijd));
     }
 
     class BodResponse {
         public bool Accepted { get; set; }
+        public float AcceptedPrice { get; set; }
         public DateTime ReceivedAt { get; set; }
 
-        public BodResponse(bool accepted, DateTime receivedAt) {
+        public BodResponse(bool accepted, float acceptedPrice, DateTime receivedAt) {
             Accepted = accepted;
+            AcceptedPrice = acceptedPrice;
             ReceivedAt = receivedAt;
         }
     }
