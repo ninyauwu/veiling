@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Veiling.Server.Models;
 
 namespace Veiling.Server.Controllers;
@@ -32,14 +33,21 @@ public class BodController : ControllerBase
 
         var now = DateTime.Now;
 
-        var kavelVerkoop = await _context.KavelVeilingen
+        var kavelLijst = (await _context.KavelVeilingen
             .Include(kv => kv.Kavel)
-            .FirstOrDefaultAsync(kv => kv.KavelId == bod.KavelId 
-                    && kv.Start < DateTime.Now
+            .Where(kv => kv.KavelId == bod.KavelId)
+            .ToListAsync()).OrderBy(kv => Math.Abs((kv.Start.AddMilliseconds(kv.DurationMs / 2) - now).TotalMilliseconds));
+        
+        var kavelVerkoop = kavelLijst.FirstOrDefault(kv => kv.Start < now
                     && kv.Start.AddMilliseconds(kv.DurationMs) > now);
 
         if (kavelVerkoop == null) {
-            return BadRequest("Kavel is not currently being auctioned at " + DateTime.Now);
+            var nearest = kavelLijst.FirstOrDefault();
+            var response = nearest == null ? "No kavels are currently part of this auction." :
+                "Kavel is not currently being auctioned at " + now + ". " +
+                "Nearest kavel is being auctioned at " + nearest?.Start;
+
+            return BadRequest(response);
         }    
 
         var timespan = DateTime.Now - kavelVerkoop.Start;
