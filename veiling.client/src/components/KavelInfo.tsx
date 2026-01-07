@@ -31,7 +31,12 @@ type KavelInfoResponse = {
   };
 };
 
-function KavelInfo({ sortOnApproval }: KavelInfoProps) {
+interface KavelInfoProps {
+  sortOnApproval?: boolean;
+  onSelectKavel?: (kavel: number) => void;
+}
+
+function KavelInfo({ sortOnApproval, onSelectKavel }: KavelInfoProps) {
   const imagePaths = [
     "https://picsum.photos/400/400?random=1",
     "https://picsum.photos/400/400?random=2",
@@ -78,6 +83,13 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
     fetchKavels();
   }, [sortOnApproval, reload]);
 
+    // Notify parent whenever selection changes
+  useEffect(() => {
+    if (onSelectKavel && kavels.length > 0 && selected !== null) {
+      onSelectKavel(kavels[selected].kavel.id)
+    }
+  }, [selected, kavels, onSelectKavel]);
+
   if (kavels.length < 1) {
     return <div>Geen kavels gevonden</div>;
   }
@@ -107,7 +119,7 @@ function KavelInfo({ sortOnApproval }: KavelInfoProps) {
       currentKavelId={kavel.id}
       onApprovalResponse={() => {
         console.log("Icky shticky");
-        if (selected) {
+        if (selected !== null) {
           if (selected == kavels.length) {
             setSelected(selected - 1);
           }
@@ -210,8 +222,6 @@ export const formatKavelData = (kavels: KavelInfoResponse[]) => {
   }));
 };
 
-interface KavelInfoProps {
-  sortOnApproval?: boolean;
-}
+
 
 export default KavelInfo;
