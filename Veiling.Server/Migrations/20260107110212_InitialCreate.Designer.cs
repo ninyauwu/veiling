@@ -12,7 +12,7 @@ using Veiling.Server;
 namespace Veiling.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251210093544_InitialCreate")]
+    [Migration("20260107110212_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
