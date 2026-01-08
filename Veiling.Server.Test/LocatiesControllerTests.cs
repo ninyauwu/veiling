@@ -117,5 +117,57 @@ namespace Veiling.Server.Test.Controllers
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
+        
+        [Fact]
+        public async Task CreateLocatie_WithValidData_ReturnsCreated()
+        {
+            var locatie = new Locatie {
+                Naam = "Utrecht",
+                KlokId = 4,
+                Actief = true
+            };
+
+            var response = await _client.PostAsJsonAsync("/api/locaties", locatie);
+            var created = await response.Content.ReadFromJsonAsync<Locatie>();
+
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            Assert.NotNull(created);
+            Assert.True(created.Id > 0);
+            Assert.Equal("Utrecht", created.Naam);
+            Assert.Equal(4, created.KlokId);
+            Assert.True(created.Actief);
+        }
+
+        [Fact]
+        public async Task DeleteLocatie_WithValidId_RemovesFromDatabase()
+        {
+            var locatie = new Locatie {
+                Naam = "To Delete",
+                KlokId = 5,
+                Actief = false
+            };
+            var createResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
+            var created = await createResponse.Content.ReadFromJsonAsync<Locatie>();
+
+            var deleteResponse = await _client.DeleteAsync($"/api/locaties/{created!.Id}");
+            Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+            var getResponse = await _client.GetAsync($"/api/locaties/{created.Id}");
+            Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateLocatie_WithNonExistingId_ReturnsNotFound()
+        {
+            var locatie = new Locatie {
+                Id = 99999,
+                Naam = "NonExistent",
+                KlokId = 1,
+                Actief = true
+            };
+
+            var response = await _client.PutAsJsonAsync("/api/locaties/99999", locatie);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
     }
 }

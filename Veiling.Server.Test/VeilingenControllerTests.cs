@@ -54,7 +54,7 @@ namespace Veiling.Server.Test.Controllers
                 Naam = "Test Actieve Veiling",
                 Klokduur = 5.0f,
                 StartTijd = DateTime.UtcNow.AddHours(-1), // Started 1 hour ago
-                EndTijd = DateTime.UtcNow.AddHours(2),    // Ends in 2 hours
+                EndTijd = DateTime.UtcNow.AddHours(2), // Ends in 2 hours
                 GeldPerTickCode = 0.5f
             };
 
@@ -93,11 +93,11 @@ namespace Veiling.Server.Test.Controllers
 
             var getResponse = await _client.GetAsync($"/api/veilingen/{created.Id}");
             var updated = await getResponse.Content.ReadFromJsonAsync<Models.Veiling>();
-            
+
             // compare
             Assert.True(Math.Abs((updated!.EndTijd - newEndTime).TotalMinutes) < 1);
         }
-        
+
         [Fact]
         public async Task CreateVeiling_WithEndTimeBeforeStartTime_ReturnsBadRequest()
         {
@@ -120,7 +120,7 @@ namespace Veiling.Server.Test.Controllers
         {
             // Test dat de time-based filtering werkt
             var now = DateTime.UtcNow;
-            
+
             // Actieve veiling
             var actief = new Models.Veiling
             {
@@ -131,7 +131,7 @@ namespace Veiling.Server.Test.Controllers
                 GeldPerTickCode = 0.5f
             };
             await _client.PostAsJsonAsync("/api/veilingen", actief);
-            
+
             // Toekomstige veiling
             var toekomst = new Models.Veiling
             {
@@ -142,7 +142,7 @@ namespace Veiling.Server.Test.Controllers
                 GeldPerTickCode = 0.5f
             };
             await _client.PostAsJsonAsync("/api/veilingen", toekomst);
-            
+
             // Afgelopen veiling
             var verleden = new Models.Veiling
             {
@@ -183,6 +183,107 @@ namespace Veiling.Server.Test.Controllers
             var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
 
             Assert.Equal(HttpStatusCode.BadRequest, updateResponse.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetAllVeilingen_IncludesLocatieAndVeilingmeesterRelations()
+        {
+            var locatie = new Locatie { Naam = "Test Loc", KlokId = 99, Actief = true };
+            var locatieResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
+            var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
+
+            var veiling = new Models.Veiling
+            {
+                Naam = "Relation Test Veiling",
+                Klokduur = 5.0f,
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                GeldPerTickCode = 0.5f,
+                LocatieId = createdLocatie!.Id
+            };
+            var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
+            var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+
+            var response = await _client.GetAsync("/api/veilingen");
+            var veilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
+
+            var retrieved = veilingen!.FirstOrDefault(v => v.Id == created!.Id);
+
+            // CRITICAL: Test relations are actually loaded
+            Assert.NotNull(retrieved);
+            Assert.NotNull(retrieved.Locatie);
+            Assert.Equal("Test Loc", retrieved.Locatie.Naam);
+        }
+
+        [Fact]
+        public async Task GetVeiling_WithInvalidId_ReturnsNotFound()
+        {
+            var response = await _client.GetAsync("/api/veilingen/99999");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteVeiling_RemovesFromDatabase()
+        {
+            var veiling = new Models.Veiling
+            {
+                Naam = "To Delete",
+                Klokduur = 5.0f,
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                GeldPerTickCode = 0.5f
+            };
+            var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
+            var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+
+            var deleteResponse = await _client.DeleteAsync($"/api/veilingen/{created!.Id}");
+            Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+            var getResponse = await _client.GetAsync($"/api/veilingen/{created.Id}");
+            Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetVeilingenByLocatie_ReturnsCorrectVeilingen()
+        {
+            var locatie = new Locatie { Naam = "Test Locatie", KlokId = 10, Actief = true };
+            var locatieResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
+            var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
+
+            var veiling1 = new Models.Veiling
+            {
+                Naam = "Veiling voor locatie",
+                Klokduur = 5.0f,
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                GeldPerTickCode = 0.5f,
+                LocatieId = createdLocatie!.Id
+            };
+            await _client.PostAsJsonAsync("/api/veilingen", veiling1);
+
+            var response = await _client.GetAsync($"/api/veilingen/locatie/{createdLocatie.Id}");
+            var veilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(veilingen);
+            Assert.Contains(veilingen, v => v.Naam == "Veiling voor locatie");
+        }
+
+        [Fact]
+        public async Task UpdateVeiling_WithInvalidId_ReturnsNotFound()
+        {
+            var veiling = new Models.Veiling
+            {
+                Id = 99999,
+                Naam = "NonExistent",
+                Klokduur = 5.0f,
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                GeldPerTickCode = 0.5f
+            };
+
+            var response = await _client.PutAsJsonAsync("/api/veilingen/99999", veiling);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }

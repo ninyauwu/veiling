@@ -267,6 +267,87 @@ namespace Veiling.Server.Test.Controllers
             var foundKavel = kavels.First(k => k.Naam == "Kavel MET Veiling");
             Assert.Equal(createdVeiling.Id, foundKavel.VeilingId);
         }
+        
+        [Fact]
+public async Task GetAllKavels_ReturnsCompleteRelations()
+{
+    // Test dat kavels correct geretourneerd worden met alle relaties
+    var leverancier = await CreateTestLeverancier();
+    
+    var kavel = new Kavel {
+        Naam = "Test Relations",
+        Beschrijving = "Test",
+        ArtikelKenmerken = "Test",
+        MinimumPrijs = 10.0f,
+        MaximumPrijs = 20.0f,
+        Minimumhoeveelheid = 5,
+        Foto = "/test.jpg",
+        Kavelkleur = "FFFFFF",
+        Karnummer = 1,
+        Rijnummer = 1,
+        HoeveelheidContainers = 10,
+        AantalProductenPerContainer = 10,
+        LengteVanBloemen = 50.0f,
+        GewichtVanBloemen = 400.0f,
+        StageOfMaturity = "Test",
+        NgsCode = 'A',
+        Keurcode = "A1",
+        Fustcode = 100,
+        GeldPerTickCode = "1.0",
+        LeverancierId = leverancier.Id
+    };
+    await _client.PostAsJsonAsync("/api/kavels", kavel);
+
+    var response = await _client.GetAsync("/api/kavels");
+    var kavels = await response.Content.ReadFromJsonAsync<List<Kavel>>();
+
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    Assert.NotNull(kavels);
+    Assert.NotEmpty(kavels);
+}
+
+[Fact]
+public async Task DeleteKavel_RemovesFromDatabase()
+{
+    var leverancier = await CreateTestLeverancier();
+    var kavel = new Kavel {
+        Naam = "To Delete",
+        Beschrijving = "Test",
+        ArtikelKenmerken = "Test",
+        MinimumPrijs = 10.0f,
+        MaximumPrijs = 20.0f,
+        Minimumhoeveelheid = 5,
+        Foto = "/test.jpg",
+        Kavelkleur = "FFFFFF",
+        Karnummer = 1,
+        Rijnummer = 1,
+        HoeveelheidContainers = 10,
+        AantalProductenPerContainer = 10,
+        LengteVanBloemen = 50.0f,
+        GewichtVanBloemen = 400.0f,
+        StageOfMaturity = "Test",
+        NgsCode = 'A',
+        Keurcode = "A1",
+        Fustcode = 100,
+        GeldPerTickCode = "1.0",
+        LeverancierId = leverancier.Id
+    };
+    var createResponse = await _client.PostAsJsonAsync("/api/kavels", kavel);
+    var created = await createResponse.Content.ReadFromJsonAsync<Kavel>();
+
+    var deleteResponse = await _client.DeleteAsync($"/api/kavels/{created!.Id}");
+    Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+    var getResponse = await _client.GetAsync($"/api/kavels/{created.Id}");
+    Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+}
+
+[Fact]
+public async Task GetKavel_WithInvalidId_ReturnsNotFound()
+{
+    var response = await _client.GetAsync("/api/kavels/99999");
+    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+}
     }
 }
 
