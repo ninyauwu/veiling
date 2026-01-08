@@ -4,6 +4,7 @@ import LoginPagina from "./pages/LoginPagina";
 import Veiling from "./pages/Veiling";
 import LocatiePagina from "./pages/Locatie.tsx";
 import KavelJudgement from "./pages/KavelJudgement.tsx";
+import RegistratiePagina from "./pages/RegistratiePagina";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/veiling" element={<Veiling />} />
         <Route path="/locaties" element={<LocatiePagina />} />
         <Route path="/judgement" element={<KavelJudgement />} />
+        <Route path="/registreer" element={<RegistratiePagina />} />
       </Routes>
     </Router>
   );
