@@ -121,6 +121,8 @@ app.MapControllers();
 app.MapIdentityApi<Gebruiker>();
 app.MapFallbackToFile("/index.html");
 
+app.UseStaticFiles();
+
 // DB seed + test
 using (var scope = app.Services.CreateScope())
 {

@@ -2,7 +2,7 @@ import "../components/KavelInfo.css";
 import KavelInfo from "../components/KavelInfo";
 import HeaderLoggedout from "../components/HeaderLoggedout";
 
-function Veiling() {
+function KavelJudgement() {
   return (
     <div>
       <HeaderLoggedout />
@@ -11,9 +11,17 @@ function Veiling() {
           height: "96px",
         }}
       />
-      <KavelInfo />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: "60px",
+        }}
+      >
+        <KavelInfo sortOnApproval={true} />
+      </div>
     </div>
   );
 }
 
-export default Veiling;
+export default KavelJudgement;

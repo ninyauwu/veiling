@@ -35,4 +35,24 @@ public class KavelInfoController : ControllerBase {
 
         return kavels.ToList();
     }
+
+    [HttpGet("pending")]
+    public async Task<ActionResult<IEnumerable<KavelLeverancier>>> GetPendingKavels()
+    {
+        var kavels = await _context.Kavels
+            .Include(k => k.Leverancier)
+                .ThenInclude(l => l.Bedrijf)
+            .Include(k => k.Veiling)
+            .Where(k => k.Approved == null)
+            .ToListAsync();
+
+        if (kavels == null || !kavels.Any())
+        {
+            return NotFound();
+        }
+
+        var result = kavels.Select(k => new KavelLeverancier(k, k.Leverancier)).ToList();
+        
+        return Ok(result);
+    }
 }

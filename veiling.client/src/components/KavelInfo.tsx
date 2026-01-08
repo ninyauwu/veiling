@@ -7,17 +7,22 @@ import NavigationBar from "./NavigationBar";
 import MetadataGrid from "./MetadataGrid";
 import CompanyQuality from "./CompanyQuality";
 import { authFetch } from "../utils/AuthFetch";
+import AuctionCountdown from "./AuctionCountdown";
+import ApproveOrDeny from "./AproveOrDenyTextBox";
 
 // Define the type for data coming from your API
 type KavelInfoResponse = {
   kavel: {
+    id: number;
     naam: string;
     beschrijving: string;
     stageOfMaturity: string;
     minimumPrijs: number;
+    maximumPrijs: number;
     kavelkleur: string;
     keurcode: string;
     fustcode: number;
+    approval: boolean | null | undefined;
   };
   leverancier: {
     indexOfReliabilityOfInformation: string;
@@ -27,7 +32,7 @@ type KavelInfoResponse = {
   };
 };
 
-function KavelInfo() {
+function KavelInfo({ sortOnApproval }: KavelInfoProps) {
   const imagePaths = [
     "https://picsum.photos/400/400?random=1",
     "https://picsum.photos/400/400?random=2",
@@ -37,23 +42,46 @@ function KavelInfo() {
   const [kavels, setKavels] = useState<KavelInfoResponse[]>([]);
   const [selected, setSelected] = useState<number | null>(0);
   const [loading, setLoading] = useState(true);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
-  async function fetchKavels() {
-    try {
-      // USE authFetch instead of fetch
-      const res = await authFetch("/api/KavelInfo/0");
-      const data: KavelInfoResponse[] = await res.json();
-      setKavels(data);
-      setLoading(false);
-      if (data.length > 0) setSelected(0);
-    } catch (err) {
-      console.error("Kon kavels niet laden:", err);
-      setLoading(false);
+    async function fetchKavels() {
+      try {
+        setLoading(true); // start loading
+        let res: Response;
+        if (sortOnApproval) {
+          res = await authFetch("/api/KavelInfo/pending");
+        } else {
+          res = await authFetch("/api/KavelInfo/0");
+        }
+
+        if (!res.ok) {
+          // Handle non-2xx responses
+          if (res.status === 404) {
+            console.log("No kavels found");
+            setKavels([]); // explicitly empty array
+          } else {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+        } else {
+          const data: KavelInfoResponse[] = await res.json();
+          setKavels(data);
+          if (data.length > 0) setSelected(0);
+        }
+      } catch (err) {
+        console.error("Kon kavels niet laden:", err);
+        setKavels([]); // ensure kavels is empty on error
+      } finally {
+        setLoading(false);
+      }
     }
+
+    fetchKavels();
+  }, [sortOnApproval, reload]);
+
+  if (kavels.length < 1) {
+    return <div>Geen kavels gevonden</div>;
   }
-  fetchKavels();
-}, []);
 
   const handleNext = () => {
     if (selected === null) return;
@@ -75,87 +103,116 @@ function KavelInfo() {
 
   const tableRows = formatKavelData(kavels);
 
+  const bonusWidget = sortOnApproval ? (
+    <ApproveOrDeny
+      currentKavelId={kavel.id}
+      onApprovalResponse={() => {
+        console.log("Icky shticky");
+        if (selected) {
+          if (selected == kavels.length) {
+            setSelected(selected - 1);
+          }
+        }
+        setReload(reload + 1);
+      }}
+    />
+  ) : (
+    <AuctionCountdown price={kavel.maximumPrijs} />
+  );
+
   return (
-    <div className="flex-column">
-      <h1 className="hidden">Veilingpagina</h1>
-      <h2 className="hidden">Kaveltabel</h2>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        gap: "60px",
+      }}
+    >
+      <div className="flex-column">
+        <h1 className="hidden">Veilingpagina</h1>
+        <h2 className="hidden">Kaveltabel</h2>
 
-      <KavelTabel
-        rows={tableRows}
-        selectedRowIndex={selected}
-        onSelectedRowChange={setSelected}
-        onRowSelect={(row, index) => {
-          setSelected(index);
-          console.log(row);
-        }}
-      />
+        <KavelTabel
+          rows={tableRows}
+          selectedRowIndex={selected}
+          onSelectedRowChange={setSelected}
+          onRowSelect={(row, index) => {
+            setSelected(index);
+            console.log(row);
+          }}
+        />
 
-      <Spacer color="#00000000" />
-      <NavigationBar
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        getSelectedItemString={() => {
-          if (selected === null) return "Geen naam";
-          return tableRows[selected].Naam;
-        }}
-      />
-      <Spacer />
+        <Spacer color="#00000000" />
+        <NavigationBar
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          getSelectedItemString={() => {
+            if (selected === null) return "Geen naam";
+            return tableRows[selected].Naam;
+          }}
+        />
+        <Spacer />
 
-      <span>
-        <div className="flex-row-justify">
-          <h2>{kavel.naam}</h2>
-          <CompanyQuality
-            naam={leverancier.bedrijf.bedrijfsnaam}
-            qi={leverancier.indexOfReliabilityOfInformation}
-            kwaliteit={kavel.keurcode}
-          />
-        </div>
+        <span>
+          <div className="flex-row-justify">
+            <h2>{kavel.naam}</h2>
+            <CompanyQuality
+              naam={leverancier.bedrijf.bedrijfsnaam}
+              qi={leverancier.indexOfReliabilityOfInformation}
+              kwaliteit={kavel.keurcode}
+            />
+          </div>
 
-        <p>{kavel.beschrijving}</p>
-      </span>
+          <p>{kavel.beschrijving}</p>
+        </span>
 
-      <ImageSet images={imagePaths} />
-      <MetadataGrid
-        items={[
-          { key: "Stadium", value: kavel.stageOfMaturity },
-          { key: "Fustcode", value: kavel.fustcode },
-          {
-            key: "Kleur",
-            value: (
-              <div
-                style={{
-                  backgroundColor: "#" + kavel.kavelkleur,
-                  width: "24px",
-                  height: "24px",
-                }}
-              />
-            ),
-          },
-        ]}
-      />
+        <ImageSet images={imagePaths} />
+        <MetadataGrid
+          items={[
+            { key: "Stadium", value: kavel.stageOfMaturity },
+            { key: "Fustcode", value: kavel.fustcode },
+            {
+              key: "Kleur",
+              value: (
+                <div
+                  style={{
+                    backgroundColor: "#" + kavel.kavelkleur,
+                    width: "24px",
+                    height: "24px",
+                  }}
+                />
+              ),
+            },
+          ]}
+        />
 
-      <Spacer />
-      <NavigationBar
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        getSelectedItemString={() => {
-          if (selected === null) return "Geen naam";
-          return tableRows[selected].Naam;
-        }}
-      />
+        <Spacer />
+        <NavigationBar
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          getSelectedItemString={() => {
+            if (selected === null) return "Geen naam";
+            return tableRows[selected].Naam;
+          }}
+        />
+      </div>
+      {bonusWidget}
     </div>
   );
 }
 
-// In a separate utils file
 export const formatKavelData = (kavels: KavelInfoResponse[]) => {
   return kavels.map((kavel) => ({
-    Naam: kavel.kavel.naam,
-    "Max Prijs": `€${kavel.kavel.minimumPrijs.toLocaleString()}`,
-    Leverancier: kavel.leverancier.bedrijf.bedrijfsnaam,
-    QI: kavel.leverancier.indexOfReliabilityOfInformation,
-    Kwaliteit: kavel.kavel.keurcode,
+    Naam: kavel?.kavel?.naam ?? "NA",
+    "Max Prijs": `€${kavel?.kavel?.minimumPrijs?.toLocaleString() ?? "N/A"}`,
+    Leverancier: kavel?.leverancier?.bedrijf?.bedrijfsnaam ?? "N/A",
+    QI: kavel?.leverancier?.indexOfReliabilityOfInformation ?? "N/A",
+    Kwaliteit: kavel?.kavel?.keurcode ?? "N/A",
   }));
 };
+
+interface KavelInfoProps {
+  sortOnApproval?: boolean;
+}
 
 export default KavelInfo;
