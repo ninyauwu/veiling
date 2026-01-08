@@ -169,6 +169,18 @@ namespace Veiling.Server.Controllers
             if (kavel.MinimumPrijs <= 0)
                 return BadRequest(new { error = "Minimum prijs moet groter dan 0 zijn" });
 
+            if (kavel.HoeveelheidContainers <= 0)
+                return BadRequest(new { error = "Hoeveelheid containers moet groter dan 0 zijn" });
+
+            if (kavel.AantalProductenPerContainer <= 0)
+                return BadRequest(new { error = "Aantal producten per container moet groter dan 0 zijn" });
+
+            if (kavel.GewichtVanBloemen <= 0)
+                return BadRequest(new { error = "Gewicht moet groter dan 0 zijn" });
+
+            if (kavel.LengteVanBloemen <= 0)
+                return BadRequest(new { error = "Lengte moet groter dan 0 zijn" });
+
             _context.Entry(kavel).State = EntityState.Modified;
 
             try
