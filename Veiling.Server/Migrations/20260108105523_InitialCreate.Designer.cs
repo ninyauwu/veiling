@@ -12,7 +12,7 @@ using Veiling.Server;
 namespace Veiling.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251210093544_InitialCreate")]
+    [Migration("20260108105523_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace Veiling.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("identity")
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -49,7 +50,7 @@ namespace Veiling.Server.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("AspNetRoles", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -74,7 +75,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims", (string)null);
+                    b.ToTable("AspNetRoleClaims", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -99,7 +100,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
+                    b.ToTable("AspNetUserClaims", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -121,7 +122,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins", (string)null);
+                    b.ToTable("AspNetUserLogins", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -136,7 +137,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
+                    b.ToTable("AspNetUserRoles", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -155,7 +156,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.ToTable("AspNetUserTokens", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Bedrijf", b =>
@@ -175,7 +176,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasKey("Bedrijfscode");
 
-                    b.ToTable("Bedrijven");
+                    b.ToTable("Bedrijven", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Bod", b =>
@@ -210,7 +211,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("KavelId");
 
-                    b.ToTable("Boden");
+                    b.ToTable("Boden", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Gebruiker", b =>
@@ -290,7 +291,7 @@ namespace Veiling.Server.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("AspNetUsers", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Kavel", b =>
@@ -391,7 +392,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("VeilingId");
 
-                    b.ToTable("Kavels");
+                    b.ToTable("Kavels", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Leverancier", b =>
@@ -413,7 +414,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("BedrijfId");
 
-                    b.ToTable("Leveranciers");
+                    b.ToTable("Leveranciers", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Locatie", b =>
@@ -436,7 +437,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Locaties");
+                    b.ToTable("Locaties", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Veiling", b =>
@@ -475,7 +476,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("VeilingmeesterId");
 
-                    b.ToTable("Veilingen");
+                    b.ToTable("Veilingen", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Veilingmeester", b =>
@@ -497,7 +498,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("GebruikerId");
 
-                    b.ToTable("Veilingmeesters");
+                    b.ToTable("Veilingmeesters", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

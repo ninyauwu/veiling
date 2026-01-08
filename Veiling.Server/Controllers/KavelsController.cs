@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 using System.ComponentModel.DataAnnotations;
@@ -6,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Veiling.Server.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class KavelsController : ControllerBase
     {
@@ -61,6 +63,11 @@ namespace Veiling.Server.Controllers
             }
         }
 
+        // GET: api/kavels
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Kavel>>> GetKavels()
         {
@@ -79,6 +86,11 @@ namespace Veiling.Server.Controllers
             }
         }
 
+        // GET: api/kavels/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Kavel>> GetKavel(int id)
         {
@@ -97,6 +109,16 @@ namespace Veiling.Server.Controllers
             return kavel;
         }
 
+
+
+        // GET: api/kavels/veiling/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpGet("veiling/{veilingId}")]
         public async Task<ActionResult<IEnumerable<Kavel>>> GetKavelsByVeiling(int veilingId)
         {
@@ -107,6 +129,11 @@ namespace Veiling.Server.Controllers
                 .ToListAsync();
         }
 
+        // POST: api/kavels
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpPost]
         public async Task<ActionResult<Kavel>> CreateKavel([FromBody] CreateKavelDto dto)
         {
@@ -159,7 +186,13 @@ namespace Veiling.Server.Controllers
                 return StatusCode(500, new { error = "Database fout" });
             }
         }
-        
+//TODO: verkoper alleen zijn eigen kavels verranderen
+        // PUT: api/kavels/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateKavel(int id, Kavel kavel)
         {
@@ -196,6 +229,11 @@ namespace Veiling.Server.Controllers
             }
         }
 
+        // DELETE: api/kavels/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteKavel(int id)
         {

@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 using Veiling.Server;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Veiling.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BedrijvenController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -17,6 +19,10 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/bedrijven
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Bedrijf>>> GetBedrijven()
         {
@@ -25,7 +31,9 @@ namespace Veiling.Server.Controllers
                 .ToListAsync();
         }
 
+//TODO: Bv1 en Vk2 moeten alleen hun eigen bedrijf kunnen opvragen 
         // GET: api/bedrijven/5
+        [Authorize(Roles = nameof(Role.Bedrijfsvertegenwoordiger) + ", " + nameof(Role.Veilingmeester) + ", " + nameof(Role.Leverancier) + ", " + nameof(Role.Administrator))]
         [HttpGet("{id}")]
         public async Task<ActionResult<Bedrijf>> GetBedrijf(int id)
         {
@@ -42,6 +50,7 @@ namespace Veiling.Server.Controllers
         }
 
         // POST: api/bedrijven
+        [Authorize(Roles = nameof(Role.Administrator))]
         [HttpPost]
         public async Task<ActionResult<Bedrijf>> CreateBedrijf(Bedrijf bedrijf)
         {
@@ -52,6 +61,7 @@ namespace Veiling.Server.Controllers
         }
 
         // PUT: api/bedrijven/5
+        [Authorize(Roles = nameof(Role.BedrijfManager) + ", " + nameof(Role.Administrator))]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBedrijf(int id, Bedrijf bedrijf)
         {
@@ -79,6 +89,7 @@ namespace Veiling.Server.Controllers
         }
 
         // DELETE: api/bedrijven/5
+        [Authorize(Roles = nameof(Role.Administrator) + ", " + nameof(Role.BedrijfManager))]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBedrijf(int id)
         {
