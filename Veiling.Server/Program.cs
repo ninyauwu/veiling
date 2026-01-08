@@ -38,16 +38,19 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Identity framework
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
-
-builder.Services.AddIdentityCore<Gebruiker>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddApiEndpoints();
-
+// DbContext
 builder.Services.AddDbContext<AppDbContext>(options => 
         options.UseSqlServer(connectionString));
+
+// Identity framework
+builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+builder.Services.AddAuthorization();
+
+builder.Services.AddIdentityCore<Gebruiker>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddSignInManager()
+    .AddApiEndpoints();
 
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -70,6 +73,8 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
+app.UseStaticFiles();
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -88,6 +93,21 @@ using (var scope = app.Services.CreateScope())
     if (app.Environment.IsDevelopment())
     {
         AppDbSeeder.Seed(db);
+    }
+}
+
+static async Task SeedRoles(IServiceProvider provider)
+{
+    var roleManager = provider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    string[] roles = { "Gebruiker", "Leverancierslid", "Bedrijfsvertegenwoordiger", "Veilingmeester", "Admin" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
     }
 }
 

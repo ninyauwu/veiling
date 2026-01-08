@@ -2,13 +2,11 @@ import {useState, useRef, type FormEvent} from 'react';
 import DefaultImage from "../assets/img_upload_bg.png";
 import DefaultImageIcon from "../assets/img_upload.tsx";
 
-interface UploadResponse {
-    originalname: string;
-    filename: string;
-    location: string;
+interface ImageUploadProps {
+    onImageUpload: (file: string | File | null) => void;
 }
 
-const ImageUpload = () => {
+const ImageUpload = ({ onImageUpload }: ImageUploadProps) => {
     const [avatarURL, setAvatarURL] = useState<string>(DefaultImage);
     const [showIcon, setShowIcon] = useState<boolean>(true);
 
@@ -24,31 +22,18 @@ const ImageUpload = () => {
                 if (!fileUploadRef.current?.files) return;
 
                 const uploadedFile = fileUploadRef.current.files[0];
-
                 const  cashedURL = URL.createObjectURL(uploadedFile);
+
                 setAvatarURL(cashedURL);
                 setShowIcon(false);
-
-                const formData = new FormData();
-                formData.append("file", uploadedFile);
-
-                const response = await fetch("https://api.escuelajs.co/api/v1/files/upload", {
-                    method: "post",
-                    body: formData
-                })
-
-                if(!response.ok) {
-                    throw new Error(`Upload failed: ${response.status}`);
-                }
-
-                const data = await response.json() as UploadResponse;
-
-                if(data.location) {
-                    console.log("Upload succesful: ", data.location);
-                }
+                
+                onImageUpload(uploadedFile);
+                
             } catch(error) {
                 console.error(error);
+                
                 setAvatarURL(DefaultImage);
+                onImageUpload(DefaultImage);
             }
     }
 
@@ -72,6 +57,7 @@ const ImageUpload = () => {
                 id="file" 
                 ref={fileUploadRef}
                 onChange={uploadImageDisplay}
+                accept="image/*"
                 hidden/>
             </form>
         </div>
