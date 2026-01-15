@@ -10,10 +10,12 @@ namespace Veiling.Server.Controllers;
 public class BodController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly CompleteBidService _completeBidService;
 
-    public BodController(AppDbContext context)
+    public BodController(AppDbContext context, CompleteBidService completeBidService)
     {
         _context = context;
+        _completeBidService = completeBidService;
     }
 
     // GET: api/boden
@@ -70,6 +72,7 @@ public class BodController : ControllerBase
         bool firstBid = !_context.Boden.Any(b => b.KavelId == bod.KavelId && b.Datumtijd < databaseBod.Datumtijd);
 
         await _context.Boden.AddAsync(databaseBod);
+        await _completeBidService.NotifyClients(bod.KavelId, databaseBod.Datumtijd);
 
         return Ok(new BodResponse(firstBid, price, databaseBod.Datumtijd));
     }

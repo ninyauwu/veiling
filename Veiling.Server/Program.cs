@@ -56,6 +56,8 @@ builder.Services.AddIdentityCore<Gebruiker>()
     .AddSignInManager()
     .AddApiEndpoints();
 
+builder.Services.AddScoped<CompleteBidService>();
+
 var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 

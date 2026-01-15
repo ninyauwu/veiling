@@ -5,6 +5,7 @@ import PriceInterpolator from "./PriceBar";
 import type { VeilingStartMessage } from "./PriceBar";
 import SimpeleKnop from "./SimpeleKnop";
 import Spacer from "./Spacer";
+import BidFeedback, { type BidFeedbackStatus } from "./BidFeedback";
 
 function getNextNov15(): Date {
   const now = new Date();
@@ -25,7 +26,6 @@ function getTimePartsUntil(target: Date) {
   const seconds = totalSec % 60;
   return { days, hours, minutes, seconds };
 }
-
 interface AuctionCountdownProps {
   price?: number;
   quantity?: number;
@@ -43,8 +43,9 @@ interface GeplaatstBod {
 }
 
 interface BodResponse {
-  Accepted: boolean;
-  ReceivedAt: string;
+  accepted: boolean;
+  acceptedPrice: number;
+  receivedAt: string;
 }
 
 export default function AuctionCountdown({
@@ -59,11 +60,13 @@ export default function AuctionCountdown({
   const [shouldInterrupt, setShouldInterrupt] = useState(false);
   const [isCountdown, setIsCountdown] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(price ?? 0);
-  const [, setBidResponse] = useState<BodResponse | null>(null);
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [serverReceivedTime, setServerReceivedTime] = useState<Date | null>(
     null,
   );
+  const [feedbackStatus, setFeedbackStatus] =
+    useState<BidFeedbackStatus | null>(null);
+  const [awaitingBidResponse, setAwaitingBidResponse] = useState(false);
 
   const resolvedTarget = (() => {
     if (targetDate === null) return getNextNov15();
@@ -87,14 +90,39 @@ export default function AuctionCountdown({
   }, [resolvedTarget]);
 
   useEffect(() => {
+    console.log("startMessage changed:", startMessage);
     if (startMessage) {
+      console.log("startingPrice:", startMessage.startingPrice);
       setIsCountdown(false);
-      setCurrentPrice(startMessage.startingPrice ?? currentPrice);
+      setCurrentPrice(startMessage.startingPrice ?? 0);
+      setShouldInterrupt(false);
+      setServerReceivedTime(null);
     }
   }, [startMessage]);
 
+  useEffect(() => {
+    if (!connection) return;
+
+    const handleBidPlaced = (bidKavelId: number) => {
+      if (bidKavelId === kavelId && !awaitingBidResponse && !feedbackStatus) {
+        setFeedbackStatus("outbid");
+      }
+    };
+
+    connection.on("BidPlaced", handleBidPlaced);
+
+    return () => {
+      connection.off("BidPlaced", handleBidPlaced);
+    };
+  }, [connection, kavelId, awaitingBidResponse, feedbackStatus]);
+
   const simulateSignalRMessage = () => {
     if (!connection) return;
+
+    // Reset state before starting new auction
+    setShouldInterrupt(false);
+    setFeedbackStatus(null);
+    setServerReceivedTime(null);
 
     const startTime = new Date();
     startTime.setSeconds(startTime.getSeconds() + 1);
@@ -102,12 +130,11 @@ export default function AuctionCountdown({
     connection
       .invoke("SendVeilingStart", kavelId, 0.8, 0.3, 5000, startTime)
       .catch((err) => console.error("Failed to send message:", err));
-
-    setShouldInterrupt(false);
   };
 
   const placeBid = async () => {
     setIsSubmittingBid(true);
+    setAwaitingBidResponse(true);
     setShouldInterrupt(true);
 
     try {
@@ -130,18 +157,42 @@ export default function AuctionCountdown({
       }
 
       const data: BodResponse = await response.json();
-      setBidResponse(data);
-      setServerReceivedTime(new Date(data.ReceivedAt));
+      console.log("Bid response data:", data);
+      console.log("data.accepted:", data.accepted);
+      setServerReceivedTime(new Date(data.receivedAt));
+
+      if (data.accepted) {
+        console.log("Setting feedback to accepted");
+        setFeedbackStatus("accepted");
+      } else {
+        console.log("Setting feedback to rejected");
+        setFeedbackStatus("rejected");
+      }
+
       console.log("Bid response:", data);
     } catch (err) {
       console.error("Failed to place bid:", err);
+      setFeedbackStatus("rejected");
     } finally {
       setIsSubmittingBid(false);
+      setAwaitingBidResponse(false);
     }
   };
 
+  const handleFeedbackComplete = () => {
+    setFeedbackStatus(null);
+  };
+
   const countdown = (
-    <section className="auc-card" aria-label="Veiling info">
+    <section
+      className="auc-card"
+      aria-label="Veiling info"
+      style={{ position: "relative" }}
+    >
+      <BidFeedback
+        status={feedbackStatus}
+        onFadeComplete={handleFeedbackComplete}
+      />
       <header className="auc-card__head">
         <h3 className="auc-card__title">Veiling start in</h3>
       </header>
@@ -201,7 +252,15 @@ export default function AuctionCountdown({
   );
 
   const bidding = (
-    <section className="auc-card" aria-label="Veiling info">
+    <section
+      className="auc-card"
+      aria-label="Veiling info"
+      style={{ position: "relative" }}
+    >
+      <BidFeedback
+        status={feedbackStatus}
+        onFadeComplete={handleFeedbackComplete}
+      />
       <header className="auc-card__head">
         <h3 className="auc-card__title">Bieden</h3>
       </header>
