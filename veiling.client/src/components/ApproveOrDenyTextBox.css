@@ -1,0 +1,59 @@
+.approve-deny-container {
+    min-height: 100vh;
+    background-color: #f3f4f6;
+    padding: 2rem;
+}
+
+.approve-deny-card {
+    max-width: 42rem;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 0.125rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.approve-deny-header {
+    background-color: #e5e7eb;
+    padding: 1rem 1.5rem;
+}
+
+.approve-deny-title {
+    font-size: 1.875rem;
+    font-weight: bold;
+    color: #1f2937;
+}
+
+.approve-deny-content {
+    padding: 1.5rem;
+}
+
+.approve-deny-label {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+}
+
+.approve-deny-textarea {
+    width: 100%;
+    height: 16rem;
+    padding: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.125rem;
+    resize: none;
+    color: #374151;
+}
+
+.approve-deny-textarea:focus {
+    outline: none;
+    border-color: transparent;
+}
+
+.approve-deny-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}

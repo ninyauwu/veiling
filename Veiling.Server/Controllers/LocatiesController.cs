@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
 namespace Veiling.Server.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class LocatiesController : ControllerBase
     {
@@ -16,6 +18,13 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/locaties
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Locatie>>> GetLocaties()
         {
@@ -23,6 +32,13 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/locaties/actief
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpGet("actief")]
         public async Task<ActionResult<IEnumerable<Locatie>>> GetActieveLocaties()
         {
@@ -32,6 +48,13 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/locaties/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Locatie>> GetLocatie(int id)
         {
@@ -48,6 +71,10 @@ namespace Veiling.Server.Controllers
         }
 
         // PUT: api/locaties/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLocatie(int id, Locatie locatie)
         {

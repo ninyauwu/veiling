@@ -1,21 +1,27 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
 namespace Veiling.Server.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class VeilingenController : ControllerBase
     {
-        private readonly IAppDbContext _context;
+        private readonly AppDbContext _context;
 
-        public VeilingenController(IAppDbContext context)
+        public VeilingenController(AppDbContext context)
         {
             _context = context;
         }
 
         // GET: api/veilingen
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetVeilingen()
         {
@@ -28,6 +34,10 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/veilingen/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Models.Veiling>> GetVeiling(int id)
         {
@@ -48,9 +58,16 @@ namespace Veiling.Server.Controllers
 
         // GET: api/veilingen/actief
         [HttpGet("actief")]
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetActieveVeilingen()
         {
-            var nu = DateTime.UtcNow;
+            var nu = DateTime.Now;
             return await _context.Veilingen
                 .Where(v => v.StartTijd <= nu && v.EndTijd >= nu)
                 .Include(v => v.Locatie)
@@ -61,6 +78,10 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/veilingen/locatie/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet("locatie/{locatieId}")]
         public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetVeilingenByLocatie(int locatieId)
         {
@@ -74,16 +95,47 @@ namespace Veiling.Server.Controllers
         }
 
         // POST: api/veilingen
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpPost]
-        public async Task<ActionResult<Models.Veiling>> CreateVeiling(Models.Veiling veiling)
+        public async Task<ActionResult<Models.Veiling>> CreateVeiling(CreateVeilingDto dto)
         {
+            var veiling = new Models.Veiling
+            {
+                Naam = dto.Naam,
+                StartTijd = dto.StartTijd,
+                EndTijd = dto.EndTijd,
+                Klokduur = 1.0f,
+                GeldPerTickCode = 0.01f
+            };
+
             _context.Veilingen.Add(veiling);
             await _context.SaveChangesAsync();
+
+            // Koppel alle geselecteerde kavels aan deze veiling
+            if (dto.KavelIds != null && dto.KavelIds.Any())
+            {
+                foreach (var kavelId in dto.KavelIds)
+                {
+                    var kavel = await _context.Kavels.FindAsync(kavelId);
+                    if (kavel != null)
+                    {
+                        kavel.VeilingId = veiling.Id;
+                    }
+                }
+                await _context.SaveChangesAsync();
+            }
 
             return CreatedAtAction(nameof(GetVeiling), new { id = veiling.Id }, veiling);
         }
 
         // PUT: api/veilingen/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVeiling(int id, Models.Veiling veiling)
         {
@@ -111,6 +163,10 @@ namespace Veiling.Server.Controllers
         }
 
         // DELETE: api/veilingen/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVeiling(int id)
         {
@@ -130,5 +186,13 @@ namespace Veiling.Server.Controllers
         {
             return _context.Veilingen.Any(v => v.Id == id);
         }
+    }
+    
+    public class CreateVeilingDto
+    {
+        public string Naam { get; set; } = string.Empty;
+        public DateTime StartTijd { get; set; }
+        public DateTime EndTijd { get; set; }
+        public List<int> KavelIds { get; set; } = new List<int>();
     }
 }

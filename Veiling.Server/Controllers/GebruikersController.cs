@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Data;
@@ -7,6 +8,7 @@ using Veiling.Server.Models;
 namespace Veiling.Server.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class GebruikersController : ControllerBase
     {
@@ -17,8 +19,11 @@ namespace Veiling.Server.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<IActionResult> Register(GebruikerRegistratie dto, [FromServices] UserManager<Gebruiker> userManager)
+        public async Task<IActionResult> Register(
+            GebruikerRegistratie dto,
+            [FromServices] UserManager<Gebruiker> userManager)
         {
             var user = new Gebruiker
             {
@@ -29,32 +34,38 @@ namespace Veiling.Server.Controllers
             };
 
             var result = await userManager.CreateAsync(user, dto.Password);
-
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);
             }
-
-            return Ok("User registered successfully");
+            return Ok(new { Message = "User Created Succesfully" });
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(GebruikerLogin dto,
-            [FromServices] SignInManager<Gebruiker> signInManager)
+        [Authorize(Roles = 
+        nameof(Role.Administrator)
+        )]
+        [HttpPut("assign-role")]
+        public async Task<IActionResult> AssignRole(
+            string userId,
+            GebruikerRegistratie dto,
+            [FromServices] UserManager<Gebruiker> userManager)
         {
-            var result = await signInManager.PasswordSignInAsync(
-                dto.Email,
-                dto.Password,
-                isPersistent: false,
-                lockoutOnFailure: false);
+            if (!GebruikerExists(userId.ToString())) return NotFound("User not found");
+            
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return NotFound("User not found");
 
-            if (!result.Succeeded)
-                return Unauthorized("Invalid login.");
+            // Assign role
+            var roleResult = await userManager.AddToRoleAsync(user, dto.Role);
+            if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
 
-            return Ok("Logged in successfully");
+            return Ok(new { message = $"Role '{dto.Role}' assigned to user {userId}" });
         }
 
         // GET: api/gebruikers
+        [Authorize(Roles = 
+        nameof(Role.Administrator)
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Gebruiker>>> GetGebruikers()
         {
@@ -65,6 +76,14 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/gebruikers/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier) + ", " +
+        nameof(Role.Gebruiker)
+        )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Gebruiker>> GetGebruiker(string id)
         {
@@ -80,8 +99,13 @@ namespace Veiling.Server.Controllers
 
             return gebruiker;
         }
-
+//TODO: Bedrijfmanager moet alleen zijn eigen bedrijf kunnen opvragen
         // GET: api/gebruikers/bedrijf/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager)
+        )]
         [HttpGet("bedrijf/{bedrijfId}")]
         public async Task<ActionResult<IEnumerable<Gebruiker>>> GetGebruikersByBedrijf(int bedrijfId)
         {
@@ -93,6 +117,7 @@ namespace Veiling.Server.Controllers
         }
 
         // POST: api/gebruikers
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<Gebruiker>> CreateGebruiker(Gebruiker gebruiker)
         {
@@ -101,8 +126,16 @@ namespace Veiling.Server.Controllers
 
             return CreatedAtAction(nameof(GetGebruiker), new { id = gebruiker.Id }, gebruiker);
         }
-
+//TODO: iedereen behalve Admin moet alleen zijn eigen gebruiker kunnen aanpassen
         // PUT: api/gebruikers/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier) + ", " +
+        nameof(Role.Gebruiker)
+        )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGebruiker(string id, Gebruiker gebruiker)
         {
@@ -128,8 +161,17 @@ namespace Veiling.Server.Controllers
 
             return NoContent();
         }
-
+        
+//TODO: iedereen behalve Admin moet alleen zijn eigen gebruiker kunnen aanpassen
         // DELETE: api/gebruikers/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier) + ", " +
+        nameof(Role.Gebruiker)
+        )]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGebruiker(int id)
         {

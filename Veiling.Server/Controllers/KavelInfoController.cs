@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Veiling.Server.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class KavelInfoController : ControllerBase {
     private readonly IAppDbContext _context;
@@ -12,6 +14,13 @@ public class KavelInfoController : ControllerBase {
         _context = context;
     }
 
+[Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+        )]
     [HttpGet("{veilingId}")]
     public ActionResult<IEnumerable<KavelLeverancier>> GetKavels(int veilingId) {
         var kavels = _context.Kavels
@@ -26,5 +35,25 @@ public class KavelInfoController : ControllerBase {
         }
 
         return kavels.ToList();
+    }
+
+    [HttpGet("pending")]
+    public async Task<ActionResult<IEnumerable<KavelLeverancier>>> GetPendingKavels()
+    {
+        var kavels = await _context.Kavels
+            .Include(k => k.Leverancier)
+                .ThenInclude(l => l.Bedrijf)
+            .Include(k => k.Veiling)
+            .Where(k => k.Approved == null)
+            .ToListAsync();
+
+        if (kavels == null || !kavels.Any())
+        {
+            return NotFound();
+        }
+
+        var result = kavels.Select(k => new KavelLeverancier(k, k.Leverancier)).ToList();
+        
+        return Ok(result);
     }
 }

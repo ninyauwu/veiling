@@ -104,3 +104,11 @@
 .simpele-knop.secondary:active .masked-color {
   color: #ffffff;
 }
+
+.simpele-knop:disabled {
+  background-color: #c4c4c4;
+  color: #f0f0f0;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.8;
+}
