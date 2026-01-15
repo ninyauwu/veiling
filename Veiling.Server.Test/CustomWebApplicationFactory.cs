@@ -14,7 +14,17 @@ namespace Veiling.Server.Test
         
             builder.ConfigureServices(services =>
             {
-                services.AddDbContext<IAppDbContext, AppDbContext>(options =>
+                // Remove the existing DbContext registration
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
+
+                // Add in-memory database
+                services.AddDbContext<AppDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("TestDb");
                 });

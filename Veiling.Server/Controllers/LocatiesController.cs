@@ -100,6 +100,40 @@ namespace Veiling.Server.Controllers
 
             return NoContent();
         }
+        
+        // POST: api/locaties
+        [Authorize(Roles = 
+            nameof(Role.Administrator) + ", " + 
+            nameof(Role.Veilingmeester)
+        )]
+        [HttpPost]
+        public async Task<ActionResult<Locatie>> CreateLocatie(Locatie locatie)
+        {
+            _context.Locaties.Add(locatie);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetLocatie), new { id = locatie.Id }, locatie);
+        }
+
+        // DELETE: api/locaties/5
+        [Authorize(Roles = 
+            nameof(Role.Administrator) + ", " + 
+            nameof(Role.Veilingmeester)
+        )]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteLocatie(int id)
+        {
+            var locatie = await _context.Locaties.FindAsync(id);
+            if (locatie == null)
+            {
+                return NotFound();
+            }
+
+            _context.Locaties.Remove(locatie);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
 
         private bool LocatieExists(int id)
         {

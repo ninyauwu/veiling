@@ -17,15 +17,6 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task CreateVeiling_WithValidData_ReturnsCreated()
         {
-            // create locatie first
-            var locatie = new Locatie
-            {
-                Naam = "Amsterdam",
-                KlokId = 1,
-                Actief = true
-            };
-            var locatieResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
-
             var veiling = new Models.Veiling
             {
                 Naam = "Amsterdam Ochtend Veiling",
@@ -48,13 +39,12 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetActieveVeilingen_ReturnsOnlyActiveOnes()
         {
-            // create actieve veiling
             var veiling = new Models.Veiling
             {
                 Naam = "Test Actieve Veiling",
                 Klokduur = 5.0f,
-                StartTijd = DateTime.UtcNow.AddHours(-1), // Started 1 hour ago
-                EndTijd = DateTime.UtcNow.AddHours(2), // Ends in 2 hours
+                StartTijd = DateTime.UtcNow.AddHours(-1),
+                EndTijd = DateTime.UtcNow.AddHours(2),
                 GeldPerTickCode = 0.5f
             };
 
@@ -65,7 +55,6 @@ namespace Veiling.Server.Test.Controllers
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(actieveVeilingen);
-            // Should have at least our created veiling
             Assert.Contains(actieveVeilingen, v => v.Naam == "Test Actieve Veiling");
         }
 
@@ -84,7 +73,6 @@ namespace Veiling.Server.Test.Controllers
             var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
             var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
-            // extend end time
             var newEndTime = DateTime.UtcNow.AddHours(4);
             created!.EndTijd = newEndTime;
             var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
@@ -94,14 +82,12 @@ namespace Veiling.Server.Test.Controllers
             var getResponse = await _client.GetAsync($"/api/veilingen/{created.Id}");
             var updated = await getResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
-            // compare
             Assert.True(Math.Abs((updated!.EndTijd - newEndTime).TotalMinutes) < 1);
         }
 
         [Fact]
         public async Task CreateVeiling_WithEndTimeBeforeStartTime_ReturnsBadRequest()
         {
-            // eindtijd moet na starttijd zijn
             var veiling = new Models.Veiling
             {
                 Naam = "Invalid Veiling",
@@ -118,10 +104,8 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetActieveVeilingen_OnlyReturnsCurrentlyActiveOnes()
         {
-            // Test dat de time-based filtering werkt
             var now = DateTime.UtcNow;
 
-            // Actieve veiling
             var actief = new Models.Veiling
             {
                 Naam = "Actief Nu",
@@ -132,7 +116,6 @@ namespace Veiling.Server.Test.Controllers
             };
             await _client.PostAsJsonAsync("/api/veilingen", actief);
 
-            // Toekomstige veiling
             var toekomst = new Models.Veiling
             {
                 Naam = "Toekomst",
@@ -143,7 +126,6 @@ namespace Veiling.Server.Test.Controllers
             };
             await _client.PostAsJsonAsync("/api/veilingen", toekomst);
 
-            // Afgelopen veiling
             var verleden = new Models.Veiling
             {
                 Naam = "Verleden",
@@ -157,7 +139,6 @@ namespace Veiling.Server.Test.Controllers
             var response = await _client.GetAsync("/api/veilingen/actief");
             var actieveVeilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
 
-            // Alleen "Actief Nu" zou terug moeten komen
             Assert.NotNull(actieveVeilingen);
             Assert.Single(actieveVeilingen);
             Assert.Equal("Actief Nu", actieveVeilingen[0].Naam);
@@ -166,7 +147,6 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task UpdateVeiling_ToInvalidTimeRange_ReturnsBadRequest()
         {
-            // Maak geldige veiling
             var veiling = new Models.Veiling
             {
                 Naam = "Test",
@@ -178,7 +158,6 @@ namespace Veiling.Server.Test.Controllers
             var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
             var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
-            // Update naar ongeldige tijden
             created!.EndTijd = created.StartTijd.AddHours(-1);
             var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
 
@@ -188,6 +167,7 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetAllVeilingen_IncludesLocatieAndVeilingmeesterRelations()
         {
+            // Create locatie first
             var locatie = new Locatie { Naam = "Test Loc", KlokId = 99, Actief = true };
             var locatieResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
             var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
@@ -209,7 +189,6 @@ namespace Veiling.Server.Test.Controllers
 
             var retrieved = veilingen!.FirstOrDefault(v => v.Id == created!.Id);
 
-            // CRITICAL: Test relations are actually loaded
             Assert.NotNull(retrieved);
             Assert.NotNull(retrieved.Locatie);
             Assert.Equal("Test Loc", retrieved.Locatie.Naam);
@@ -246,6 +225,7 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetVeilingenByLocatie_ReturnsCorrectVeilingen()
         {
+            // Create locatie first
             var locatie = new Locatie { Naam = "Test Locatie", KlokId = 10, Actief = true };
             var locatieResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
             var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
