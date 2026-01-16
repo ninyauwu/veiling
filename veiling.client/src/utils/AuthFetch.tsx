@@ -7,13 +7,19 @@ export async function authFetch(url: string, options: RequestInit = {}) {
     throw new Error("No authentication token found");
   }
 
+  const headers: Record<string, string> = {
+    ...(options.headers as Record<string, string> || {}),
+    "Authorization": `Bearer ${token}`,
+  };
+
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  // 3. Pass the computed headers object to fetch
   const response = await fetch(url, {
     ...options,
-    headers: {
-      ...(options.headers || {}),
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    }
+    headers: headers // <--- usage of the variable we created above
   });
 
   // Handle 401 Unauthorized
