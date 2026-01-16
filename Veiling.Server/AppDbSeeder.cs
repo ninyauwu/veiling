@@ -100,6 +100,16 @@ namespace Veiling.Server
                 BedrijfId = bedrijf2.Bedrijfscode
             };
 
+            var gebruiker3 = new Gebruiker
+            {
+                UserName = "verkoper@verkopen.nl",
+                Email = "verkoper@verkopen.nl",
+                Name = "Verkoper Verkopen",
+                PhoneNumber = "612345678",
+                Bedrijfsbeheerder = true,
+                Geverifieerd = true,
+                BedrijfId = bedrijf1.Bedrijfscode
+            };
 
             //Give default password
             if (await userManager.FindByEmailAsync(gebruiker1.Email) == null)
@@ -108,14 +118,19 @@ namespace Veiling.Server
             if (await userManager.FindByEmailAsync(gebruiker2.Email) == null)
                 await userManager.CreateAsync(gebruiker2, "Password123!");
 
+            if (await userManager.FindByEmailAsync(gebruiker3.Email) == null)
+                await userManager.CreateAsync(gebruiker3, "Password123!");
+
             //Reload users
             gebruiker1 = await userManager.FindByEmailAsync(gebruiker1.Email);
             gebruiker2 = await userManager.FindByEmailAsync(gebruiker2.Email);
+            gebruiker3 = await userManager.FindByEmailAsync(gebruiker3.Email);
 
 
             //Give roles
             await userManager.AddToRoleAsync(gebruiker1, nameof(Role.Gebruiker));
             await userManager.AddToRoleAsync(gebruiker2, nameof(Role.Administrator));
+            await userManager.AddToRoleAsync(gebruiker3, nameof(Role.Leverancier));
 
 
             // Veilingmeesters
