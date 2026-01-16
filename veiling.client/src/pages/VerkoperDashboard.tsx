@@ -22,7 +22,7 @@ export default function VerkoperDashboard() {
           // Then update the button:
           <SimpeleKnop 
             appearance="primary"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/invoer")}
           >
             <Plus size={18} />
             Nieuw kavel
