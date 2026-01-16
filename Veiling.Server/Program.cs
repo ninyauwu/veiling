@@ -6,6 +6,7 @@ using Veiling.Server.Models;
 using Microsoft.OpenApi.Models;
 using System.Xml.Serialization;
 using Veiling.Server.Data;
+using Veiling.Server.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -120,6 +121,8 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapIdentityApi<Gebruiker>();
 app.MapFallbackToFile("/index.html");
+app.MapUserEndpoints();
+
 
 app.UseStaticFiles();
 
