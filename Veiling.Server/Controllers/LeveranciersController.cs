@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
@@ -31,6 +32,40 @@ namespace Veiling.Server.Controllers
                 .Include(l => l.Kavels)
                 .ToListAsync();
         }
+
+        [Authorize(Roles = 
+    nameof(Role.Administrator) + ", " + 
+    nameof(Role.Veilingmeester) + ", " + 
+    nameof(Role.Leverancier)
+)]
+[HttpGet("mijn/kavels")]
+public async Task<ActionResult<IEnumerable<KavelListDto>>> GetMijnKavels(
+    [FromServices] UserManager<Gebruiker> userManager)
+{
+    var user = await userManager.GetUserAsync(User);
+    if (user == null || user.BedrijfId == null)
+        return Unauthorized();
+
+    var leverancier = await _context.Leveranciers
+        .Include(l => l.Kavels)
+        .FirstOrDefaultAsync(l => l.BedrijfId == user.BedrijfId);
+
+    if (leverancier == null)
+        return NotFound("Geen leverancier gevonden voor dit bedrijf");
+
+    // 3️⃣ Map de kavels naar DTO
+    var kavelsDto = leverancier.Kavels.Select(k => new KavelListDto
+    {
+        Id = k.Id,
+        Title = k.Naam,
+        Price = (decimal)k.MinimumPrijs,
+        Location = k.LocatieId.ToString() // of k.Veiling.Naam als je naam wilt
+    }).ToList();
+
+    return Ok(kavelsDto);
+}
+
+
 //TODO: Vk3 moet alleen zijn eigen leverancier kunnen opvragen
         // GET: api/leveranciers/5
         [Authorize(Roles = 
