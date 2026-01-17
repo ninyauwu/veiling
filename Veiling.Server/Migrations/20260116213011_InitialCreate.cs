@@ -321,6 +321,7 @@ namespace Veiling.Server.Migrations
                     GeldPerTickCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Approved = table.Column<bool>(type: "bit", nullable: true),
                     Reasoning = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LocatieId = table.Column<int>(type: "int", nullable: false),
                     VeilingId = table.Column<int>(type: "int", nullable: true),
                     LeverancierId = table.Column<int>(type: "int", nullable: true)
                 },

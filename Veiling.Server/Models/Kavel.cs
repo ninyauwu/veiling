@@ -28,6 +28,7 @@
         public string? Reasoning { get; set; } = null;
         
         // Foreign Keys
+        public int LocatieId { get; set; }
         public int? VeilingId { get; set; }
         public int? LeverancierId { get; set; }
         

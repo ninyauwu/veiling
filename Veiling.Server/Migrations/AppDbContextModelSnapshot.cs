@@ -353,6 +353,9 @@ namespace Veiling.Server.Migrations
                     b.Property<int?>("LeverancierId")
                         .HasColumnType("int");
 
+                    b.Property<int>("LocatieId")
+                        .HasColumnType("int");
+
                     b.Property<float>("MaximumPrijs")
                         .HasColumnType("real");
 

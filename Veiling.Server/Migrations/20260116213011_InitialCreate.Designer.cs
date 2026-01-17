@@ -12,7 +12,7 @@ using Veiling.Server;
 namespace Veiling.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260108105523_InitialCreate")]
+    [Migration("20260116213011_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -354,6 +354,9 @@ namespace Veiling.Server.Migrations
                         .HasColumnType("real");
 
                     b.Property<int?>("LeverancierId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LocatieId")
                         .HasColumnType("int");
 
                     b.Property<float>("MaximumPrijs")
