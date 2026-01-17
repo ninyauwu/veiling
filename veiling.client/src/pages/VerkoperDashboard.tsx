@@ -1,26 +1,54 @@
 import { Plus } from "lucide-react";
 import SimpeleKnop from "../components/SimpeleKnop";
 import "./VerkoperDashboard.css";
-  import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { authFetch } from "../utils/AuthFetch";
+import { useEffect, useState } from "react";
 
-// Mock data – replace with API data later
-const kavels = [
-  { id: 1, title: "Kavel 12", location: "Amsterdam", price: 250000 },
-  { id: 2, title: "Kavel 18", location: "Utrecht", price: 310000 },
-];
+type Kavel = {
+  id: number;
+  title: string;
+  location: string;
+  price: number;
+};
 
 export default function VerkoperDashboard() {
   const navigate = useNavigate();
+  const [kavels, setKavels] = useState<Kavel[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  const retrieveKavels = async () => {
+    try {
+      const response = await authFetch("/api/leveranciers/mijn/kavels");
+
+      if (!response.ok) {
+        throw new Error("Kon kavels niet ophalen");
+      }
+
+      const data = await response.json();
+      setKavels(data);
+    } catch (err) {
+      console.error("Fout bij ophalen kavels:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  retrieveKavels();
+}, []);
+
+  if (loading) {
+    return <p className="loading-text">Kavels laden…</p>;
+  }
 
   return (
     <div className="verkoper-page">
       <div className="verkoper-container">
         <div className="verkoper-header">
           <h1 className="verkoper-title">Mijn kavels</h1>
-          const navigate = useNavigate();
 
-          // Then update the button:
-          <SimpeleKnop 
+          <SimpeleKnop
             appearance="primary"
             onClick={() => navigate("/invoer")}
           >
@@ -38,7 +66,9 @@ export default function VerkoperDashboard() {
                 <div className="kavel-content">
                   <h2 className="kavel-title">{kavel.title}</h2>
                   <p className="kavel-location">Locatie: {kavel.location}</p>
-                  <p className="kavel-price">€ {kavel.price.toLocaleString()}</p>
+                  <p className="kavel-price">
+                    € {kavel.price.toLocaleString()}
+                  </p>
                 </div>
               </div>
             ))}
