@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+
 using System.ComponentModel.DataAnnotations;
 
 namespace Veiling.Server.Controllers
@@ -13,13 +16,15 @@ namespace Veiling.Server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly UserManager<Gebruiker> _userManager;
         private readonly ILogger<KavelsController> _logger;
 
-        public KavelsController(AppDbContext context, IWebHostEnvironment environment, ILogger<KavelsController> logger)
+        public KavelsController(AppDbContext context, IWebHostEnvironment environment, ILogger<KavelsController> logger, UserManager<Gebruiker> userManager)
         {
             _context = context;
             _environment = environment;
             _logger = logger;
+            _userManager = userManager;
         }
 
         [HttpPost("upload-image")]
@@ -143,9 +148,24 @@ namespace Veiling.Server.Controllers
                 return BadRequest(new { error = "Validatie mislukt", details = errors });
             }
 
-            var veilingExists = await _context.Veilingen.AnyAsync(v => v.Id == dto.VeilingId);
-            if (!veilingExists)
-                return BadRequest(new { error = $"Veiling met ID {dto.VeilingId} bestaat niet" });
+            // 🔑 1. Haal gebruiker op uit JWT
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return Unauthorized();
+
+            if (user.BedrijfId == null)
+                return BadRequest("Gebruiker heeft geen BedrijfId");
+
+            // 🔑 2. Zoek leverancier via BedrijfId
+            var leverancier = await _context.Leveranciers
+                .FirstOrDefaultAsync(l => l.BedrijfId == user.BedrijfId);
+
+            if (leverancier == null)
+                return BadRequest("Geen leverancier gevonden voor dit bedrijf");
 
             try
             {
@@ -157,7 +177,8 @@ namespace Veiling.Server.Controllers
                     MinimumPrijs = dto.MinimumPrijs,
                     HoeveelheidContainers = dto.Aantal,
                     Keurcode = dto.Ql,
-                    VeilingId = dto.VeilingId,
+                    LocatieId = dto.VeilingId,
+                    LeverancierId = leverancier.Id,
                     StageOfMaturity = dto.Stadium,
                     LengteVanBloemen = dto.Lengte,
                     Kavelkleur = dto.Kleur,
@@ -172,7 +193,7 @@ namespace Veiling.Server.Controllers
                     Karnummer = 0,
                     Rijnummer = 0,
                     NgsCode = 'A',
-                    GeldPerTickCode = string.Empty
+                    GeldPerTickCode = string.Empty,
                 };
 
                 _context.Kavels.Add(kavel);
