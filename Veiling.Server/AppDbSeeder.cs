@@ -210,6 +210,7 @@ namespace Veiling.Server
                 Kavelkleur = "FF0000",
                 Karnummer = 1,
                 Rijnummer = 1,
+                LeverancierId = leverancier1.Id,
                 HoeveelheidContainers = 50,
                 AantalProductenPerContainer = 20,
                 LengteVanBloemen = 60.0f,
@@ -220,7 +221,6 @@ namespace Veiling.Server
                 Fustcode = 123,
                 GeldPerTickCode = "0.5",
                 VeilingId = amsterdamVeiling.Id,
-                LeverancierId = leverancier1.Id
             };
 
             var kavel2 = new Kavel
