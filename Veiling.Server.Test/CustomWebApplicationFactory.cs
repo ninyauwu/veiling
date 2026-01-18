@@ -24,7 +24,7 @@ namespace Veiling.Server.Test
                     services.Remove(descriptor);
                 }
 
-                // Add in-memory database
+                // Add in-memory database - gebruik vaste naam zodat tests dezelfde database delen
                 services.AddDbContext<AppDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("TestDb");
@@ -46,7 +46,6 @@ namespace Veiling.Server.Test
     {
         public Task HandleAsync(AuthorizationHandlerContext context)
         {
-            // Succeed all requirements to bypass authorization
             foreach (var requirement in context.PendingRequirements.ToList())
             {
                 context.Succeed(requirement);

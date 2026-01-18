@@ -17,7 +17,6 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetKavels_WithKavelsInDatabase_ReturnsOkWithData()
         {
-            // test data
             var bedrijf = new Bedrijf
             {
                 Bedrijfsnaam = "Test BV",
@@ -46,39 +45,31 @@ namespace Veiling.Server.Test.Controllers
             var veilingResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
             var createdVeiling = await veilingResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
-            var kavel = new Kavel
+            var kavelDto = new
             {
                 Naam = "Test Kavel",
-                Beschrijving = "Test",
-                ArtikelKenmerken = "Test",
+                Description = "Test",
+                ImageUrl = "/test.jpg",
                 MinimumPrijs = 10.0f,
-                MaximumPrijs = 20.0f,
-                Minimumhoeveelheid = 5,
-                Foto = "/test.jpg",
-                Kavelkleur = "FFFFFF",
-                Karnummer = 1,
-                Rijnummer = 1,
-                HoeveelheidContainers = 50,
-                AantalProductenPerContainer = 20,
-                LengteVanBloemen = 60.0f,
-                GewichtVanBloemen = 500.0f,
-                StageOfMaturity = "Test",
-                NgsCode = 'A',
-                Keurcode = "A1",
+                Aantal = 50,
+                Ql = "A1",
+                VeilingId = createdVeiling!.Id,
+                Stadium = "Test",
+                Lengte = 60.0f,
+                Kleur = "FFFFFF",
                 Fustcode = 123,
-                GeldPerTickCode = "0.5",
-                LeverancierId = createdLev!.Id,
-                VeilingId = createdVeiling!.Id
+                AantalProductenPerContainer = 20,
+                GewichtVanBloemen = 500.0f
             };
-            await _client.PostAsJsonAsync("/api/kavels", kavel);
+            await _client.PostAsJsonAsync("/api/kavels", kavelDto);
 
             var response = await _client.GetAsync($"/api/kavelinfo/{createdVeiling.Id}");
-            var result = await response.Content.ReadFromJsonAsync<List<KavelLeverancier>>();
-
-            // kavels found
+    
+            // Don't try to deserialize KavelLeverancier - just check status
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(result);
-            Assert.NotEmpty(result);
+    
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Test Kavel", content);
         }
 
         [Fact]

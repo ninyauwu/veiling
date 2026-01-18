@@ -213,7 +213,7 @@ namespace Veiling.Server.Test.Controllers
             var createResponse = await _client.PostAsJsonAsync("/api/gebruikers", gebruiker);
             var created = await createResponse.Content.ReadFromJsonAsync<Gebruiker>();
 
-            // delete user
+            // delete user - gebruik string Id in plaats van int
             var deleteResponse = await _client.DeleteAsync($"/api/gebruikers/{created!.Id}");
 
             Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
@@ -222,7 +222,7 @@ namespace Veiling.Server.Test.Controllers
             var getResponse = await _client.GetAsync($"/api/gebruikers/{created.Id}");
             Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
         }
-
+        
         [Fact]
         public async Task Register_WithValidData_CreatesUser()
         {
@@ -232,7 +232,8 @@ namespace Veiling.Server.Test.Controllers
                 FirstName = "New",
                 LastName = "User",
                 PhoneNumber = "0612345678",
-                Password = "SecurePass123!"
+                Password = "SecurePass123!",
+                Role = "" // Voeg lege role toe
             };
 
             var response = await _client.PostAsJsonAsync("/api/gebruikers/register", registratie);
@@ -241,7 +242,7 @@ namespace Veiling.Server.Test.Controllers
             Assert.True(
                 response.StatusCode == HttpStatusCode.OK || 
                 response.StatusCode == HttpStatusCode.Created,
-                $"Expected OK or Created, got {response.StatusCode}"
+                $"Expected OK or Created, got {response.StatusCode}. Error: {await response.Content.ReadAsStringAsync()}"
             );
         }
 

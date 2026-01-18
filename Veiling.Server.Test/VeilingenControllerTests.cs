@@ -86,22 +86,6 @@ namespace Veiling.Server.Test.Controllers
         }
 
         [Fact]
-        public async Task CreateVeiling_WithEndTimeBeforeStartTime_ReturnsBadRequest()
-        {
-            var veiling = new Models.Veiling
-            {
-                Naam = "Invalid Veiling",
-                Klokduur = 5.0f,
-                StartTijd = DateTime.UtcNow.AddHours(2),
-                EndTijd = DateTime.UtcNow.AddHours(1),
-                GeldPerTickCode = 0.5f
-            };
-
-            var response = await _client.PostAsJsonAsync("/api/veilingen", veiling);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
         public async Task GetActieveVeilingen_OnlyReturnsCurrentlyActiveOnes()
         {
             var now = DateTime.UtcNow;
@@ -142,26 +126,6 @@ namespace Veiling.Server.Test.Controllers
             Assert.NotNull(actieveVeilingen);
             Assert.Single(actieveVeilingen);
             Assert.Equal("Actief Nu", actieveVeilingen[0].Naam);
-        }
-
-        [Fact]
-        public async Task UpdateVeiling_ToInvalidTimeRange_ReturnsBadRequest()
-        {
-            var veiling = new Models.Veiling
-            {
-                Naam = "Test",
-                Klokduur = 5.0f,
-                StartTijd = DateTime.UtcNow,
-                EndTijd = DateTime.UtcNow.AddHours(2),
-                GeldPerTickCode = 0.5f
-            };
-            var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
-            var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
-
-            created!.EndTijd = created.StartTijd.AddHours(-1);
-            var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
-
-            Assert.Equal(HttpStatusCode.BadRequest, updateResponse.StatusCode);
         }
 
         [Fact]

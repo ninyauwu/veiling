@@ -17,6 +17,10 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetLocaties_ReturnsAllLocaties_WithAtLeastOneItem()
         {
+            // Create een test locatie eerst
+            var locatie = new Locatie { Naam = "Test Locatie", KlokId = 1, Actief = true };
+            await _client.PostAsJsonAsync("/api/locaties", locatie);
+            
             var response = await _client.GetAsync("/api/locaties");
             var locaties = await response.Content.ReadFromJsonAsync<List<Locatie>>();
 
@@ -29,12 +33,14 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetActieveLocaties_ReturnsOnlyActive_AndIsSubsetOfAll()
         {
-            // haal alle locaties op
+            // Create test locaties
+            await _client.PostAsJsonAsync("/api/locaties", new Locatie { Naam = "Actief", KlokId = 1, Actief = true });
+            await _client.PostAsJsonAsync("/api/locaties", new Locatie { Naam = "Inactief", KlokId = 2, Actief = false });
+            
             var allResponse = await _client.GetAsync("/api/locaties");
             var allLocaties = await allResponse.Content.ReadFromJsonAsync<List<Locatie>>();
             Assert.NotNull(allLocaties);
 
-            // haal alleen actieve locaties op
             var response = await _client.GetAsync("/api/locaties/actief");
             var actieveLocaties = await response.Content.ReadFromJsonAsync<List<Locatie>>();
 
@@ -42,7 +48,6 @@ namespace Veiling.Server.Test.Controllers
             Assert.NotNull(actieveLocaties);
             Assert.All(actieveLocaties!, l => Assert.True(l.Actief));
 
-            // Alle actieve locaties moeten subset zijn van allLocaties
             var allIds = allLocaties!.Select(l => l.Id).ToHashSet();
             Assert.All(actieveLocaties!, l => Assert.Contains(l.Id, allIds));
         }
@@ -50,19 +55,19 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetLocatie_WithExistingId_ReturnsSingleLocatie()
         {
-            // pak eerst een geldige Id uit de lijst
-            var allResponse = await _client.GetAsync("/api/locaties");
-            var allLocaties = await allResponse.Content.ReadFromJsonAsync<List<Locatie>>();
-            Assert.NotNull(allLocaties);
-            var first = allLocaties!.First();
+            // Create locatie eerst
+            var locatie = new Locatie { Naam = "Test Locatie", KlokId = 10, Actief = true };
+            var createResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
+            var created = await createResponse.Content.ReadFromJsonAsync<Locatie>();
 
-            var response = await _client.GetAsync($"/api/locaties/{first.Id}");
-            var locatie = await response.Content.ReadFromJsonAsync<Locatie>();
+            var response = await _client.GetAsync($"/api/locaties/{created!.Id}");
+            var retrieved = await response.Content.ReadFromJsonAsync<Locatie>();
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(locatie);
-            Assert.Equal(first.Id, locatie!.Id);
+            Assert.NotNull(retrieved);
+            Assert.Equal(created.Id, retrieved!.Id);
         }
+
 
         [Fact]
         public async Task GetLocatie_WithNonExistingId_ReturnsNotFound()
@@ -78,42 +83,37 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task UpdateLocatie_WithValidData_UpdatesAndReturnsNoContent()
         {
-            // haal bestaande locatie op
-            var allResponse = await _client.GetAsync("/api/locaties");
-            var allLocaties = await allResponse.Content.ReadFromJsonAsync<List<Locatie>>();
-            Assert.NotNull(allLocaties);
-            var locatie = allLocaties!.First();
+            // Create locatie eerst
+            var locatie = new Locatie { Naam = "Original", KlokId = 5, Actief = true };
+            var createResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
+            var created = await createResponse.Content.ReadFromJsonAsync<Locatie>();
 
-            var originalActief = locatie.Actief;
-            locatie.Actief = !locatie.Actief; 
+            var originalActief = created!.Actief;
+            created.Actief = !created.Actief; 
 
-            // stuur PUT met hetzelfde Id
-            var putResponse = await _client.PutAsJsonAsync($"/api/locaties/{locatie.Id}", locatie);
+            var putResponse = await _client.PutAsJsonAsync($"/api/locaties/{created.Id}", created);
 
-            // response
             Assert.Equal(HttpStatusCode.NoContent, putResponse.StatusCode);
 
-            // Assert dat het ook echt is opgeslagen door opnieuw te fetchen
-            var getResponse = await _client.GetAsync($"/api/locaties/{locatie.Id}");
+            var getResponse = await _client.GetAsync($"/api/locaties/{created.Id}");
             var updatedLocatie = await getResponse.Content.ReadFromJsonAsync<Locatie>();
 
             Assert.NotNull(updatedLocatie);
-            Assert.Equal(locatie.Id, updatedLocatie!.Id);
+            Assert.Equal(created.Id, updatedLocatie!.Id);
             Assert.Equal(!originalActief, updatedLocatie.Actief);
         }
 
         [Fact]
         public async Task UpdateLocatie_WithIdMismatch_ReturnsBadRequest()
         {
-            // haal bestaande locatie op
-            var allResponse = await _client.GetAsync("/api/locaties");
-            var allLocaties = await allResponse.Content.ReadFromJsonAsync<List<Locatie>>();
-            Assert.NotNull(allLocaties);
-            var locatie = allLocaties!.First();
+            // Create locatie eerst
+            var locatie = new Locatie { Naam = "Test", KlokId = 1, Actief = true };
+            var createResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
+            var created = await createResponse.Content.ReadFromJsonAsync<Locatie>();
 
-            var routeId = locatie.Id + 1;
+            var routeId = created!.Id + 1;
 
-            var response = await _client.PutAsJsonAsync($"/api/locaties/{routeId}", locatie);
+            var response = await _client.PutAsJsonAsync($"/api/locaties/{routeId}", created);
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
