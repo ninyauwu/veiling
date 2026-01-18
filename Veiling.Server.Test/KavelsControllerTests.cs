@@ -308,12 +308,120 @@ namespace Veiling.Server.Test.Controllers
             Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
         }
 
-[Fact]
-public async Task GetKavel_WithInvalidId_ReturnsNotFound()
-{
-    var response = await _client.GetAsync("/api/kavels/99999");
-    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-}
+        [Fact]
+        public async Task GetKavel_WithInvalidId_ReturnsNotFound()
+        {
+            var response = await _client.GetAsync("/api/kavels/99999");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+        
+        [Fact]
+        public async Task UploadImage_WithValidImage_ReturnsImageUrl()
+        {
+            // Create a fake image file
+            var imageContent = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 }; // JPEG header
+            var content = new MultipartFormDataContent();
+            var fileContent = new ByteArrayContent(imageContent);
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+            content.Add(fileContent, "image", "test.jpg");
+
+            var response = await _client.PostAsync("/api/kavels/upload-image", content);
+            
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Contains("imageUrl", result);
+        }
+
+        [Fact]
+        public async Task UploadImage_WithNoImage_ReturnsBadRequest()
+        {
+            var content = new MultipartFormDataContent();
+
+            var response = await _client.PostAsync("/api/kavels/upload-image", content);
+            
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UploadImage_WithInvalidFileType_ReturnsBadRequest()
+        {
+            var content = new MultipartFormDataContent();
+            var fileContent = new ByteArrayContent(new byte[] { 0x00, 0x01, 0x02 });
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/pdf");
+            content.Add(fileContent, "image", "test.pdf");
+
+            var response = await _client.PostAsync("/api/kavels/upload-image", content);
+            
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateKavel_WithInvalidData_ReturnsBadRequest()
+        {
+            // Missing required fields
+            var invalidDto = new
+            {
+                Naam = "", // Empty naam
+                MinimumPrijs = -5.0f // Negative price
+            };
+
+            var response = await _client.PostAsJsonAsync("/api/kavels", invalidDto);
+            
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateKavel_WithInvalidValidation_ReturnsBadRequest()
+        {
+            var leverancier = await CreateTestLeverancier();
+            
+            var veiling = new Models.Veiling
+            {
+                Naam = "Test Veiling",
+                Klokduur = 5.0f,
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                GeldPerTickCode = 0.5f
+            };
+            var veilingResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
+            var createdVeiling = await veilingResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+            
+            var kavelDto = new
+            {
+                Naam = "Test Kavel",
+                Description = "Test",
+                ImageUrl = "/test.jpg",
+                MinimumPrijs = 10.0f,
+                Aantal = 10,
+                Ql = "A1",
+                VeilingId = createdVeiling!.Id,
+                Stadium = "Test",
+                Lengte = 50.0f,
+                Kleur = "FFFFFF",
+                Fustcode = 100,
+                AantalProductenPerContainer = 10,
+                GewichtVanBloemen = 400.0f
+            };
+            var createResponse = await _client.PostAsJsonAsync("/api/kavels", kavelDto);
+            var created = await createResponse.Content.ReadFromJsonAsync<Kavel>();
+
+            // Try to update with invalid data
+            created!.MinimumPrijs = -10.0f; // Negative price
+            created.HoeveelheidContainers = -5; // Negative containers
+            
+            var updateResponse = await _client.PutAsJsonAsync($"/api/kavels/{created.Id}", created);
+            
+            Assert.Equal(HttpStatusCode.BadRequest, updateResponse.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetKavel_WithInvalidId_ReturnsBadRequest()
+        {
+            var response = await _client.GetAsync("/api/kavels/0"); // Invalid ID
+            
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
     }
 }
 
