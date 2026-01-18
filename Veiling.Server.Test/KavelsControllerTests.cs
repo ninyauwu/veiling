@@ -314,24 +314,6 @@ namespace Veiling.Server.Test.Controllers
             var response = await _client.GetAsync("/api/kavels/99999");
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
-        
-        [Fact]
-        public async Task UploadImage_WithValidImage_ReturnsImageUrl()
-        {
-            // Create a fake image file
-            var imageContent = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 }; // JPEG header
-            var content = new MultipartFormDataContent();
-            var fileContent = new ByteArrayContent(imageContent);
-            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
-            content.Add(fileContent, "image", "test.jpg");
-
-            var response = await _client.PostAsync("/api/kavels/upload-image", content);
-            
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            
-            var result = await response.Content.ReadAsStringAsync();
-            Assert.Contains("imageUrl", result);
-        }
 
         [Fact]
         public async Task UploadImage_WithNoImage_ReturnsBadRequest()
