@@ -91,44 +91,45 @@ namespace Veiling.Server.Test.Controllers
             var now = DateTime.UtcNow;
             var uniqueId = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var actief = new Models.Veiling
+            // Create actieve veiling
+            var actiefDto = new
             {
                 Naam = $"Actief Nu {uniqueId}",
-                Klokduur = 5.0f,
                 StartTijd = now.AddHours(-1),
                 EndTijd = now.AddHours(1),
-                GeldPerTickCode = 0.5f
+                KavelIds = new List<int>()
             };
-            await _client.PostAsJsonAsync("/api/veilingen", actief);
+            var actiefResponse = await _client.PostAsJsonAsync("/api/veilingen", actiefDto);
+            var actiefCreated = await actiefResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
-            var toekomst = new Models.Veiling
+            // Create toekomstige veiling
+            var toekomstDto = new
             {
                 Naam = $"Toekomst {uniqueId}",
-                Klokduur = 5.0f,
                 StartTijd = now.AddHours(2),
                 EndTijd = now.AddHours(4),
-                GeldPerTickCode = 0.5f
+                KavelIds = new List<int>()
             };
-            await _client.PostAsJsonAsync("/api/veilingen", toekomst);
+            await _client.PostAsJsonAsync("/api/veilingen", toekomstDto);
 
-            var verleden = new Models.Veiling
+            // Create verleden veiling
+            var verledenDto = new
             {
                 Naam = $"Verleden {uniqueId}",
-                Klokduur = 5.0f,
                 StartTijd = now.AddHours(-3),
                 EndTijd = now.AddHours(-1),
-                GeldPerTickCode = 0.5f
+                KavelIds = new List<int>()
             };
-            await _client.PostAsJsonAsync("/api/veilingen", verleden);
+            await _client.PostAsJsonAsync("/api/veilingen", verledenDto);
 
             var response = await _client.GetAsync("/api/veilingen/actief");
             var actieveVeilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
 
             Assert.NotNull(actieveVeilingen);
-            // Check alleen dat onze actieve veiling erin zit, niet hoeveel er totaal zijn
-            Assert.Contains(actieveVeilingen, v => v.Naam == $"Actief Nu {uniqueId}");
-            Assert.DoesNotContain(actieveVeilingen, v => v.Naam == $"Toekomst {uniqueId}");
-            Assert.DoesNotContain(actieveVeilingen, v => v.Naam == $"Verleden {uniqueId}");
+            // Check dat onze specifieke actieve veiling erin zit via ID
+            Assert.Contains(actieveVeilingen, v => v.Id == actiefCreated!.Id);
+            Assert.DoesNotContain(actieveVeilingen, v => v.Naam.Contains($"Toekomst {uniqueId}"));
+            Assert.DoesNotContain(actieveVeilingen, v => v.Naam.Contains($"Verleden {uniqueId}"));
         }
 
         [Fact]
@@ -139,29 +140,32 @@ namespace Veiling.Server.Test.Controllers
             var locatieResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
             var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
 
-            var veiling = new Models.Veiling
+            // Create veiling via DTO (zonder locatie)
+            var veilingDto = new
             {
-                Naam = $"Relation Test Veiling {Guid.NewGuid()}", // Unique naam
-                Klokduur = 5.0f,
+                Naam = $"Relation Test Veiling {Guid.NewGuid()}",
                 StartTijd = DateTime.UtcNow,
                 EndTijd = DateTime.UtcNow.AddHours(2),
-                GeldPerTickCode = 0.5f,
-                LocatieId = createdLocatie!.Id
+                KavelIds = new List<int>()
             };
-            var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
+            var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veilingDto);
             var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+
+            // Update veiling met locatie via PUT
+            created!.LocatieId = createdLocatie!.Id;
+            await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
 
             // Get all veilingen and find ours
             var response = await _client.GetAsync("/api/veilingen");
             var veilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
 
-            var retrieved = veilingen!.FirstOrDefault(v => v.Id == created!.Id);
+            var retrieved = veilingen!.FirstOrDefault(v => v.Id == created.Id);
 
             Assert.NotNull(retrieved);
             Assert.NotNull(retrieved.Locatie);
             Assert.Equal("Test Loc Unique", retrieved.Locatie.Naam);
         }
-
+        
         [Fact]
         public async Task GetVeiling_WithInvalidId_ReturnsNotFound()
         {
@@ -199,16 +203,21 @@ namespace Veiling.Server.Test.Controllers
             var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
 
             var uniqueName = $"Veiling voor locatie {Guid.NewGuid()}";
-            var veiling1 = new Models.Veiling
+    
+            // Create via DTO
+            var veilingDto = new
             {
                 Naam = uniqueName,
-                Klokduur = 5.0f,
                 StartTijd = DateTime.UtcNow,
                 EndTijd = DateTime.UtcNow.AddHours(2),
-                GeldPerTickCode = 0.5f,
-                LocatieId = createdLocatie!.Id
+                KavelIds = new List<int>()
             };
-            await _client.PostAsJsonAsync("/api/veilingen", veiling1);
+            var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veilingDto);
+            var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+    
+            // Update met locatie
+            created!.LocatieId = createdLocatie!.Id;
+            await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
 
             var response = await _client.GetAsync($"/api/veilingen/locatie/{createdLocatie.Id}");
             var veilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();

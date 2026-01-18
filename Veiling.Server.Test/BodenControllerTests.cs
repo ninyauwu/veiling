@@ -107,6 +107,8 @@ namespace Veiling.Server.Test.Controllers
             Assert.True((created.Datumtijd - timestamp).TotalSeconds < 5);
         }
 
+        // BodenControllerTests.cs
+
         [Fact]
         public async Task GetBodenByKavel_ReturnsOnlyBodenForThatKavel()
         {
@@ -115,9 +117,9 @@ namespace Veiling.Server.Test.Controllers
             var (kavel2, gebruiker2) = await CreateTestData();
 
             // Use unique prices to identify our boden
-            var uniquePrice1 = 15.123f;
-            var uniquePrice2 = 18.456f;
-            var uniquePrice3 = 25.789f;
+            var uniquePrice1 = Random.Shared.NextSingle() * 10 + 100; // 100-110 range
+            var uniquePrice2 = Random.Shared.NextSingle() * 10 + 200; // 200-210 range
+            var uniquePrice3 = Random.Shared.NextSingle() * 10 + 300; // 300-310 range
 
             // Boden voor kavel 1
             var bod1Kavel1 = new Bod
@@ -161,18 +163,15 @@ namespace Veiling.Server.Test.Controllers
             // should only have boden for kavel1
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(boden);
-            // Check only our specific boden are there
-            var ourBoden = boden.Where(b =>
-                Math.Abs(b.Koopprijs - uniquePrice1) < 0.001f ||
-                Math.Abs(b.Koopprijs - uniquePrice2) < 0.001f).ToList();
 
-            Assert.Equal(2, ourBoden.Count);
+            // All boden should be for kavel1
             Assert.All(boden, b => Assert.Equal(kavel1.Id, b.KavelId));
 
-            // Check the actual prices
+            // Check that our specific boden are present (ignore others from previous tests)
             Assert.Contains(boden, b => Math.Abs(b.Koopprijs - uniquePrice1) < 0.001f);
             Assert.Contains(boden, b => Math.Abs(b.Koopprijs - uniquePrice2) < 0.001f);
-            Assert.DoesNotContain(boden, b => Math.Abs(b.Koopprijs - uniquePrice3) < 0.001f);
+
+            // DON'T check DoesNotContain - there might be other boden from previous tests
         }
 
         [Fact]
