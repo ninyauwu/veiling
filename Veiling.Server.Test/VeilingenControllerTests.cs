@@ -89,10 +89,11 @@ namespace Veiling.Server.Test.Controllers
         public async Task GetActieveVeilingen_OnlyReturnsCurrentlyActiveOnes()
         {
             var now = DateTime.UtcNow;
+            var uniqueId = Guid.NewGuid().ToString().Substring(0, 8);
 
             var actief = new Models.Veiling
             {
-                Naam = "Actief Nu",
+                Naam = $"Actief Nu {uniqueId}",
                 Klokduur = 5.0f,
                 StartTijd = now.AddHours(-1),
                 EndTijd = now.AddHours(1),
@@ -102,7 +103,7 @@ namespace Veiling.Server.Test.Controllers
 
             var toekomst = new Models.Veiling
             {
-                Naam = "Toekomst",
+                Naam = $"Toekomst {uniqueId}",
                 Klokduur = 5.0f,
                 StartTijd = now.AddHours(2),
                 EndTijd = now.AddHours(4),
@@ -112,7 +113,7 @@ namespace Veiling.Server.Test.Controllers
 
             var verleden = new Models.Veiling
             {
-                Naam = "Verleden",
+                Naam = $"Verleden {uniqueId}",
                 Klokduur = 5.0f,
                 StartTijd = now.AddHours(-3),
                 EndTijd = now.AddHours(-1),
@@ -124,21 +125,23 @@ namespace Veiling.Server.Test.Controllers
             var actieveVeilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
 
             Assert.NotNull(actieveVeilingen);
-            Assert.Single(actieveVeilingen);
-            Assert.Equal("Actief Nu", actieveVeilingen[0].Naam);
+            // Check alleen dat onze actieve veiling erin zit, niet hoeveel er totaal zijn
+            Assert.Contains(actieveVeilingen, v => v.Naam == $"Actief Nu {uniqueId}");
+            Assert.DoesNotContain(actieveVeilingen, v => v.Naam == $"Toekomst {uniqueId}");
+            Assert.DoesNotContain(actieveVeilingen, v => v.Naam == $"Verleden {uniqueId}");
         }
 
         [Fact]
         public async Task GetAllVeilingen_IncludesLocatieAndVeilingmeesterRelations()
         {
             // Create locatie first
-            var locatie = new Locatie { Naam = "Test Loc", KlokId = 99, Actief = true };
+            var locatie = new Locatie { Naam = "Test Loc Unique", KlokId = 99, Actief = true };
             var locatieResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
             var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
 
             var veiling = new Models.Veiling
             {
-                Naam = "Relation Test Veiling",
+                Naam = $"Relation Test Veiling {Guid.NewGuid()}", // Unique naam
                 Klokduur = 5.0f,
                 StartTijd = DateTime.UtcNow,
                 EndTijd = DateTime.UtcNow.AddHours(2),
@@ -148,6 +151,7 @@ namespace Veiling.Server.Test.Controllers
             var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
             var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
+            // Get all veilingen and find ours
             var response = await _client.GetAsync("/api/veilingen");
             var veilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
 
@@ -155,7 +159,7 @@ namespace Veiling.Server.Test.Controllers
 
             Assert.NotNull(retrieved);
             Assert.NotNull(retrieved.Locatie);
-            Assert.Equal("Test Loc", retrieved.Locatie.Naam);
+            Assert.Equal("Test Loc Unique", retrieved.Locatie.Naam);
         }
 
         [Fact]
@@ -189,14 +193,15 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetVeilingenByLocatie_ReturnsCorrectVeilingen()
         {
-            // Create locatie first
-            var locatie = new Locatie { Naam = "Test Locatie", KlokId = 10, Actief = true };
+            // Create unique locatie
+            var locatie = new Locatie { Naam = $"Locatie {Guid.NewGuid()}", KlokId = 10, Actief = true };
             var locatieResponse = await _client.PostAsJsonAsync("/api/locaties", locatie);
             var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
 
+            var uniqueName = $"Veiling voor locatie {Guid.NewGuid()}";
             var veiling1 = new Models.Veiling
             {
-                Naam = "Veiling voor locatie",
+                Naam = uniqueName,
                 Klokduur = 5.0f,
                 StartTijd = DateTime.UtcNow,
                 EndTijd = DateTime.UtcNow.AddHours(2),
@@ -210,7 +215,7 @@ namespace Veiling.Server.Test.Controllers
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(veilingen);
-            Assert.Contains(veilingen, v => v.Naam == "Veiling voor locatie");
+            Assert.Contains(veilingen, v => v.Naam == uniqueName);
         }
 
         [Fact]

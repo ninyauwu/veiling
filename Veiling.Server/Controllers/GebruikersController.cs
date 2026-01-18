@@ -173,7 +173,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Gebruiker)
         )]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGebruiker(int id)
+        public async Task<IActionResult> DeleteGebruiker(string id) 
         {
             var gebruiker = await _context.Gebruikers.FindAsync(id);
             if (gebruiker == null)

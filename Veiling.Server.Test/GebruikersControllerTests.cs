@@ -213,12 +213,11 @@ namespace Veiling.Server.Test.Controllers
             var createResponse = await _client.PostAsJsonAsync("/api/gebruikers", gebruiker);
             var created = await createResponse.Content.ReadFromJsonAsync<Gebruiker>();
 
-            // delete user - gebruik string Id in plaats van int
+            // Use string Id (after fixing backend)
             var deleteResponse = await _client.DeleteAsync($"/api/gebruikers/{created!.Id}");
 
             Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
-            // user is gone
             var getResponse = await _client.GetAsync($"/api/gebruikers/{created.Id}");
             Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
         }

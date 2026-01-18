@@ -110,16 +110,21 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetBodenByKavel_ReturnsOnlyBodenForThatKavel()
         {
-            // create 2 kavels with different boden
+            // create 2 unique kavels with different boden
             var (kavel1, gebruiker1) = await CreateTestData();
             var (kavel2, gebruiker2) = await CreateTestData();
+
+            // Use unique prices to identify our boden
+            var uniquePrice1 = 15.123f;
+            var uniquePrice2 = 18.456f;
+            var uniquePrice3 = 25.789f;
 
             // Boden voor kavel 1
             var bod1Kavel1 = new Bod
             {
                 Datumtijd = DateTime.Now,
                 HoeveelheidContainers = 10,
-                Koopprijs = 15.0f,
+                Koopprijs = uniquePrice1,
                 Betaald = false,
                 GebruikerId = gebruiker1.Id,
                 KavelId = kavel1.Id
@@ -130,7 +135,7 @@ namespace Veiling.Server.Test.Controllers
             {
                 Datumtijd = DateTime.Now,
                 HoeveelheidContainers = 20,
-                Koopprijs = 18.0f,
+                Koopprijs = uniquePrice2,
                 Betaald = false,
                 GebruikerId = gebruiker1.Id,
                 KavelId = kavel1.Id
@@ -142,7 +147,7 @@ namespace Veiling.Server.Test.Controllers
             {
                 Datumtijd = DateTime.Now,
                 HoeveelheidContainers = 5,
-                Koopprijs = 25.0f,
+                Koopprijs = uniquePrice3,
                 Betaald = false,
                 GebruikerId = gebruiker2.Id,
                 KavelId = kavel2.Id
@@ -156,13 +161,18 @@ namespace Veiling.Server.Test.Controllers
             // should only have boden for kavel1
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(boden);
-            Assert.Equal(2, boden.Count);
+            // Check only our specific boden are there
+            var ourBoden = boden.Where(b =>
+                Math.Abs(b.Koopprijs - uniquePrice1) < 0.001f ||
+                Math.Abs(b.Koopprijs - uniquePrice2) < 0.001f).ToList();
+
+            Assert.Equal(2, ourBoden.Count);
             Assert.All(boden, b => Assert.Equal(kavel1.Id, b.KavelId));
 
             // Check the actual prices
-            Assert.Contains(boden, b => b.Koopprijs == 15.0f);
-            Assert.Contains(boden, b => b.Koopprijs == 18.0f);
-            Assert.DoesNotContain(boden, b => b.Koopprijs == 25.0f);
+            Assert.Contains(boden, b => Math.Abs(b.Koopprijs - uniquePrice1) < 0.001f);
+            Assert.Contains(boden, b => Math.Abs(b.Koopprijs - uniquePrice2) < 0.001f);
+            Assert.DoesNotContain(boden, b => Math.Abs(b.Koopprijs - uniquePrice3) < 0.001f);
         }
 
         [Fact]
@@ -173,11 +183,31 @@ namespace Veiling.Server.Test.Controllers
             // Create multiple boden with different prices
             var bodenData = new[]
             {
-                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 5, Koopprijs = 12.50f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id },
-                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 10, Koopprijs = 18.75f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id },
-                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 15, Koopprijs = 25.00f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id },
-                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 8, Koopprijs = 14.25f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id },
-                new Bod { Datumtijd = DateTime.Now, HoeveelheidContainers = 12, Koopprijs = 21.00f, Betaald = false, GebruikerId = gebruiker.Id, KavelId = kavel.Id }
+                new Bod
+                {
+                    Datumtijd = DateTime.Now, HoeveelheidContainers = 5, Koopprijs = 12.50f, Betaald = false,
+                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
+                },
+                new Bod
+                {
+                    Datumtijd = DateTime.Now, HoeveelheidContainers = 10, Koopprijs = 18.75f, Betaald = false,
+                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
+                },
+                new Bod
+                {
+                    Datumtijd = DateTime.Now, HoeveelheidContainers = 15, Koopprijs = 25.00f, Betaald = false,
+                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
+                },
+                new Bod
+                {
+                    Datumtijd = DateTime.Now, HoeveelheidContainers = 8, Koopprijs = 14.25f, Betaald = false,
+                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
+                },
+                new Bod
+                {
+                    Datumtijd = DateTime.Now, HoeveelheidContainers = 12, Koopprijs = 21.00f, Betaald = false,
+                    GebruikerId = gebruiker.Id, KavelId = kavel.Id
+                }
             };
 
             foreach (var bod in bodenData)
@@ -267,12 +297,12 @@ namespace Veiling.Server.Test.Controllers
             Assert.Contains(boden, b => b.Koopprijs == 15.0f);
             Assert.DoesNotContain(boden, b => b.Koopprijs == 99.0f);
         }
-        
+
         [Fact]
         public async Task GetAllBoden_ReturnsAllBids()
         {
             var (kavel, gebruiker) = await CreateTestData();
-            
+
             // meerdere boden
             await _client.PostAsJsonAsync("/api/boden", new Bod
             {
@@ -283,7 +313,7 @@ namespace Veiling.Server.Test.Controllers
                 GebruikerId = gebruiker.Id,
                 KavelId = kavel.Id
             });
-            
+
             await _client.PostAsJsonAsync("/api/boden", new Bod
             {
                 Datumtijd = DateTime.Now,
@@ -306,7 +336,7 @@ namespace Veiling.Server.Test.Controllers
         public async Task GetBod_WithValidId_ReturnsBod()
         {
             var (kavel, gebruiker) = await CreateTestData();
-            
+
             var bod = new Bod
             {
                 Datumtijd = DateTime.Now,
@@ -341,7 +371,7 @@ namespace Veiling.Server.Test.Controllers
         public async Task UpdateBod_ChangesData()
         {
             var (kavel, gebruiker) = await CreateTestData();
-            
+
             var bod = new Bod
             {
                 Datumtijd = DateTime.Now,
@@ -372,7 +402,7 @@ namespace Veiling.Server.Test.Controllers
         public async Task DeleteBod_RemovesFromDatabase()
         {
             var (kavel, gebruiker) = await CreateTestData();
-            
+
             var bod = new Bod
             {
                 Datumtijd = DateTime.Now,
