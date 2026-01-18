@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -29,11 +30,28 @@ namespace Veiling.Server.Test
                     options.UseInMemoryDatabase("TestDb");
                 });
 
+                // Disable authorization for tests
+                services.AddSingleton<IAuthorizationHandler, AllowAnonymousAuthorizationHandler>();
+
                 var sp = services.BuildServiceProvider();
                 using var scope = sp.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 db.Database.EnsureCreated();
             });
+        }
+    }
+
+    // Authorization handler that allows all requests in test environment
+    public class AllowAnonymousAuthorizationHandler : IAuthorizationHandler
+    {
+        public Task HandleAsync(AuthorizationHandlerContext context)
+        {
+            // Succeed all requirements to bypass authorization
+            foreach (var requirement in context.PendingRequirements.ToList())
+            {
+                context.Succeed(requirement);
+            }
+            return Task.CompletedTask;
         }
     }
 }
