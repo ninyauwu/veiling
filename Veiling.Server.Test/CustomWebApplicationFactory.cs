@@ -29,7 +29,7 @@ namespace Veiling.Server.Test
                     services.Remove(descriptor);
                 }
 
-                // Add in-memory database - gebruik vaste naam zodat tests dezelfde database delen
+                // Add in-memory database
                 services.AddDbContext<AppDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("TestDb");

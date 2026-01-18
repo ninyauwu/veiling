@@ -10,9 +10,9 @@ namespace Veiling.Server.Controllers
     [Route("api/[controller]")]
     public class VeilingenController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public VeilingenController(AppDbContext context)
+        public VeilingenController(IAppDbContext context)
         {
             _context = context;
         }
@@ -210,3 +210,4 @@ namespace Veiling.Server.Controllers
         public List<int> KavelIds { get; set; } = new List<int>();
     }
 }
+
