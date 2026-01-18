@@ -161,7 +161,7 @@ namespace Veiling.Server.Test.Controllers
             var createResponse = await _client.PostAsJsonAsync("/api/kavels", kavelDto);
             var created = await createResponse.Content.ReadFromJsonAsync<Kavel>();
 
-            // update multiple fields - now use the full Kavel object for PUT
+            // update fields
             created!.Naam = "UPDATED NAAM";
             created.Beschrijving = "UPDATED BESCHRIJVING";
             created.MinimumPrijs = 99.99f;

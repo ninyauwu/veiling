@@ -88,11 +88,10 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetActieveVeilingen_OnlyReturnsCurrentlyActiveOnes()
         {
-            // Use DateTime.Now instead of DateTime.UtcNow to match controller
             var now = DateTime.Now;
             var uniqueId = Guid.NewGuid().ToString().Substring(0, 8);
 
-            // Create actieve veiling - give it a wider time window to avoid edge cases
+            // Create actieve veiling
             var actiefDto = new
             {
                 Naam = $"Actief Nu {uniqueId}",
@@ -176,7 +175,7 @@ namespace Veiling.Server.Test.Controllers
             var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{veilingToUpdate.Id}", veilingToUpdate);
             Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
 
-            // GET opnieuw - maar gebruik GetAll om de Include te testen
+            // GET opnieuw, gebruik GetAll om de Include te testen
             var getAllResponse = await _client.GetAsync("/api/veilingen");
             var allVeilingen = await getAllResponse.Content.ReadFromJsonAsync<List<Models.Veiling>>();
             

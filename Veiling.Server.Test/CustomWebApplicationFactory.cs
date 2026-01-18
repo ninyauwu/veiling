@@ -43,7 +43,7 @@ namespace Veiling.Server.Test
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 db.Database.EnsureCreated();
                 
-                // Initialize roles for testing - only once
+                // Initialize roles for testing
                 lock (_lock)
                 {
                     if (!_rolesInitialized)

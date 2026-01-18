@@ -170,8 +170,6 @@ namespace Veiling.Server.Test.Controllers
             // Check that our specific boden are present (ignore others from previous tests)
             Assert.Contains(boden, b => Math.Abs(b.Koopprijs - uniquePrice1) < 0.001f);
             Assert.Contains(boden, b => Math.Abs(b.Koopprijs - uniquePrice2) < 0.001f);
-
-            // DON'T check DoesNotContain - there might be other boden from previous tests
         }
 
         [Fact]
