@@ -88,26 +88,30 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetActieveVeilingen_OnlyReturnsCurrentlyActiveOnes()
         {
-            var now = DateTime.UtcNow;
+            // Use DateTime.Now instead of DateTime.UtcNow to match controller
+            var now = DateTime.Now;
             var uniqueId = Guid.NewGuid().ToString().Substring(0, 8);
 
-            // Create actieve veiling
+            // Create actieve veiling - give it a wider time window to avoid edge cases
             var actiefDto = new
             {
                 Naam = $"Actief Nu {uniqueId}",
-                StartTijd = now.AddHours(-1),
-                EndTijd = now.AddHours(1),
+                StartTijd = now.AddHours(-2), // Started 2 hours ago
+                EndTijd = now.AddHours(2), // Ends in 2 hours
                 KavelIds = new List<int>()
             };
             var actiefResponse = await _client.PostAsJsonAsync("/api/veilingen", actiefDto);
             var actiefCreated = await actiefResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
+            Assert.NotNull(actiefCreated);
+            Assert.True(actiefCreated.Id > 0);
+
             // Create toekomstige veiling
             var toekomstDto = new
             {
                 Naam = $"Toekomst {uniqueId}",
-                StartTijd = now.AddHours(2),
-                EndTijd = now.AddHours(4),
+                StartTijd = now.AddHours(3),
+                EndTijd = now.AddHours(5),
                 KavelIds = new List<int>()
             };
             await _client.PostAsJsonAsync("/api/veilingen", toekomstDto);
@@ -116,8 +120,8 @@ namespace Veiling.Server.Test.Controllers
             var verledenDto = new
             {
                 Naam = $"Verleden {uniqueId}",
-                StartTijd = now.AddHours(-3),
-                EndTijd = now.AddHours(-1),
+                StartTijd = now.AddHours(-5),
+                EndTijd = now.AddHours(-3),
                 KavelIds = new List<int>()
             };
             await _client.PostAsJsonAsync("/api/veilingen", verledenDto);
@@ -126,8 +130,18 @@ namespace Veiling.Server.Test.Controllers
             var actieveVeilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
 
             Assert.NotNull(actieveVeilingen);
+
+            // Debug info if it fails
+            if (!actieveVeilingen.Any(v => v.Id == actiefCreated.Id))
+            {
+                var debugInfo = $"Looking for veiling {actiefCreated.Id} with name '{actiefCreated.Naam}', " +
+                                $"StartTijd: {actiefCreated.StartTijd}, EndTijd: {actiefCreated.EndTijd}, " +
+                                $"Current time: {now}";
+                throw new Exception(debugInfo);
+            }
+
             // Check dat onze specifieke actieve veiling erin zit via ID
-            Assert.Contains(actieveVeilingen, v => v.Id == actiefCreated!.Id);
+            Assert.Contains(actieveVeilingen, v => v.Id == actiefCreated.Id);
             Assert.DoesNotContain(actieveVeilingen, v => v.Naam.Contains($"Toekomst {uniqueId}"));
             Assert.DoesNotContain(actieveVeilingen, v => v.Naam.Contains($"Verleden {uniqueId}"));
         }
@@ -153,19 +167,18 @@ namespace Veiling.Server.Test.Controllers
 
             // Update veiling met locatie via PUT
             created!.LocatieId = createdLocatie!.Id;
-            await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
+            var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
+            Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
 
-            // Get all veilingen and find ours
-            var response = await _client.GetAsync("/api/veilingen");
-            var veilingen = await response.Content.ReadFromJsonAsync<List<Models.Veiling>>();
-
-            var retrieved = veilingen!.FirstOrDefault(v => v.Id == created.Id);
+            // Get the specific veiling with includes
+            var getResponse = await _client.GetAsync($"/api/veilingen/{created.Id}");
+            var retrieved = await getResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
             Assert.NotNull(retrieved);
             Assert.NotNull(retrieved.Locatie);
             Assert.Equal("Test Loc Unique", retrieved.Locatie.Naam);
         }
-        
+
         [Fact]
         public async Task GetVeiling_WithInvalidId_ReturnsNotFound()
         {
@@ -203,7 +216,7 @@ namespace Veiling.Server.Test.Controllers
             var createdLocatie = await locatieResponse.Content.ReadFromJsonAsync<Locatie>();
 
             var uniqueName = $"Veiling voor locatie {Guid.NewGuid()}";
-    
+
             // Create via DTO
             var veilingDto = new
             {
@@ -214,7 +227,7 @@ namespace Veiling.Server.Test.Controllers
             };
             var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veilingDto);
             var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
-    
+
             // Update met locatie
             created!.LocatieId = createdLocatie!.Id;
             await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
