@@ -33,23 +33,38 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetActieveLocaties_ReturnsOnlyActive_AndIsSubsetOfAll()
         {
-            // Create test locaties
-            await _client.PostAsJsonAsync("/api/locaties", new Locatie { Naam = "Actief", KlokId = 1, Actief = true });
-            await _client.PostAsJsonAsync("/api/locaties", new Locatie { Naam = "Inactief", KlokId = 2, Actief = false });
-            
-            var allResponse = await _client.GetAsync("/api/locaties");
-            var allLocaties = await allResponse.Content.ReadFromJsonAsync<List<Locatie>>();
-            Assert.NotNull(allLocaties);
+            // Create test locaties met unique namen
+            var uniqueId = Guid.NewGuid().ToString().Substring(0, 8);
+    
+            var actief1 = new Locatie { Naam = $"Actief1_{uniqueId}", KlokId = 1, Actief = true };
+            var actief2 = new Locatie { Naam = $"Actief2_{uniqueId}", KlokId = 2, Actief = true };
+            var inactief = new Locatie { Naam = $"Inactief_{uniqueId}", KlokId = 3, Actief = false };
+    
+            var resp1 = await _client.PostAsJsonAsync("/api/locaties", actief1);
+            var created1 = await resp1.Content.ReadFromJsonAsync<Locatie>();
+    
+            var resp2 = await _client.PostAsJsonAsync("/api/locaties", actief2);
+            var created2 = await resp2.Content.ReadFromJsonAsync<Locatie>();
+    
+            var resp3 = await _client.PostAsJsonAsync("/api/locaties", inactief);
+            var created3 = await resp3.Content.ReadFromJsonAsync<Locatie>();
 
+            // Get alleen actieve locaties
             var response = await _client.GetAsync("/api/locaties/actief");
             var actieveLocaties = await response.Content.ReadFromJsonAsync<List<Locatie>>();
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(actieveLocaties);
+    
+            // Check dat onze twee actieve locaties erin zitten
+            Assert.Contains(actieveLocaties, l => l.Id == created1!.Id);
+            Assert.Contains(actieveLocaties, l => l.Id == created2!.Id);
+    
+            // Check dat onze inactieve locatie er niet in zit
+            Assert.DoesNotContain(actieveLocaties, l => l.Id == created3!.Id);
+    
+            // Alle actieve locaties moeten Actief = true hebben
             Assert.All(actieveLocaties!, l => Assert.True(l.Actief));
-
-            var allIds = allLocaties!.Select(l => l.Id).ToHashSet();
-            Assert.All(actieveLocaties!, l => Assert.Contains(l.Id, allIds));
         }
 
         [Fact]

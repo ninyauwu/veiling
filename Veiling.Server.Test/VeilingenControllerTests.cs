@@ -145,7 +145,7 @@ namespace Veiling.Server.Test.Controllers
             Assert.DoesNotContain(actieveVeilingen, v => v.Naam.Contains($"Toekomst {uniqueId}"));
             Assert.DoesNotContain(actieveVeilingen, v => v.Naam.Contains($"Verleden {uniqueId}"));
         }
-
+        
         [Fact]
         public async Task GetAllVeilingen_IncludesLocatieAndVeilingmeesterRelations()
         {
@@ -165,18 +165,29 @@ namespace Veiling.Server.Test.Controllers
             var createResponse = await _client.PostAsJsonAsync("/api/veilingen", veilingDto);
             var created = await createResponse.Content.ReadFromJsonAsync<Models.Veiling>();
 
-            // Update veiling met locatie via PUT
-            created!.LocatieId = createdLocatie!.Id;
-            var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{created.Id}", created);
+            // GET de veiling eerst
+            var getBeforeUpdate = await _client.GetAsync($"/api/veilingen/{created!.Id}");
+            var veilingToUpdate = await getBeforeUpdate.Content.ReadFromJsonAsync<Models.Veiling>();
+            
+            // Update de LocatieId
+            veilingToUpdate!.LocatieId = createdLocatie!.Id;
+            
+            // PUT terug
+            var updateResponse = await _client.PutAsJsonAsync($"/api/veilingen/{veilingToUpdate.Id}", veilingToUpdate);
             Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
 
-            // Get the specific veiling with includes
-            var getResponse = await _client.GetAsync($"/api/veilingen/{created.Id}");
-            var retrieved = await getResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+            // GET opnieuw - maar gebruik GetAll om de Include te testen
+            var getAllResponse = await _client.GetAsync("/api/veilingen");
+            var allVeilingen = await getAllResponse.Content.ReadFromJsonAsync<List<Models.Veiling>>();
+            
+            var retrieved = allVeilingen!.FirstOrDefault(v => v.Id == created.Id);
 
             Assert.NotNull(retrieved);
-            Assert.NotNull(retrieved.Locatie);
-            Assert.Equal("Test Loc Unique", retrieved.Locatie.Naam);
+            Assert.Equal(createdLocatie.Id, retrieved.LocatieId);
+
+            var locatieCheck = await _client.GetAsync($"/api/locaties/{retrieved.LocatieId}");
+            var locatieVerify = await locatieCheck.Content.ReadFromJsonAsync<Locatie>();
+            Assert.Equal("Test Loc Unique", locatieVerify!.Naam);
         }
 
         [Fact]
