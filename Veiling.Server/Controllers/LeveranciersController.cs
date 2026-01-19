@@ -66,37 +66,48 @@ public async Task<ActionResult<IEnumerable<KavelListDto>>> GetMijnKavels(
 }
 
         [HttpGet("{id}")]
-[Authorize(Roles =
-    nameof(Role.Administrator) + ", " +
-    nameof(Role.Veilingmeester) + ", " +
-    nameof(Role.Leverancier)
-)]
-public async Task<ActionResult<Leverancier>> GetLeverancier(int id)
-{
-    var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        [Authorize(Roles =
+            nameof(Role.Administrator) + ", " +
+            nameof(Role.Veilingmeester) + ", " +
+            nameof(Role.Leverancier)
+        )]
+        public async Task<ActionResult<Leverancier>> GetLeverancier(int id)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-    if (User.IsInRole(nameof(Role.Leverancier)))
-    {
-        var eigenLeverancierId = await _context.Gebruikers
-            .Where(g => g.Id == userId)
-            .Select(g => g.BedrijfId)
-            .FirstOrDefaultAsync();
+            if (User.IsInRole(nameof(Role.Leverancier)) && userIdClaim != null)
+            {
+                var userId = userIdClaim.Value;
+                var eigenLeverancierId = await _context.Gebruikers
+                    .Where(g => g.Id == userId)
+                    .Select(g => g.BedrijfId)
+                    .FirstOrDefaultAsync();
 
-        if (eigenLeverancierId != id)
-            return Forbid();
-    }
+                if (eigenLeverancierId != id)
+                    return Forbid();
+            }
 
-    var leverancier = await _context.Leveranciers
-        .Include(l => l.Bedrijf)
-        .Include(l => l.Kavels)
-        .FirstOrDefaultAsync(l => l.Id == id);
+            var leverancier = await _context.Leveranciers
+                .Include(l => l.Bedrijf)
+                .Include(l => l.Kavels)
+                .FirstOrDefaultAsync(l => l.Id == id);
 
-    if (leverancier == null)
-        return NotFound();
+            if (leverancier == null)
+                return NotFound();
 
-    return leverancier;
-}
+            return leverancier;
+        }
 
+        [Authorize(Roles = nameof(Role.Administrator))]
+        [HttpPost]
+        public async Task<ActionResult<Leverancier>> CreateLeverancier(Leverancier leverancier)
+        {
+            _context.Leveranciers.Add(leverancier);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetLeverancier), new { id = leverancier.Id }, leverancier);
+        }
+        
         // PUT: api/leveranciers/5
         [Authorize(Roles = 
         nameof(Role.Administrator)

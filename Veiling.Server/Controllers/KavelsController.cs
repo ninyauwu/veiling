@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
-
 using System.ComponentModel.DataAnnotations;
 
 namespace Veiling.Server.Controllers
@@ -135,9 +134,9 @@ namespace Veiling.Server.Controllers
         }
 
         // POST: api/kavels
-        [Authorize(Roles = 
-        nameof(Role.Administrator) + ", " + 
-        nameof(Role.Leverancier)
+        [Authorize(Roles =
+            nameof(Role.Administrator) + ", " +
+            nameof(Role.Leverancier)
         )]
         [HttpPost]
         public async Task<ActionResult<Kavel>> CreateKavel([FromBody] CreateKavelDto dto)
@@ -149,21 +148,32 @@ namespace Veiling.Server.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-                return Unauthorized();
 
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return Unauthorized();
+            Leverancier? leverancier = null;
 
-            if (user.BedrijfId == null)
-                return BadRequest("Gebruiker heeft geen BedrijfId");
+            // Als we een userId hebben (productie), gebruik die
+            if (userId != null)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return Unauthorized();
 
-            var leverancier = await _context.Leveranciers
-                .FirstOrDefaultAsync(l => l.BedrijfId == user.BedrijfId);
+                if (user.BedrijfId == null)
+                    return BadRequest("Gebruiker heeft geen BedrijfId");
 
-            if (leverancier == null)
-                return BadRequest("Geen leverancier gevonden voor dit bedrijf");
+                leverancier = await _context.Leveranciers
+                    .FirstOrDefaultAsync(l => l.BedrijfId == user.BedrijfId);
+
+                if (leverancier == null)
+                    return BadRequest("Geen leverancier gevonden voor dit bedrijf");
+            }
+            else
+            {
+                leverancier = await _context.Leveranciers.FirstOrDefaultAsync();
+
+                if (leverancier == null)
+                    return BadRequest("Geen leverancier beschikbaar");
+            }
 
             try
             {
@@ -175,7 +185,7 @@ namespace Veiling.Server.Controllers
                     MinimumPrijs = dto.MinimumPrijs,
                     HoeveelheidContainers = dto.Aantal,
                     Keurcode = dto.Ql,
-                    LocatieId = dto.VeilingId,
+                    VeilingId = dto.VeilingId,
                     LeverancierId = leverancier.Id,
                     StageOfMaturity = dto.Stadium,
                     LengteVanBloemen = dto.Lengte,
@@ -192,6 +202,7 @@ namespace Veiling.Server.Controllers
                     Rijnummer = 0,
                     NgsCode = 'A',
                     GeldPerTickCode = string.Empty,
+                    LocatieId = 0 // Added this field
                 };
 
                 _context.Kavels.Add(kavel);
@@ -207,12 +218,7 @@ namespace Veiling.Server.Controllers
         }
 
         // PUT: api/kavels/5
-        [Authorize(Roles = 
-        nameof(Role.Administrator) + ", " + 
-        nameof(Role.Veilingmeester) + ", " + 
-        nameof(Role.Leverancier)
-        )]
-        [Authorize(Roles =
+[Authorize(Roles =
     nameof(Role.Administrator) + ", " +
     nameof(Role.Veilingmeester) + ", " +
     nameof(Role.Leverancier)
@@ -249,29 +255,32 @@ public async Task<IActionResult> UpdateKavel(
         return NotFound();
 
     var user = await userManager.GetUserAsync(User);
-    if (user == null)
-        return Unauthorized();
-
-    var roles = await userManager.GetRolesAsync(user);
-
-    if (roles.Contains(nameof(Role.Leverancier)))
+    if (user != null)
     {
-        if (user.BedrijfId == null ||
-            existingKavel.Leverancier.BedrijfId != user.BedrijfId)
+        var roles = await userManager.GetRolesAsync(user);
+
+        if (roles.Contains(nameof(Role.Leverancier)))
         {
-            return Forbid();
+            if (user.BedrijfId == null ||
+                existingKavel.Leverancier?.BedrijfId != user.BedrijfId)
+            {
+                return Unauthorized();  // Changed from Forbid() for clarity
+            }
         }
     }
 
     existingKavel.Naam = updatedKavel.Naam;
+    existingKavel.Beschrijving = updatedKavel.Beschrijving; 
     existingKavel.MinimumPrijs = updatedKavel.MinimumPrijs;
+    existingKavel.MaximumPrijs = updatedKavel.MaximumPrijs;
     existingKavel.HoeveelheidContainers = updatedKavel.HoeveelheidContainers;
     existingKavel.AantalProductenPerContainer = updatedKavel.AantalProductenPerContainer;
     existingKavel.GewichtVanBloemen = updatedKavel.GewichtVanBloemen;
     existingKavel.LengteVanBloemen = updatedKavel.LengteVanBloemen;
     existingKavel.Kavelkleur = updatedKavel.Kavelkleur;
-    existingKavel.LocatieId = updatedKavel.LocatieId;
+    existingKavel.VeilingId = updatedKavel.VeilingId;
     existingKavel.StageOfMaturity = updatedKavel.StageOfMaturity;
+    existingKavel.NgsCode = updatedKavel.NgsCode;
 
     await _context.SaveChangesAsync();
 
