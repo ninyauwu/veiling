@@ -22,6 +22,7 @@ type KavelInfoResponse = {
     kavelkleur: string;
     keurcode: string;
     fustcode: number;
+    foto: string;
     approval: boolean | null | undefined;
   };
   leverancier: {
@@ -38,12 +39,6 @@ interface KavelInfoProps {
 }
 
 function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
-  const imagePaths = [
-    "https://picsum.photos/400/400?random=1",
-    "https://picsum.photos/400/400?random=2",
-    "https://picsum.photos/400/400?random=3",
-  ];
-
   const [kavels, setKavels] = useState<KavelInfoResponse[]>([]);
   const [selected, setSelected] = useState<number | null>(0);
   const [loading, setLoading] = useState(true);
@@ -140,6 +135,7 @@ function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
 
   const currentKavel = selected !== null ? kavels[selected] : kavels[0];
   const { kavel, leverancier } = currentKavel;
+  const imagePaths = [kavel.foto];
 
   const tableRows = formatKavelData(kavels);
 

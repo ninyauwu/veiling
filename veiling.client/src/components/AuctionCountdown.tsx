@@ -242,7 +242,7 @@ export default function AuctionCountdown({
           appearance="primary"
           disabled={isSubmittingBid}
         >
-          {isSubmittingBid ? "Bezig..." : "Bied je hypotheek"}
+          {isSubmittingBid ? "Bezig..." : "Bieden"}
         </SimpeleKnop>
         <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
           Start veiling
