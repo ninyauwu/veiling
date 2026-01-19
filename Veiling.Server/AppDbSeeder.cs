@@ -172,8 +172,8 @@ namespace Veiling.Server
             {
                 Naam = "Amsterdam Ochtend Veiling",
                 Klokduur = 5.0f,
-                StartTijd = today.AddHours(9), // start 9 uur sochtends
-                EndTijd = today.AddHours(11), // eindigd 11 uur sochtends
+                StartTijd = today.AddHours(33), // start morgen 9 uur sochtends
+                EndTijd = today.AddHours(35), // eindigd morgen 11 uur sochtends
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
                 LocatieId = amsterdam.Id
