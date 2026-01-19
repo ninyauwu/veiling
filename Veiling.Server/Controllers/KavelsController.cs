@@ -185,7 +185,7 @@ namespace Veiling.Server.Controllers
                     MinimumPrijs = dto.MinimumPrijs,
                     HoeveelheidContainers = dto.Aantal,
                     Keurcode = dto.Ql,
-                    VeilingId = dto.VeilingId,
+                    LocatieId = dto.VeilingId,
                     LeverancierId = leverancier.Id,
                     StageOfMaturity = dto.Stadium,
                     LengteVanBloemen = dto.Lengte,
@@ -202,7 +202,6 @@ namespace Veiling.Server.Controllers
                     Rijnummer = 0,
                     NgsCode = 'A',
                     GeldPerTickCode = string.Empty,
-                    LocatieId = 0 // Added this field
                 };
 
                 _context.Kavels.Add(kavel);
