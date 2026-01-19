@@ -12,13 +12,22 @@ public class KavelInfoController : ControllerBase {
         _context = context;
     }
 
-    [HttpGet("{veilingId}")]
-    public ActionResult<IEnumerable<KavelLeverancier>> GetKavels(int veilingId) {
+    [HttpGet("{locatieId}")]
+    public async Task<ActionResult<IEnumerable<KavelLeverancier>>> GetKavels(int locatieId) {
+        var now = DateTime.Now;
+        var locatie = await _context.Locaties.FirstOrDefaultAsync(l => l.Id == locatieId);
+
+        if (locatie == null) return NotFound($"Found no location with Id ${locatieId}");
+
+        var veilingen = await _context.Veilingen.Where(v => v.LocatieId == locatieId).ToListAsync();
+        var veiling = veilingen.Where(v => v.EndTijd > DateTime.Now).OrderBy(v => v.EndTijd).FirstOrDefault();
+        if (veiling == null) return NotFound($"No auctions at ${locatie.Naam} currently active.");
+
         var kavels = _context.Kavels
             .Include(k => k.Leverancier)
             .Include(k => k.Veiling)
             .Include(k => k.Leverancier.Bedrijf)
-            .Where(k => k.VeilingId == veilingId)
+            .Where(k => k.VeilingId == veiling.Id)
             .Select(k => new KavelLeverancier(k, k.Leverancier));
 
         if (kavels == null || kavels.Count() < 1) {
