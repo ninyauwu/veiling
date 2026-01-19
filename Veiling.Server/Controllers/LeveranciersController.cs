@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
 namespace Veiling.Server.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class LeveranciersController : ControllerBase
     {
@@ -16,6 +19,10 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/leveranciers
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Leverancier>>> GetLeveranciers()
         {
@@ -24,8 +31,13 @@ namespace Veiling.Server.Controllers
                 .Include(l => l.Kavels)
                 .ToListAsync();
         }
-
+//TODO: Vk3 moet alleen zijn eigen leverancier kunnen opvragen
         // GET: api/leveranciers/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Leverancier>> GetLeverancier(int id)
         {
@@ -43,6 +55,9 @@ namespace Veiling.Server.Controllers
         }
 
         // POST: api/leveranciers
+        [Authorize(Roles = 
+        nameof(Role.Administrator)
+        )]
         [HttpPost]
         public async Task<ActionResult<Leverancier>> CreateLeverancier(Leverancier leverancier)
         {
@@ -53,6 +68,9 @@ namespace Veiling.Server.Controllers
         }
 
         // PUT: api/leveranciers/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator)
+        )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLeverancier(int id, Leverancier leverancier)
         {
@@ -80,6 +98,9 @@ namespace Veiling.Server.Controllers
         }
 
         // DELETE: api/leveranciers/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator)
+        )]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLeverancier(int id)
         {

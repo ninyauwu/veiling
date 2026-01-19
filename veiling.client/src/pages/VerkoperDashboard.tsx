@@ -4,6 +4,7 @@ import HeaderLoggedout from "../components/HeaderLoggedout";
 import KavelInvulTabel from "../components/KavelInvulTabel";
 import SimpeleKnop from "../components/SimpeleKnop";
 import { useState } from "react";
+import { authFetch } from "../utils/AuthFetch";
 
 function VerkoperDashboard() {
     const [description, setDescription] = useState<string>('');
@@ -44,7 +45,7 @@ function VerkoperDashboard() {
             const formData = new FormData();
             formData.append('image', imageFile);
 
-            const response = await fetch('/api/kavels/upload-image', {
+            const response = await authFetch('/api/kavels/upload-image', {
                 method: 'POST',
                 body: formData
             });
@@ -86,7 +87,7 @@ function VerkoperDashboard() {
 
             console.log('Payload being sent:', payload);
 
-            const response = await fetch('/api/kavels', {
+            const response = await authFetch('/api/kavels', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -3,6 +3,9 @@ using DotNetEnv;
 using Veiling.Server;
 using Microsoft.AspNetCore.Identity;
 using Veiling.Server.Models;
+using Microsoft.OpenApi.Models;
+using System.Xml.Serialization;
+using Veiling.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,23 +30,63 @@ var connectionString
     = builder.Configuration.GetConnectionString("Default")
     + $"Server={Environment.GetEnvironmentVariable("DB_SERVER")};"
     + $"User Id={Environment.GetEnvironmentVariable("DB_USERNAME")};";
+
 Console.WriteLine($"Connecting to database via {connectionString}");
+
 if (password?.Length < 8) Console.WriteLine("Warning: Password should be at least 8 characters.");
+
 connectionString += $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"; 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Configure Swagger with Bearer token support
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SupportNonNullableReferenceTypes();
+    
+    // Add bearer token authentication to Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter the bearer token from the /login or /register endpoint"
+    });
+    
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // DbContext
-builder.Services.AddDbContext<AppDbContext>(options => 
-        options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
-// Identity framework
-builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+// Identity - Configure authentication properly
+builder.Services.AddAuthentication(options =>
+{
+    // Set Bearer as the default scheme for API endpoints
+    options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme;
+    options.DefaultChallengeScheme = IdentityConstants.BearerScheme;
+})
+    .AddBearerToken(IdentityConstants.BearerScheme)
+    .AddCookie(IdentityConstants.ApplicationScheme);
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityCore<Gebruiker>()
@@ -53,28 +96,34 @@ builder.Services.AddIdentityCore<Gebruiker>()
     .AddApiEndpoints();
 
 var app = builder.Build();
-var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
+// Static files
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Configure the HTTP request pipeline.
+// Dev Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.DisplayRequestDuration();
+        options.EnableTryItOutByDefault(); 
+    });
 }
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization(); 
 
 app.MapControllers();
-
+app.MapIdentityApi<Gebruiker>();
 app.MapFallbackToFile("/index.html");
 
 app.UseStaticFiles();
 
+// DB seed + test
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -92,22 +141,10 @@ using (var scope = app.Services.CreateScope())
 
     if (app.Environment.IsDevelopment())
     {
-        AppDbSeeder.Seed(db);
-    }
-}
-
-static async Task SeedRoles(IServiceProvider provider)
-{
-    var roleManager = provider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    string[] roles = { "Gebruiker", "Leverancierslid", "Bedrijfsvertegenwoordiger", "Veilingmeester", "Admin" };
-
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Gebruiker>>(); 
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(); 
+        
+        await AppDbSeeder.Seed(db, userManager, roleManager); 
     }
 }
 

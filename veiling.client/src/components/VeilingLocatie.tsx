@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from "react";
 import "./VeilingLocatie.css";
 import SimpeleKnop from "./SimpeleKnop";
+import { authFetch } from "../utils/AuthFetch";
 
 interface Locatie {
     id: number;
@@ -138,22 +139,19 @@ export default function VeilingLocatieOverzicht({ onJoin }: VeilingLocatieOverzi
     useEffect(() => {
         async function fetchData() {
             try {
-                // Haal locaties op
-                const locatiesResponse = await fetch('/api/locaties');
+                const locatiesResponse = await authFetch('/api/locaties');
                 if (!locatiesResponse.ok) {
                     throw new Error(`HTTP error! status: ${locatiesResponse.status}`);
                 }
                 const locatiesData: Locatie[] = await locatiesResponse.json();
 
-                // Haal actieve veilingen op
-                const actieveVeilingenResponse = await fetch('/api/veilingen/actief');
+                const actieveVeilingenResponse = await authFetch('/api/veilingen/actief');
                 let actieveVeilingenData: VeilingData[] = [];
                 if (actieveVeilingenResponse.ok) {
                     actieveVeilingenData = await actieveVeilingenResponse.json();
                 }
 
-                // Haal alle veilingen op voor toekomstige veilingen
-                const alleVeilingenResponse = await fetch('/api/veilingen');
+                const alleVeilingenResponse = await authFetch('/api/veilingen');
                 let alleVeilingenData: VeilingData[] = [];
                 if (alleVeilingenResponse.ok) {
                     alleVeilingenData = await alleVeilingenResponse.json();

@@ -1,12 +1,18 @@
-using Veiling.Server;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Veiling.Server;
 using Veiling.Server.Models;
 
 namespace Veiling.Server
 {
     public class AppDbSeeder
     {
-        public static void Seed(AppDbContext context)
+        public static async Task Seed(
+            AppDbContext context,
+            UserManager<Gebruiker> userManager,
+            RoleManager<IdentityRole> roleManager
+        )
         {
             //clear db
             context.Boden.RemoveRange(context.Boden);
@@ -62,11 +68,21 @@ namespace Veiling.Server
             context.Bedrijven.AddRange(bedrijf1, bedrijf2);
             context.SaveChanges();
 
+            //Create rolles 
+            foreach (var roleName in Enum.GetNames(typeof(Role)))
+            {
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+
             // Gebruikers
             var gebruiker1 = new Gebruiker
             {
-                Name = "Jan Jansen",
+                UserName = "jan@bloemen.nl",
                 Email = "jan@bloemen.nl",
+                Name = "Jan Jansen",
                 PhoneNumber = "612345678",
                 Bedrijfsbeheerder = true,
                 Geverifieerd = true,
@@ -75,16 +91,32 @@ namespace Veiling.Server
 
             var gebruiker2 = new Gebruiker
             {
-                Name = "Marie Pieters",
+                UserName = "marie@flora.nl",
                 Email = "marie@flora.nl",
+                Name = "Marie Pieters",
                 PhoneNumber = "687654321",
                 Bedrijfsbeheerder = false,
                 Geverifieerd = true,
                 BedrijfId = bedrijf2.Bedrijfscode
             };
 
-            context.Gebruikers.AddRange(gebruiker1, gebruiker2);
-            context.SaveChanges();
+
+            //Give default password
+            if (await userManager.FindByEmailAsync(gebruiker1.Email) == null)
+                await userManager.CreateAsync(gebruiker1, "Password123!");
+
+            if (await userManager.FindByEmailAsync(gebruiker2.Email) == null)
+                await userManager.CreateAsync(gebruiker2, "Password123!");
+
+            //Reload users
+            gebruiker1 = await userManager.FindByEmailAsync(gebruiker1.Email);
+            gebruiker2 = await userManager.FindByEmailAsync(gebruiker2.Email);
+
+
+            //Give roles
+            await userManager.AddToRoleAsync(gebruiker1, nameof(Role.Gebruiker));
+            await userManager.AddToRoleAsync(gebruiker2, nameof(Role.Administrator));
+
 
             // Veilingmeesters
             var veilingmeester1 = new Veilingmeester
@@ -95,6 +127,7 @@ namespace Veiling.Server
 
             context.Veilingmeesters.Add(veilingmeester1);
             context.SaveChanges();
+
 
             // Leveranciers
             var leverancier1 = new Leverancier
@@ -114,6 +147,8 @@ namespace Veiling.Server
             context.Leveranciers.Add(leverancier1);
             context.Leveranciers.Add(leverancier2);
             context.SaveChanges();
+
+
             
             var today = DateTime.Today;
             
@@ -153,6 +188,7 @@ namespace Veiling.Server
 
             context.Veilingen.AddRange(amsterdamVeiling, rotterdamVeiling1, delftVeiling);
             context.SaveChanges();
+
 
             // Kavels
             var kavel1 = new Kavel

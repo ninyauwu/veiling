@@ -6,6 +6,7 @@ import ImageSet from "./ImageSet";
 import NavigationBar from "./NavigationBar";
 import MetadataGrid from "./MetadataGrid";
 import CompanyQuality from "./CompanyQuality";
+import { authFetch } from "../utils/AuthFetch";
 import AuctionCountdown from "./AuctionCountdown";
 import ApproveOrDeny from "./AproveOrDenyTextBox";
 
@@ -54,9 +55,9 @@ function KavelInfo({ sortOnApproval, onSelectKavel }: KavelInfoProps) {
         setLoading(true); // start loading
         let res: Response;
         if (sortOnApproval) {
-          res = await fetch("/api/KavelInfo/pending");
+          res = await authFetch("/api/KavelInfo/pending");
         } else {
-          res = await fetch("/api/KavelInfo/0");
+          res = await authFetch("/api/KavelInfo/0");
         }
 
         if (!res.ok) {
@@ -73,7 +74,7 @@ function KavelInfo({ sortOnApproval, onSelectKavel }: KavelInfoProps) {
           if (data.length > 0) setSelected(0);
         }
       } catch (err) {
-        console.error("Failed to load kavels:", err);
+        console.error("Kon kavels niet laden:", err);
         setKavels([]); // ensure kavels is empty on error
       } finally {
         setLoading(false);
