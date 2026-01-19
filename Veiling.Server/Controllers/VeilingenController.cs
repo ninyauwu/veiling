@@ -10,9 +10,9 @@ namespace Veiling.Server.Controllers
     [Route("api/[controller]")]
     public class VeilingenController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public VeilingenController(AppDbContext context)
+        public VeilingenController(IAppDbContext context)
         {
             _context = context;
         }
@@ -133,8 +133,8 @@ namespace Veiling.Server.Controllers
 
         // PUT: api/veilingen/5
         [Authorize(Roles = 
-        nameof(Role.Administrator) + ", " + 
-        nameof(Role.Veilingmeester)
+            nameof(Role.Administrator) + ", " + 
+            nameof(Role.Veilingmeester)
         )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVeiling(int id, Models.Veiling veiling)
@@ -144,7 +144,21 @@ namespace Veiling.Server.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(veiling).State = EntityState.Modified;
+            // Haal de bestaande veiling op uit de database
+            var existingVeiling = await _context.Veilingen.FindAsync(id);
+            if (existingVeiling == null)
+            {
+                return NotFound();
+            }
+
+            // Update alleen de scalar properties (niet de navigation properties)
+            existingVeiling.Naam = veiling.Naam;
+            existingVeiling.Klokduur = veiling.Klokduur;
+            existingVeiling.StartTijd = veiling.StartTijd;
+            existingVeiling.EndTijd = veiling.EndTijd;
+            existingVeiling.GeldPerTickCode = veiling.GeldPerTickCode;
+            existingVeiling.VeilingmeesterId = veiling.VeilingmeesterId;
+            existingVeiling.LocatieId = veiling.LocatieId;
 
             try
             {
@@ -196,3 +210,4 @@ namespace Veiling.Server.Controllers
         public List<int> KavelIds { get; set; } = new List<int>();
     }
 }
+

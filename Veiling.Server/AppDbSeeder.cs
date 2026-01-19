@@ -152,7 +152,15 @@ namespace Veiling.Server
                 IndexOfReliabilityOfInformation = "A"
             };
 
+            var leverancier2 = new Leverancier
+            {
+                BedrijfId = bedrijf2.Bedrijfscode,
+                Bedrijf = bedrijf2,
+                IndexOfReliabilityOfInformation = "B"
+            };
+
             context.Leveranciers.Add(leverancier1);
+            context.Leveranciers.Add(leverancier2);
             context.SaveChanges();
 
 
@@ -232,7 +240,7 @@ namespace Veiling.Server
                 MaximumPrijs = 0.8f,
                 Minimumhoeveelheid = 20,
                 Foto = "/images/rozen.jpg",
-                Kavelkleur = "FF0000",
+                Kavelkleur = "800080",
                 Karnummer = 1,
                 Rijnummer = 1,
                 HoeveelheidContainers = 50,
@@ -247,9 +255,90 @@ namespace Veiling.Server
                 VeilingId = amsterdamVeiling.Id,
                 LeverancierId = leverancier1.Id
             };
+            
+            var kavel3 = new Kavel
+            {
+                Naam = "Paarse Franse Tulpen",
+                Beschrijving = "Matige Franse tulpen met de neiging om tot stof uit elkaar te vallen, extra goedkoop",
+                ArtikelKenmerken = "Lang, sterk",
+                MinimumPrijs = 0.1f,
+                GekochtPrijs = 0.5f,
+                MaximumPrijs = 0.8f,
+                Minimumhoeveelheid = 20,
+                Foto = "/images/rozen.jpg",
+                Kavelkleur = "800080",
+                Karnummer = 1,
+                Rijnummer = 1,
+                HoeveelheidContainers = 50,
+                AantalProductenPerContainer = 24,
+                LengteVanBloemen = 60.0f,
+                GewichtVanBloemen = 500.0f,
+                StageOfMaturity = "Bloeiend",
+                NgsCode = 'A',
+                Keurcode = "A1",
+                Fustcode = 123,
+                GeldPerTickCode = "0.5",
+                VeilingId = rotterdamVeiling1.Id,
+                LeverancierId = leverancier1.Id
+            };
+
+            var kavel4 = new Kavel
+            {
+                Naam = "Zonnige Zonebloemen",
+                Beschrijving = "Deze bloemen worden heel lang gebraad in de zon voordat ze geteeld worden",
+                ArtikelKenmerken = "Lang, sterk",
+                MinimumPrijs = 20.0f,
+                GekochtPrijs = 30.0f,
+                MaximumPrijs = 80.0f,
+                Minimumhoeveelheid = 20,
+                Foto = "/images/rozen.jpg",
+                Kavelkleur = "FFF017",
+                Karnummer = 1,
+                Rijnummer = 1,
+                HoeveelheidContainers = 50,
+                AantalProductenPerContainer = 24,
+                LengteVanBloemen = 60.0f,
+                GewichtVanBloemen = 500.0f,
+                StageOfMaturity = "Bloeiend",
+                NgsCode = 'A',
+                Keurcode = "A1",
+                Fustcode = 123,
+                GeldPerTickCode = "0.5",
+                VeilingId = rotterdamVeiling1.Id,
+                LeverancierId = leverancier1.Id
+            };
+
+            var kavel5 = new Kavel
+            {
+                Naam = "Zonnige Zonebloemen",
+                Beschrijving = "Deze bloemen worden heel lang gebraad in de zon voordat ze geteeld worden",
+                ArtikelKenmerken = "Lang, sterk",
+                MinimumPrijs = 20.0f,
+                GekochtPrijs = 70.0f,
+                MaximumPrijs = 80.0f,
+                Minimumhoeveelheid = 20,
+                Foto = "/images/rozen.jpg",
+                Kavelkleur = "FFF017",
+                Karnummer = 1,
+                Rijnummer = 1,
+                HoeveelheidContainers = 50,
+                AantalProductenPerContainer = 24,
+                LengteVanBloemen = 60.0f,
+                GewichtVanBloemen = 500.0f,
+                StageOfMaturity = "Bloeiend",
+                NgsCode = 'A',
+                Keurcode = "A1",
+                Fustcode = 123,
+                GeldPerTickCode = "0.5",
+                VeilingId = rotterdamVeiling1.Id,
+                LeverancierId = leverancier2.Id
+            };
 
             context.Kavels.Add(kavel1);
             context.Kavels.Add(kavel2);
+            context.Kavels.Add(kavel3);
+            context.Kavels.Add(kavel4);
+            context.Kavels.Add(kavel5);
             context.SaveChanges();
 
             Console.WriteLine("Database seeded successfully!");

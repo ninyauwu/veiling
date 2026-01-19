@@ -12,9 +12,9 @@ namespace Veiling.Server.Controllers
     [Route("api/[controller]")]
     public class GebruikersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public GebruikersController(AppDbContext context)
+        public GebruikersController(IAppDbContext context)
         {
             _context = context;
         }
@@ -173,7 +173,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Gebruiker)
         )]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGebruiker(int id)
+        public async Task<IActionResult> DeleteGebruiker(string id) 
         {
             var gebruiker = await _context.Gebruikers.FindAsync(id);
             if (gebruiker == null)

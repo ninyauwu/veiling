@@ -1,4 +1,4 @@
-enum Role
+public enum Role
 {
     Gebruiker,
     Bedrijfsvertegenwoordiger,

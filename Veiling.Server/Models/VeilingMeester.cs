@@ -6,7 +6,7 @@
         public int AantalVeilingenBeheerd { get; set; }
         
         public string GebruikerId { get; set; }
-        public Gebruiker Gebruiker { get; set; }
+        public Gebruiker? Gebruiker { get; set; }
         
         public ICollection<Veiling> Veilingen { get; set; } = new List<Veiling>();  
     }

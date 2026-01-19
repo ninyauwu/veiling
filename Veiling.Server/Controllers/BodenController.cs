@@ -11,9 +11,9 @@ namespace Veiling.Server.Controllers
     [Route("api/[controller]")]
     public class BodenController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public BodenController(AppDbContext context)
+        public BodenController(IAppDbContext context)
         {
             _context = context;
         }
