@@ -65,8 +65,6 @@ public async Task<ActionResult<IEnumerable<KavelListDto>>> GetMijnKavels(
     return Ok(kavelsDto);
 }
 
-
-//TODO: Vk3 moet alleen zijn eigen leverancier kunnen opvragen
         [HttpGet("{id}")]
 [Authorize(Roles =
     nameof(Role.Administrator) + ", " +
