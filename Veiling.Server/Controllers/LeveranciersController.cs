@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -53,13 +54,12 @@ public async Task<ActionResult<IEnumerable<KavelListDto>>> GetMijnKavels(
     if (leverancier == null)
         return NotFound("Geen leverancier gevonden voor dit bedrijf");
 
-    // 3️⃣ Map de kavels naar DTO
     var kavelsDto = leverancier.Kavels.Select(k => new KavelListDto
     {
         Id = k.Id,
         Title = k.Naam,
         Price = (decimal)k.MinimumPrijs,
-        Location = k.LocatieId.ToString() // of k.Veiling.Naam als je naam wilt
+        Location = k.LocatieId.ToString()
     }).ToList();
 
     return Ok(kavelsDto);
@@ -67,40 +67,37 @@ public async Task<ActionResult<IEnumerable<KavelListDto>>> GetMijnKavels(
 
 
 //TODO: Vk3 moet alleen zijn eigen leverancier kunnen opvragen
-        // GET: api/leveranciers/5
-        [Authorize(Roles = 
-        nameof(Role.Administrator) + ", " + 
-        nameof(Role.Veilingmeester) + ", " + 
-        nameof(Role.Leverancier)
-        )]
         [HttpGet("{id}")]
-        public async Task<ActionResult<Leverancier>> GetLeverancier(int id)
-        {
-            var leverancier = await _context.Leveranciers
-                .Include(l => l.Bedrijf)
-                .Include(l => l.Kavels)
-                .FirstOrDefaultAsync(l => l.Id == id);
+[Authorize(Roles =
+    nameof(Role.Administrator) + ", " +
+    nameof(Role.Veilingmeester) + ", " +
+    nameof(Role.Leverancier)
+)]
+public async Task<ActionResult<Leverancier>> GetLeverancier(int id)
+{
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
-            if (leverancier == null)
-            {
-                return NotFound();
-            }
+    if (User.IsInRole(nameof(Role.Leverancier)))
+    {
+        var eigenLeverancierId = await _context.Gebruikers
+            .Where(g => g.Id == userId)
+            .Select(g => g.BedrijfId)
+            .FirstOrDefaultAsync();
 
-            return leverancier;
-        }
+        if (eigenLeverancierId != id)
+            return Forbid();
+    }
 
-        // POST: api/leveranciers
-        [Authorize(Roles = 
-        nameof(Role.Administrator)
-        )]
-        [HttpPost]
-        public async Task<ActionResult<Leverancier>> CreateLeverancier(Leverancier leverancier)
-        {
-            _context.Leveranciers.Add(leverancier);
-            await _context.SaveChangesAsync();
+    var leverancier = await _context.Leveranciers
+        .Include(l => l.Bedrijf)
+        .Include(l => l.Kavels)
+        .FirstOrDefaultAsync(l => l.Id == id);
 
-            return CreatedAtAction(nameof(GetLeverancier), new { id = leverancier.Id }, leverancier);
-        }
+    if (leverancier == null)
+        return NotFound();
+
+    return leverancier;
+}
 
         // PUT: api/leveranciers/5
         [Authorize(Roles = 

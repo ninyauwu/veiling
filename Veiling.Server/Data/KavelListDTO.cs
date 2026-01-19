@@ -1,4 +1,3 @@
-// 1️⃣ Maak een DTO voor de frontend
 public class KavelListDto
 {
     public int Id { get; set; }

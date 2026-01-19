@@ -148,7 +148,6 @@ namespace Veiling.Server.Controllers
                 return BadRequest(new { error = "Validatie mislukt", details = errors });
             }
 
-            // 🔑 1. Haal gebruiker op uit JWT
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
                 return Unauthorized();
@@ -160,7 +159,6 @@ namespace Veiling.Server.Controllers
             if (user.BedrijfId == null)
                 return BadRequest("Gebruiker heeft geen BedrijfId");
 
-            // 🔑 2. Zoek leverancier via BedrijfId
             var leverancier = await _context.Leveranciers
                 .FirstOrDefaultAsync(l => l.BedrijfId == user.BedrijfId);
 
@@ -207,48 +205,79 @@ namespace Veiling.Server.Controllers
                 return StatusCode(500, new { error = "Database fout" });
             }
         }
-//TODO: verkoper alleen zijn eigen kavels verranderen
+
         // PUT: api/kavels/5
         [Authorize(Roles = 
         nameof(Role.Administrator) + ", " + 
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.Leverancier)
         )]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateKavel(int id, Kavel kavel)
+        [Authorize(Roles =
+    nameof(Role.Administrator) + ", " +
+    nameof(Role.Veilingmeester) + ", " +
+    nameof(Role.Leverancier)
+)]
+[HttpPut("{id}")]
+public async Task<IActionResult> UpdateKavel(
+    int id,
+    Kavel updatedKavel,
+    [FromServices] UserManager<Gebruiker> userManager)
+{
+    if (id != updatedKavel.Id)
+        return BadRequest(new { error = "ID mismatch" });
+
+    if (updatedKavel.MinimumPrijs <= 0)
+        return BadRequest(new { error = "Minimum prijs moet groter dan 0 zijn" });
+
+    if (updatedKavel.HoeveelheidContainers <= 0)
+        return BadRequest(new { error = "Hoeveelheid containers moet groter dan 0 zijn" });
+
+    if (updatedKavel.AantalProductenPerContainer <= 0)
+        return BadRequest(new { error = "Aantal producten per container moet groter dan 0 zijn" });
+
+    if (updatedKavel.GewichtVanBloemen <= 0)
+        return BadRequest(new { error = "Gewicht moet groter dan 0 zijn" });
+
+    if (updatedKavel.LengteVanBloemen <= 0)
+        return BadRequest(new { error = "Lengte moet groter dan 0 zijn" });
+
+    var existingKavel = await _context.Kavels
+        .Include(k => k.Leverancier)
+        .FirstOrDefaultAsync(k => k.Id == id);
+
+    if (existingKavel == null)
+        return NotFound();
+
+    var user = await userManager.GetUserAsync(User);
+    if (user == null)
+        return Unauthorized();
+
+    var roles = await userManager.GetRolesAsync(user);
+
+    if (roles.Contains(nameof(Role.Leverancier)))
+    {
+        if (user.BedrijfId == null ||
+            existingKavel.Leverancier.BedrijfId != user.BedrijfId)
         {
-            if (id != kavel.Id)
-                return BadRequest(new { error = "ID mismatch" });
-
-            if (kavel.MinimumPrijs <= 0)
-                return BadRequest(new { error = "Minimum prijs moet groter dan 0 zijn" });
-
-            if (kavel.HoeveelheidContainers <= 0)
-                return BadRequest(new { error = "Hoeveelheid containers moet groter dan 0 zijn" });
-
-            if (kavel.AantalProductenPerContainer <= 0)
-                return BadRequest(new { error = "Aantal producten per container moet groter dan 0 zijn" });
-
-            if (kavel.GewichtVanBloemen <= 0)
-                return BadRequest(new { error = "Gewicht moet groter dan 0 zijn" });
-
-            if (kavel.LengteVanBloemen <= 0)
-                return BadRequest(new { error = "Lengte moet groter dan 0 zijn" });
-
-            _context.Entry(kavel).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-                return NoContent();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await KavelExists(id))
-                    return NotFound();
-                throw;
-            }
+            return Forbid();
         }
+    }
+
+    existingKavel.Naam = updatedKavel.Naam;
+    existingKavel.MinimumPrijs = updatedKavel.MinimumPrijs;
+    existingKavel.HoeveelheidContainers = updatedKavel.HoeveelheidContainers;
+    existingKavel.AantalProductenPerContainer = updatedKavel.AantalProductenPerContainer;
+    existingKavel.GewichtVanBloemen = updatedKavel.GewichtVanBloemen;
+    existingKavel.LengteVanBloemen = updatedKavel.LengteVanBloemen;
+    existingKavel.Kavelkleur = updatedKavel.Kavelkleur;
+    existingKavel.LocatieId = updatedKavel.LocatieId;
+    existingKavel.StageOfMaturity = updatedKavel.StageOfMaturity;
+
+    await _context.SaveChangesAsync();
+
+    return NoContent();
+}
+
 
         // DELETE: api/kavels/5
         [Authorize(Roles = 
