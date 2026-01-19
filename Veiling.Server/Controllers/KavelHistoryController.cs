@@ -86,9 +86,9 @@ namespace Veiling.Server.Controllers
                     k.Naam,
                     k.LeverancierId,
                     ISNULL(b.Bedrijfsnaam, 'Onbekend') AS LeverancierNaam
-                FROM Kavels k
-                LEFT JOIN Leveranciers l ON k.LeverancierId = l.Id
-                LEFT JOIN Bedrijven b ON l.BedrijfId = b.Bedrijfscode
+                FROM [identity].Kavels k
+                LEFT JOIN [identity].Leveranciers l ON k.LeverancierId = l.Id
+                LEFT JOIN [identity].Bedrijven b ON l.BedrijfId = b.Bedrijfscode
                 WHERE k.Id = @KavelId";
 
             await using var cmd = new SqlCommand(query, connection);
@@ -117,7 +117,7 @@ namespace Veiling.Server.Controllers
             const string query = @"
                 SELECT
                     AVG(CAST(k.GekochtPrijs AS FLOAT)) AS GemiddeldePrijs
-                FROM Kavels k
+                FROM [identity].Kavels k
                 WHERE k.LeverancierId = @LeverancierId
                   AND LTRIM(RTRIM(LOWER(k.Naam))) = LTRIM(RTRIM(LOWER(@Naam)))
                   AND k.GekochtPrijs > 0;
@@ -126,8 +126,8 @@ namespace Veiling.Server.Controllers
                     k.GekochtPrijs,
                     v.Naam AS VeilingNaam,
                     k.Id
-                FROM Kavels k
-                INNER JOIN Veilingen v ON k.VeilingId = v.Id
+                FROM [identity].Kavels k
+                INNER JOIN [identity].Veilingen v ON k.VeilingId = v.Id
                 WHERE k.LeverancierId = @LeverancierId
                   AND LTRIM(RTRIM(LOWER(k.Naam))) = LTRIM(RTRIM(LOWER(@Naam)))
                   AND k.GekochtPrijs > 0
@@ -172,7 +172,7 @@ namespace Veiling.Server.Controllers
             const string query = @"
                 SELECT
                     AVG(CAST(k.GekochtPrijs AS FLOAT)) AS GemiddeldePrijs
-                FROM Kavels k
+                FROM [identity].Kavels k
                 WHERE LTRIM(RTRIM(LOWER(k.Naam))) = LTRIM(RTRIM(LOWER(@Naam)))
                   AND k.GekochtPrijs > 0;
 
@@ -180,10 +180,10 @@ namespace Veiling.Server.Controllers
                     k.GekochtPrijs,
                     v.Naam AS VeilingNaam,
                     ISNULL(b.Bedrijfsnaam, 'Onbekend') AS LeverancierNaam
-                FROM Kavels k
-                INNER JOIN Veilingen v ON k.VeilingId = v.Id
-                LEFT JOIN Leveranciers l ON k.LeverancierId = l.Id
-                LEFT JOIN Bedrijven b ON l.BedrijfId = b.Bedrijfscode
+                FROM [identity].Kavels k
+                INNER JOIN [identity].Veilingen v ON k.VeilingId = v.Id
+                LEFT JOIN [identity].Leveranciers l ON k.LeverancierId = l.Id
+                LEFT JOIN [identity].Bedrijven b ON l.BedrijfId = b.Bedrijfscode
                 WHERE LTRIM(RTRIM(LOWER(k.Naam))) = LTRIM(RTRIM(LOWER(@Naam)))
                   AND k.GekochtPrijs > 0
                 ORDER BY k.Id DESC;
