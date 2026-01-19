@@ -34,17 +34,7 @@ namespace Veiling.Server.Test.Controllers
             var levResponse = await _client.PostAsJsonAsync("/api/leveranciers", leverancier);
             var createdLev = await levResponse.Content.ReadFromJsonAsync<Leverancier>();
 
-            var veiling = new Models.Veiling
-            {
-                Naam = "Test Veiling",
-                Klokduur = 5.0f,
-                StartTijd = DateTime.UtcNow,
-                EndTijd = DateTime.UtcNow.AddHours(2),
-                GeldPerTickCode = 0.5f
-            };
-            var veilingResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
-            var createdVeiling = await veilingResponse.Content.ReadFromJsonAsync<Models.Veiling>();
-
+            // Create kavel first
             var kavelDto = new
             {
                 Naam = "Test Kavel",
@@ -53,7 +43,6 @@ namespace Veiling.Server.Test.Controllers
                 MinimumPrijs = 10.0f,
                 Aantal = 50,
                 Ql = "A1",
-                VeilingId = createdVeiling!.Id,
                 Stadium = "Test",
                 Lengte = 60.0f,
                 Kleur = "FFFFFF",
@@ -61,13 +50,24 @@ namespace Veiling.Server.Test.Controllers
                 AantalProductenPerContainer = 20,
                 GewichtVanBloemen = 500.0f
             };
-            await _client.PostAsJsonAsync("/api/kavels", kavelDto);
+            var kavelResponse = await _client.PostAsJsonAsync("/api/kavels", kavelDto);
+            var createdKavel = await kavelResponse.Content.ReadFromJsonAsync<Kavel>();
 
-            var response = await _client.GetAsync($"/api/kavelinfo/{createdVeiling.Id}");
-    
-            // Don't try to deserialize KavelLeverancier - just check status
+            // Create veiling with kavel
+            var veilingDto = new
+            {
+                Naam = "Test Veiling",
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                KavelIds = new List<int> { createdKavel!.Id }
+            };
+            var veilingResponse = await _client.PostAsJsonAsync("/api/veilingen", veilingDto);
+            var createdVeiling = await veilingResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+
+            var response = await _client.GetAsync($"/api/kavelinfo/{createdVeiling!.Id}");
+
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    
+
             var content = await response.Content.ReadAsStringAsync();
             Assert.Contains("Test Kavel", content);
         }
