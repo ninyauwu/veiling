@@ -11,9 +11,9 @@ namespace Veiling.Server.Controllers
     [Authorize]
     public class BedrijvenController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public BedrijvenController(AppDbContext context)
+        public BedrijvenController(IAppDbContext context)
         {
             _context = context;
         }

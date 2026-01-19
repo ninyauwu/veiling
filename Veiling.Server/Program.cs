@@ -4,8 +4,6 @@ using Veiling.Server;
 using Microsoft.AspNetCore.Identity;
 using Veiling.Server.Models;
 using Microsoft.OpenApi.Models;
-using System.Xml.Serialization;
-using Veiling.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,39 +11,14 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
-// ==Create connection string==
-// Part 1 - Container-specific variables
-string? db_server;
-string? db_username;
-var containerized = builder.Configuration["Docker:IsContainerized"] != "False";
-if (!containerized) {
-    Env.TraversePath().Load();
-}
-
-// Part 2 - General variables
-var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
-
-// Part 3 - Build connection string
-var connectionString
-    = builder.Configuration.GetConnectionString("Default")
-    + $"Server={Environment.GetEnvironmentVariable("DB_SERVER")};"
-    + $"User Id={Environment.GetEnvironmentVariable("DB_USERNAME")};";
-
-Console.WriteLine($"Connecting to database via {connectionString}");
-
-if (password?.Length < 8) Console.WriteLine("Warning: Password should be at least 8 characters.");
-
-connectionString += $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"; 
-
 // Add services to the container.
-builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure Swagger with Bearer token support
 builder.Services.AddSwaggerGen(options =>
 {
     options.SupportNonNullableReferenceTypes();
-    
+
     // Add bearer token authentication to Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -56,7 +29,7 @@ builder.Services.AddSwaggerGen(options =>
         In = ParameterLocation.Header,
         Description = "Enter the bearer token from the /login or /register endpoint"
     });
-    
+
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -73,9 +46,47 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// DbContext
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+// DbContext - Only configure SQL Server when not in Testing environment
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    // ==Create connection string== (MOVED INSIDE THIS BLOCK)
+    var containerized = builder.Configuration["Docker:IsContainerized"] != "False";
+    if (!containerized)
+    {
+        Env.TraversePath().Load();
+    }
+
+    var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+
+    var connectionString
+        = builder.Configuration.GetConnectionString("Default")
+        + $"Server={Environment.GetEnvironmentVariable("DB_SERVER")};"
+        + $"User Id={Environment.GetEnvironmentVariable("DB_USERNAME")};";
+
+    Console.WriteLine($"Connecting to database via {connectionString}");
+
+    if (password?.Length < 8) Console.WriteLine("Warning: Password should be at least 8 characters.");
+
+    connectionString += $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};";
+
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(connectionString));
+}
+
+// Configure MVC
+builder.Services.AddControllers(options =>
+{
+    // always clear filters in Testing environment
+    if (builder.Environment.IsEnvironment("Testing"))
+    {
+        // Remove authorization filters for tests
+        options.Filters.Clear();
+    }
+});
+
+// Always register IAppDbContext interface
+builder.Services.AddScoped<IAppDbContext>(provider =>
+    provider.GetRequiredService<AppDbContext>());
 
 // Identity - Configure authentication properly
 builder.Services.AddAuthentication(options =>
@@ -108,44 +119,47 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.DisplayRequestDuration();
-        options.EnableTryItOutByDefault(); 
+        options.EnableTryItOutByDefault();
     });
 }
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseAuthorization(); 
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapIdentityApi<Gebruiker>();
 app.MapFallbackToFile("/index.html");
 
-app.UseStaticFiles();
-
-// DB seed + test
-using (var scope = app.Services.CreateScope())
+// DB seed + test - Only when not in Testing environment
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
 
-    try
-    {
-        var canConnect = await db.Database.ExecuteSqlRawAsync("SELECT 1");
-        app.Logger.LogInformation("Successfully connected to database and executed test query.");
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "Failed to connect to database or execute query.");
-    }
+        try
+        {
+            var canConnect = await db.Database.ExecuteSqlRawAsync("SELECT 1");
+            app.Logger.LogInformation("Successfully connected to database and executed test query.");
+        }
+        catch (Exception ex)
+        {
+            app.Logger.LogError(ex, "Failed to connect to database or execute query.");
+        }
 
-    if (app.Environment.IsDevelopment())
-    {
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Gebruiker>>(); 
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(); 
-        
-        await AppDbSeeder.Seed(db, userManager, roleManager); 
+        if (app.Environment.IsDevelopment())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Gebruiker>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            await AppDbSeeder.Seed(db, userManager, roleManager);
+        }
     }
 }
 
 app.Run();
+
+public partial class Program { }

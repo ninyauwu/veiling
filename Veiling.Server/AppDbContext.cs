@@ -4,7 +4,7 @@ using Veiling.Server.Models;
 
 namespace Veiling.Server
 {
-    public class AppDbContext : IdentityDbContext<Gebruiker>
+    public class AppDbContext : IdentityDbContext<Gebruiker>, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -99,6 +99,10 @@ namespace Veiling.Server
                 .HasForeignKey(v => v.LocatieId)
                 .OnDelete(DeleteBehavior.SetNull);
             
+        }
+
+        public async Task SaveChangesAsync() {
+            await base.SaveChangesAsync();
         }
     }
 }
