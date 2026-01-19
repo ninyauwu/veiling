@@ -1,172 +1,80 @@
-import ImageUpload from "../components/ImageUpload";
-import KavelDescription from "../components/KavelDescription";
-import HeaderLoggedout from "../components/HeaderLoggedout";
-import KavelInvulTabel from "../components/KavelInvulTabel";
+import { Plus } from "lucide-react";
 import SimpeleKnop from "../components/SimpeleKnop";
-import { useState } from "react";
+import "./VerkoperDashboard.css";
+import { useNavigate } from "react-router-dom";
 import { authFetch } from "../utils/AuthFetch";
+import { useEffect, useState } from "react";
 
-function VerkoperDashboard() {
-    const [description, setDescription] = useState<string>('');
-    const [imageFile, setImageFile] = useState<string | File | null>();
-    const [formData, setFormData] = useState({
-    naam: '',
-    prijs: '',
-    aantal: '',
-    ql: '',
-    plaats: '',
-    stadium: '',
-    lengte: '',
-    kleur: '',
-    fustcode: '',
-    aantalPerContainer: '',
-    gewicht: ''
-    });
+type Kavel = {
+  id: number;
+  title: string;
+  location: string;
+  price: number;
+};
 
-    const [isFormValid, setIsFormValid] = useState(false);
+export default function VerkoperDashboard() {
+  const navigate = useNavigate();
+  const [kavels, setKavels] = useState<Kavel[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    const handleImageUpload = (file: string | File | null, ) => {
-        setImageFile(file); 
-    };
+  useEffect(() => {
+  const retrieveKavels = async () => {
+    try {
+      const response = await authFetch("/api/leveranciers/mijn/kavels");
 
-    const handleTableDataChange = (data: any, isValid: boolean) => {
-        setFormData(data);
-        setIsFormValid(isValid);
-    };
+      if (!response.ok) {
+        throw new Error("Kon kavels niet ophalen");
+      }
 
-    const handleDescriptionChange = (description: string) => {
-        setDescription(description);
+      const data = await response.json();
+      setKavels(data);
+    } catch (err) {
+      console.error("Fout bij ophalen kavels:", err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const uploadImageToServer = async (): Promise<string | null | string> => {
-        if (!imageFile) return null;
+  retrieveKavels();
+}, []);
 
-        try {
-            const formData = new FormData();
-            formData.append('image', imageFile);
+  if (loading) {
+    return <p className="loading-text">Kavels laden…</p>;
+  }
 
-            const response = await authFetch('/api/kavels/upload-image', {
-                method: 'POST',
-                body: formData
-            });
+  return (
+    <div className="verkoper-page">
+      <div className="verkoper-container">
+        <div className="verkoper-header">
+          <h1 className="verkoper-title">Mijn kavels</h1>
 
-            if (!response.ok) {
-                throw new Error('Image upload failed');
-            }
-
-            const result = await response.json();
-            return result.imageUrl;
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            throw error;
-        }
-    };
-
-    const handleSubmit = async () => {
-        try {
-          let uploadedImageUrl = null;
-          if (imageFile) {
-            uploadedImageUrl = await uploadImageToServer();
-          }
-
-          const payload = {
-            Naam: formData.naam,
-            Description: description,
-            ImageUrl: uploadedImageUrl, 
-            MinimumPrijs: formData.prijs,
-            Aantal: formData.aantal, 
-            Ql: formData.ql, 
-            Plaats: formData.plaats, 
-            Stadium: formData.stadium, 
-            Lengte: formData.lengte, 
-            Kleur: formData.kleur,
-            Fustcode: formData.fustcode,
-            AantalProductenPerContainer: formData.aantalPerContainer,
-            GewichtVanBloemen: formData.gewicht 
-          };
-
-            console.log('Payload being sent:', payload);
-
-            const response = await authFetch('/api/kavels', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-            }
-
-            const result = await response.json();
-            console.log('Success:', result);
-            alert('Kavel successfully created!');
-            
-        } catch (error) {
-            console.error('Error submitting data:', error);
-            alert('Failed to submit data. Please try again.');
-        }
-    };
-
-    return (
-        <div style={{
-            maxWidth: '1400px',  
-            margin: '0 auto',     
-            padding: '0 40px',    
-            width: '100%'
-        }}>
-            <HeaderLoggedout />
-            <div style={{ height: "96px" }} />
-            
-            <div style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "60px",
-                flexWrap: "wrap",
-                width: "100%",
-            }}>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    flex: '1 1 400px',
-                    maxWidth: '600px',
-                }}>
-                    <div style={{
-                        height: '35vh',
-                        minHeight: '300px'
-                    }}>
-                        <ImageUpload onImageUpload={handleImageUpload} />
-                    </div>
-                    <KavelDescription onDescriptionChange={handleDescriptionChange}/>
-                </div>
-                
-                <div style={{
-                    flex: '2 1 500px',
-                    minWidth: '400px',
-                }}>
-                    <KavelInvulTabel onDataChange={handleTableDataChange} />
-                </div>
-                
-                <div style={{
-                    display: 'flex',
-                    position: 'fixed',
-                    gap: '10px',
-                    right: '2vw',
-                    bottom: '2vh'
-                }}>
-                    <SimpeleKnop 
-                        label="Submit"
-                        appearance="primary"
-                        onClick={handleSubmit}
-                        disabled={!isFormValid}
-                    />
-                </div>
-            </div>
+          <SimpeleKnop
+            appearance="primary"
+            onClick={() => navigate("/invoer")}
+          >
+            <Plus size={18} />
+            Nieuw kavel
+          </SimpeleKnop>
         </div>
-    );
-}
 
-export default VerkoperDashboard;
+        {kavels.length === 0 ? (
+          <p className="empty-text">Je hebt nog geen kavels aangemaakt.</p>
+        ) : (
+          <div className="kavels-grid">
+            {kavels.map((kavel) => (
+              <div key={kavel.id} className="kavel-card">
+                <div className="kavel-content">
+                  <h2 className="kavel-title">{kavel.title}</h2>
+                  <p className="kavel-location">Locatie: {kavel.location}</p>
+                  <p className="kavel-price">
+                    € {kavel.price.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Veiling.Server.Controllers
@@ -13,13 +15,15 @@ namespace Veiling.Server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly UserManager<Gebruiker> _userManager;
         private readonly ILogger<KavelsController> _logger;
 
-        public KavelsController(AppDbContext context, IWebHostEnvironment environment, ILogger<KavelsController> logger)
+        public KavelsController(AppDbContext context, IWebHostEnvironment environment, ILogger<KavelsController> logger, UserManager<Gebruiker> userManager)
         {
             _context = context;
             _environment = environment;
             _logger = logger;
+            _userManager = userManager;
         }
 
         [HttpPost("upload-image")]
@@ -130,9 +134,9 @@ namespace Veiling.Server.Controllers
         }
 
         // POST: api/kavels
-        [Authorize(Roles = 
-        nameof(Role.Administrator) + ", " + 
-        nameof(Role.Leverancier)
+        [Authorize(Roles =
+            nameof(Role.Administrator) + ", " +
+            nameof(Role.Leverancier)
         )]
         [HttpPost]
         public async Task<ActionResult<Kavel>> CreateKavel([FromBody] CreateKavelDto dto)
@@ -143,9 +147,33 @@ namespace Veiling.Server.Controllers
                 return BadRequest(new { error = "Validatie mislukt", details = errors });
             }
 
-            var veilingExists = await _context.Veilingen.AnyAsync(v => v.Id == dto.VeilingId);
-            if (!veilingExists)
-                return BadRequest(new { error = $"Veiling met ID {dto.VeilingId} bestaat niet" });
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            Leverancier? leverancier = null;
+
+            // Als we een userId hebben (productie), gebruik die
+            if (userId != null)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return Unauthorized();
+
+                if (user.BedrijfId == null)
+                    return BadRequest("Gebruiker heeft geen BedrijfId");
+
+                leverancier = await _context.Leveranciers
+                    .FirstOrDefaultAsync(l => l.BedrijfId == user.BedrijfId);
+
+                if (leverancier == null)
+                    return BadRequest("Geen leverancier gevonden voor dit bedrijf");
+            }
+            else
+            {
+                leverancier = await _context.Leveranciers.FirstOrDefaultAsync();
+
+                if (leverancier == null)
+                    return BadRequest("Geen leverancier beschikbaar");
+            }
 
             try
             {
@@ -157,7 +185,8 @@ namespace Veiling.Server.Controllers
                     MinimumPrijs = dto.MinimumPrijs,
                     HoeveelheidContainers = dto.Aantal,
                     Keurcode = dto.Ql,
-                    VeilingId = dto.VeilingId,
+                    LocatieId = dto.VeilingId, 
+                    LeverancierId = leverancier.Id,
                     StageOfMaturity = dto.Stadium,
                     LengteVanBloemen = dto.Lengte,
                     Kavelkleur = dto.Kleur,
@@ -172,7 +201,7 @@ namespace Veiling.Server.Controllers
                     Karnummer = 0,
                     Rijnummer = 0,
                     NgsCode = 'A',
-                    GeldPerTickCode = string.Empty
+                    GeldPerTickCode = string.Empty,
                 };
 
                 _context.Kavels.Add(kavel);
@@ -186,48 +215,77 @@ namespace Veiling.Server.Controllers
                 return StatusCode(500, new { error = "Database fout" });
             }
         }
-//TODO: verkoper alleen zijn eigen kavels verranderen
+
         // PUT: api/kavels/5
-        [Authorize(Roles = 
-        nameof(Role.Administrator) + ", " + 
-        nameof(Role.Veilingmeester) + ", " + 
-        nameof(Role.Leverancier)
-        )]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateKavel(int id, Kavel kavel)
+[Authorize(Roles =
+    nameof(Role.Administrator) + ", " +
+    nameof(Role.Veilingmeester) + ", " +
+    nameof(Role.Leverancier)
+)]
+[HttpPut("{id}")]
+public async Task<IActionResult> UpdateKavel(
+    int id,
+    Kavel updatedKavel,
+    [FromServices] UserManager<Gebruiker> userManager)
+{
+    if (id != updatedKavel.Id)
+        return BadRequest(new { error = "ID mismatch" });
+
+    if (updatedKavel.MinimumPrijs <= 0)
+        return BadRequest(new { error = "Minimum prijs moet groter dan 0 zijn" });
+
+    if (updatedKavel.HoeveelheidContainers <= 0)
+        return BadRequest(new { error = "Hoeveelheid containers moet groter dan 0 zijn" });
+
+    if (updatedKavel.AantalProductenPerContainer <= 0)
+        return BadRequest(new { error = "Aantal producten per container moet groter dan 0 zijn" });
+
+    if (updatedKavel.GewichtVanBloemen <= 0)
+        return BadRequest(new { error = "Gewicht moet groter dan 0 zijn" });
+
+    if (updatedKavel.LengteVanBloemen <= 0)
+        return BadRequest(new { error = "Lengte moet groter dan 0 zijn" });
+
+    var existingKavel = await _context.Kavels
+        .Include(k => k.Leverancier)
+        .FirstOrDefaultAsync(k => k.Id == id);
+
+    if (existingKavel == null)
+        return NotFound();
+
+    var user = await userManager.GetUserAsync(User);
+    if (user != null)
+    {
+        var roles = await userManager.GetRolesAsync(user);
+
+        if (roles.Contains(nameof(Role.Leverancier)))
         {
-            if (id != kavel.Id)
-                return BadRequest(new { error = "ID mismatch" });
-
-            if (kavel.MinimumPrijs <= 0)
-                return BadRequest(new { error = "Minimum prijs moet groter dan 0 zijn" });
-
-            if (kavel.HoeveelheidContainers <= 0)
-                return BadRequest(new { error = "Hoeveelheid containers moet groter dan 0 zijn" });
-
-            if (kavel.AantalProductenPerContainer <= 0)
-                return BadRequest(new { error = "Aantal producten per container moet groter dan 0 zijn" });
-
-            if (kavel.GewichtVanBloemen <= 0)
-                return BadRequest(new { error = "Gewicht moet groter dan 0 zijn" });
-
-            if (kavel.LengteVanBloemen <= 0)
-                return BadRequest(new { error = "Lengte moet groter dan 0 zijn" });
-
-            _context.Entry(kavel).State = EntityState.Modified;
-
-            try
+            if (user.BedrijfId == null ||
+                existingKavel.Leverancier?.BedrijfId != user.BedrijfId)
             {
-                await _context.SaveChangesAsync();
-                return NoContent();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await KavelExists(id))
-                    return NotFound();
-                throw;
+                return Unauthorized();  // Changed from Forbid() for clarity
             }
         }
+    }
+
+    existingKavel.Naam = updatedKavel.Naam;
+    existingKavel.Beschrijving = updatedKavel.Beschrijving; 
+    existingKavel.MinimumPrijs = updatedKavel.MinimumPrijs;
+    existingKavel.MaximumPrijs = updatedKavel.MaximumPrijs;
+    existingKavel.HoeveelheidContainers = updatedKavel.HoeveelheidContainers;
+    existingKavel.AantalProductenPerContainer = updatedKavel.AantalProductenPerContainer;
+    existingKavel.GewichtVanBloemen = updatedKavel.GewichtVanBloemen;
+    existingKavel.LengteVanBloemen = updatedKavel.LengteVanBloemen;
+    existingKavel.Kavelkleur = updatedKavel.Kavelkleur;
+    existingKavel.VeilingId = updatedKavel.VeilingId;
+    existingKavel.StageOfMaturity = updatedKavel.StageOfMaturity;
+    existingKavel.NgsCode = updatedKavel.NgsCode;
+
+    await _context.SaveChangesAsync();
+
+    return NoContent();
+}
+
 
         // DELETE: api/kavels/5
         [Authorize(Roles = 

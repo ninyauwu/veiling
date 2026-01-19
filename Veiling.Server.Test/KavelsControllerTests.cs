@@ -185,17 +185,6 @@ namespace Veiling.Server.Test.Controllers
         [Fact]
         public async Task GetKavelsByVeiling_FiltersCorrectly()
         {
-            var veiling = new Models.Veiling
-            {
-                Naam = "Test Veiling",
-                Klokduur = 5.0f,
-                StartTijd = DateTime.UtcNow,
-                EndTijd = DateTime.UtcNow.AddHours(2),
-                GeldPerTickCode = 0.5f
-            };
-            var veilingResponse = await _client.PostAsJsonAsync("/api/veilingen", veiling);
-            var createdVeiling = await veilingResponse.Content.ReadFromJsonAsync<Models.Veiling>();
-
             var leverancier = await CreateTestLeverancier();
 
             var kavelDto = new
@@ -206,7 +195,6 @@ namespace Veiling.Server.Test.Controllers
                 MinimumPrijs = 10.0f,
                 Aantal = 10,
                 Ql = "A1",
-                VeilingId = createdVeiling!.Id,
                 Stadium = "Test",
                 Lengte = 50.0f,
                 Kleur = "FFFFFF",
@@ -214,9 +202,21 @@ namespace Veiling.Server.Test.Controllers
                 AantalProductenPerContainer = 10,
                 GewichtVanBloemen = 400.0f
             };
-            await _client.PostAsJsonAsync("/api/kavels", kavelDto);
+            var kavelResponse = await _client.PostAsJsonAsync("/api/kavels", kavelDto);
+            var createdKavel = await kavelResponse.Content.ReadFromJsonAsync<Kavel>();
 
-            var response = await _client.GetAsync($"/api/kavels/veiling/{createdVeiling.Id}");
+            // Create veiling with kavel
+            var veilingDto = new
+            {
+                Naam = "Test Veiling",
+                StartTijd = DateTime.UtcNow,
+                EndTijd = DateTime.UtcNow.AddHours(2),
+                KavelIds = new List<int> { createdKavel!.Id }
+            };
+            var veilingResponse = await _client.PostAsJsonAsync("/api/veilingen", veilingDto);
+            var createdVeiling = await veilingResponse.Content.ReadFromJsonAsync<Models.Veiling>();
+
+            var response = await _client.GetAsync($"/api/kavels/veiling/{createdVeiling!.Id}");
             var kavels = await response.Content.ReadFromJsonAsync<List<Kavel>>();
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
