@@ -7,12 +7,15 @@ export interface AccountDropdownProps {
     align?: "left" | "right";
     avatarUrl?: string;
     children?: ReactNode;
+    onLogout?: () => void;
 }
+
 export default function AccountDropdown({
     className = "",
     align = "right",
     avatarUrl,
     children,
+    onLogout,
 }: AccountDropdownProps) {
     const [open, setOpen] = useState(false);
     const btnRef = useRef<HTMLButtonElement | null>(null);
@@ -99,9 +102,15 @@ export default function AccountDropdown({
                     </div>
 
                     <div className="pd-actions">
-                        <button className="pd-action pd-action--danger" role="menuitem" tabIndex={0}>
+                        <button
+                            className="pd-action pd-action--danger"
+                            role="menuitem"
+                            tabIndex={0}
+                            onClick={onLogout}
+                        >
                             Uitloggen
                         </button>
+
                     </div>
                 </div>
             )}
