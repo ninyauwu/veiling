@@ -1,21 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veiling.Server.Models;
 
 namespace Veiling.Server.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class BodenController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public BodenController(AppDbContext context)
+        public BodenController(IAppDbContext context)
         {
             _context = context;
         }
 
         // GET: api/boden
+        [Authorize(Roles = nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Bod>>> GetBoden()
         {
@@ -24,8 +33,11 @@ namespace Veiling.Server.Controllers
                 .Include(b => b.Kavel)
                 .ToListAsync();
         }
-
+//TODO: Bv1 kan alleen hun eigen boden zien, Vk3 kan al de boden zien die op hun kavel zijn geboden
         // GET: api/boden/5
+        [Authorize(Roles = nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.Administrator)
+        )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Bod>> GetBod(int id)
         {
@@ -43,6 +55,10 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/boden/kavel/5
+        [Authorize(Roles = nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpGet("kavel/{kavelId}")]
         public async Task<ActionResult<IEnumerable<Bod>>> GetBodenByKavel(int kavelId)
         {
@@ -54,6 +70,9 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/boden/gebruiker/5
+        [Authorize(Roles = nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpGet("gebruiker/{gebruikerId}")]
         public async Task<ActionResult<IEnumerable<Bod>>> GetBodenByGebruiker(string gebruikerId)
         {
@@ -65,6 +84,7 @@ namespace Veiling.Server.Controllers
         }
 
         // GET: api/boden/hoogste/5
+        [Authorize()]
         [HttpGet("hoogste/{kavelId}")]
         public async Task<ActionResult<Bod>> GetHoogsteBod(int kavelId)
         {
@@ -83,6 +103,12 @@ namespace Veiling.Server.Controllers
         }
 
         // POST: api/boden
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+        )]
         [HttpPost]
         public async Task<ActionResult<Bod>> CreateBod(Bod bod)
         {
@@ -94,6 +120,10 @@ namespace Veiling.Server.Controllers
         }
 
         // PUT: api/boden/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBod(int id, Bod bod)
         {
@@ -121,6 +151,10 @@ namespace Veiling.Server.Controllers
         }
 
         // DELETE: api/boden/5
+        [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester)
+        )]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBod(int id)
         {

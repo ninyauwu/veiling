@@ -60,7 +60,7 @@ function Header({ showLocationDropdown = true }: HeaderProps) {
           />
           <SimpeleKnop
             label="Registreer"
-            onClick={() => {}}
+            onClick={() => navigate("/registreer")}
             appearance="primary"
           />
         </div>

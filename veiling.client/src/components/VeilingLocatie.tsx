@@ -2,6 +2,7 @@
 import "./VeilingLocatie.css";
 import SimpeleKnop from "./SimpeleKnop";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../utils/AuthFetch";
 
 interface Locatie {
   id: number;
@@ -132,11 +133,11 @@ const locatieAfbeeldingen: Record<string, string> = {
 // Inactieve locatie afbeeldingen
 const inactieveAfbeeldingen: Record<string, string> = {
   Amsterdam:
-    "https://images.ad.nl/N2E0NzY5ZTY1NzQwZTM1YjRjMDgvZGlvLzI1MDUzMTE0Ni9maXQtd2lkdGgvMTIwMA",
+    "https://keeskrick.com/wp-content/uploads/2019/01/amsterdam-nachtfoto-herengracht-blauwburgwal-02.jpg",
   Rotterdam:
-    "https://image.volkskrant.nl/224702415/width/2480/een-menigte-op-het-amsterdamse-mercatorplein-na-de-winst-van",
+    "https://www.ms-fotografie.nl/wp-content/gallery/24034/cache/erasmusbrug-rood-wit-blauw-stadscentrum-rotterdam-24034-1.jpg-nggid043983-ngg0dyn-0x0x100-00f0w010c010r110f110r010t010.jpg",
   Delft:
-    "https://redactie.rtl.nl/sites/default/files/content/images/2021/01/24/politie%20auto.jpg?itok=Ij_a8ZWx&offsetX=0&offsetY=31&cropWidth=1917&cropHeight=1078&width=2048&height=1152&impolicy=dynamic",
+    "https://cdn-thumbs.ohmyprints.net/1/0337c93a0e09cded409b3075d7db0f83/817x600/thumbnail/fit.jpg",
 };
 
 interface VeilingLocatieOverzichtProps {
@@ -154,21 +155,21 @@ export default function VeilingLocatieOverzicht({
     async function fetchData() {
       try {
         // Haal locaties op
-        const locatiesResponse = await fetch("/api/locaties");
+        const locatiesResponse = await authFetch("/api/locaties");
         if (!locatiesResponse.ok) {
           throw new Error(`HTTP error! status: ${locatiesResponse.status}`);
         }
         const locatiesData: Locatie[] = await locatiesResponse.json();
 
         // Haal actieve veilingen op
-        const actieveVeilingenResponse = await fetch("/api/veilingen/actief");
+        const actieveVeilingenResponse = await authFetch("/api/veilingen/actief");
         let actieveVeilingenData: VeilingData[] = [];
         if (actieveVeilingenResponse.ok) {
           actieveVeilingenData = await actieveVeilingenResponse.json();
         }
 
         // Haal alle veilingen op voor toekomstige veilingen
-        const alleVeilingenResponse = await fetch("/api/veilingen");
+        const alleVeilingenResponse = await authFetch("/api/veilingen");
         let alleVeilingenData: VeilingData[] = [];
         if (alleVeilingenResponse.ok) {
           alleVeilingenData = await alleVeilingenResponse.json();

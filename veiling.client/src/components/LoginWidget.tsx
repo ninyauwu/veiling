@@ -2,17 +2,71 @@ import React, { useState} from 'react';
 import bloomifyLogo from '../assets/bloomify_naam_logo.png';
 import emailIcon from '../assets/login/email.png';
 import keyIcon from '../assets/login/key.png';
+import { useNavigate } from "react-router-dom";
 import './LoginWidget.css';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Login submitted:', { email, password, rememberMe });
-    };
+    e.preventDefault();
+
+    try {
+            const response = await fetch("/login?useCookies=false&useSessionCookies=false", {
+
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email,
+                password
+            })
+        });
+
+        if (!response.ok) {
+            alert("Invalid email or password");
+            return;
+        }
+
+        const data = await response.json();
+        console.log("Login success:", data);
+
+        // Store token
+        localStorage.setItem("access_token", data.accessToken);
+
+        const meResponse = await fetch("/me", {
+        headers: {
+            Authorization: `Bearer ${data.accessToken}`
+        }
+        });
+
+        if (!meResponse.ok) {
+        throw new Error("Failed to fetch user info");
+        }
+
+        const me = await meResponse.json();
+        console.log("Current user:", me);
+
+        // Optional: refresh token
+        if (data.refreshToken) {
+            localStorage.setItem("refresh_token", data.refreshToken);
+        }
+
+        if (me.roles.includes("Leverancier")) {
+            navigate("/verkoper-dashboard");
+        } else {
+            navigate("/locaties");
+        }
+
+
+    } catch (error) {
+        console.error("Login error:", error);
+    }
+};
 
     return (
         <div className="login-container">

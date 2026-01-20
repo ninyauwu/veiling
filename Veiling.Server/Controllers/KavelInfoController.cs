@@ -1,17 +1,26 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Veiling.Server.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class KavelInfoController : ControllerBase {
-    private readonly AppDbContext _context;
+    private readonly IAppDbContext _context;
 
-    public KavelInfoController(AppDbContext context) {
+    public KavelInfoController(IAppDbContext context) {
         _context = context;
     }
 
+    [Authorize(Roles = 
+        nameof(Role.Administrator) + ", " + 
+        nameof(Role.Veilingmeester) + ", " + 
+        nameof(Role.BedrijfManager) + ", " + 
+        nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+        nameof(Role.Leverancier)
+    )]
     [HttpGet("{locatieId}")]
     public async Task<ActionResult<IEnumerable<KavelLeverancier>>> GetKavels(int locatieId) {
         var now = DateTime.Now;
@@ -24,6 +33,7 @@ public class KavelInfoController : ControllerBase {
         if (veiling == null) return NotFound($"No auctions at ${locatie.Naam} currently active.");
 
         var kavels = _context.Kavels
+            .Where(k => k.VeilingId == veilingId)
             .Include(k => k.Leverancier)
             .Include(k => k.Veiling)
             .Include(k => k.Leverancier.Bedrijf)

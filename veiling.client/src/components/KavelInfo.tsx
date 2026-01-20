@@ -7,6 +7,7 @@ import ImageSet from "./ImageSet";
 import NavigationBar from "./NavigationBar";
 import MetadataGrid from "./MetadataGrid";
 import CompanyQuality from "./CompanyQuality";
+import { authFetch } from "../utils/AuthFetch";
 import AuctionCountdown from "./AuctionCountdown";
 import ApproveOrDeny from "./AproveOrDenyTextBox";
 import type { VeilingStartMessage } from "./PriceBar";
@@ -36,9 +37,10 @@ type KavelInfoResponse = {
 interface KavelInfoProps {
   locatieId?: number;
   sortOnApproval?: boolean;
+  onSelectKavel?: (kavel: number) => void;
 }
 
-function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
+function KavelInfo({ locatieId = 1, sortOnApproval = false, onSelectKavel }: KavelInfoProps) {
   const [kavels, setKavels] = useState<KavelInfoResponse[]>([]);
   const [selected, setSelected] = useState<number | null>(0);
   const [loading, setLoading] = useState(true);
@@ -54,9 +56,9 @@ function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
         setLoading(true);
         let res: Response;
         if (sortOnApproval) {
-          res = await fetch("/api/KavelInfo/pending");
+          res = await authFetch("/api/KavelInfo/pending");
         } else {
-          res = await fetch(`/api/KavelInfo/${locatieId}`);
+          res = await authFetch(`/api/KavelInfo/${locatieId}`);
         }
 
         if (!res.ok) {
@@ -72,8 +74,8 @@ function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
           if (data.length > 0) setSelected(0);
         }
       } catch (err) {
-        console.error("Failed to load kavels:", err);
-        setKavels([]);
+        console.error("Kon kavels niet laden:", err);
+        setKavels([]); // ensure kavels is empty on error
       } finally {
         setLoading(false);
       }
@@ -82,6 +84,15 @@ function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
     fetchKavels();
   }, [sortOnApproval, reload, locatieId]);
 
+  useEffect(() => {
+    if (onSelectKavel && kavels.length > 0 && selected !== null) {
+      onSelectKavel(kavels[selected].kavel.id)
+    }
+  }, [selected, kavels, onSelectKavel]);
+
+  if (kavels.length < 1) {
+    return <div>Geen kavels gevonden</div>;
+  }
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("https://localhost:32274/hubs/veiling")
@@ -119,7 +130,7 @@ function KavelInfo({ locatieId = 1, sortOnApproval = false }: KavelInfoProps) {
   }, []);
 
   if (loading) return <div>Loading...</div>;
-  if (kavels.length === 0) return <div>Geen kavels gevonden</div>;
+  if (kavels.length < 1) return <div>Geen kavels gevonden</div>;
 
   const handleNext = () => {
     if (selected === null) return;
