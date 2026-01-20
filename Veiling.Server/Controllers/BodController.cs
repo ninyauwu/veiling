@@ -18,15 +18,10 @@ public class BodController : ControllerBase
         _completeBidService = completeBidService;
     }
 
-    // GET: api/boden
+    // POST: api/boden
     [HttpPost]
     public async Task<ActionResult<bool>> PlaatsBod(GeplaatstBod bod)
     {
-        //var gebruiker = await _context.Gebruikers
-        //    .FirstOrDefaultAsync(g => g.Id == bod.GebruikerId);
-        //if (gebruiker == null) {
-        //    return BadRequest("No Gebruiker with that ID exists.");
-        //}
         var kavel = await _context.Kavels
             .FirstOrDefaultAsync(k => k.Id == bod.KavelId);
         if (kavel == null) {
