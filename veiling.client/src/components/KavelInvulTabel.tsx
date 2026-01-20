@@ -117,7 +117,34 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
       </select>
       {errors[field] && <div className="error-text">{errors[field]}</div>}
     </div>
-  );
+    );
+
+    const renderColorPicker = (
+        label: string,
+        field: keyof typeof formData
+    ) => (
+        <div className="kavel-color-wrapper">
+            <div className="kavel-invul-label">{label}</div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <input
+                    type="color"
+                    value={formData[field] || "#000000"}
+                    onChange={(e) => handleInputChange(field, e.target.value)}
+                    style={{ width: "50px", height: "36px", padding: 0, border: "none" }}
+                />
+                <input
+                    type="text"
+                    value={formData[field]}
+                    readOnly
+                    className="kavel-invul-input"
+                />
+            </div>
+
+            {errors[field] && <div className="error-text">{errors[field]}</div>}
+        </div>
+    );
+
 
   return (
     <div className="kavel-invul-container">
@@ -129,7 +156,7 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
       {renderDropdown('Ql', 'ql', QI)}
       {renderDropdown('Plaats van verkoop', 'plaats', locations)}
       {renderInput('Stadium', 'stadium', 'Stadium')}
-      {renderInput('Kleur', 'kleur', 'Kleur')}
+      {renderColorPicker('Kleur', 'kleur')}
       {renderInput('Fustcode', 'fustcode', 'Fustcode')}
       {renderInput('Producten per container', 'aantalPerContainer', 'Aantal producten per container')}
       {renderInput('Lengte Van Bloem', 'lengte', 'Bijv. 50, avg lengte per bloem in cm')}
