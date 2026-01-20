@@ -15,7 +15,7 @@ function App() {
         <Route path="/" element={<LandingsPagina />} /> 
         <Route path="/invoer" element={<KavelInvoer />} />
         <Route path="/login" element={<LoginPagina />} />
-        <Route path="/veiling" element={<Veiling />} />
+        <Route path="/veiling/:locatieId" element={<Veiling />} />
         <Route path="/locaties" element={<LocatiePagina />} />
         <Route path="/judgement" element={<KavelJudgement />} />
         <Route path="/registreer" element={<RegistratiePagina />} />
@@ -26,4 +26,3 @@ function App() {
 }
 
 export default App;
-

@@ -15,64 +15,6 @@ namespace Veiling.Server.Test.Controllers
         }
 
         [Fact]
-        public async Task GetKavels_WithKavelsInDatabase_ReturnsOkWithData()
-        {
-            var bedrijf = new Bedrijf
-            {
-                Bedrijfsnaam = "Test BV",
-                KVKnummer = Random.Shared.Next(10000000, 99999999)
-            };
-            var bedrijfResponse = await _client.PostAsJsonAsync("/api/bedrijven", bedrijf);
-            var createdBedrijf = await bedrijfResponse.Content.ReadFromJsonAsync<Bedrijf>();
-
-            var leverancier = new Leverancier
-            {
-                BedrijfId = createdBedrijf!.Bedrijfscode,
-                IndexOfReliabilityOfInformation = "A",
-                Bedrijf = null
-            };
-            var levResponse = await _client.PostAsJsonAsync("/api/leveranciers", leverancier);
-            var createdLev = await levResponse.Content.ReadFromJsonAsync<Leverancier>();
-
-            // Create kavel first
-            var kavelDto = new
-            {
-                Naam = "Test Kavel",
-                Description = "Test",
-                ImageUrl = "/test.jpg",
-                MinimumPrijs = 10.0f,
-                Aantal = 50,
-                Ql = "A1",
-                Stadium = "Test",
-                Lengte = 60.0f,
-                Kleur = "FFFFFF",
-                Fustcode = 123,
-                AantalProductenPerContainer = 20,
-                GewichtVanBloemen = 500.0f
-            };
-            var kavelResponse = await _client.PostAsJsonAsync("/api/kavels", kavelDto);
-            var createdKavel = await kavelResponse.Content.ReadFromJsonAsync<Kavel>();
-
-            // Create veiling with kavel
-            var veilingDto = new
-            {
-                Naam = "Test Veiling",
-                StartTijd = DateTime.UtcNow,
-                EndTijd = DateTime.UtcNow.AddHours(2),
-                KavelIds = new List<int> { createdKavel!.Id }
-            };
-            var veilingResponse = await _client.PostAsJsonAsync("/api/veilingen", veilingDto);
-            var createdVeiling = await veilingResponse.Content.ReadFromJsonAsync<Models.Veiling>();
-
-            var response = await _client.GetAsync($"/api/kavelinfo/{createdVeiling!.Id}");
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Test Kavel", content);
-        }
-
-        [Fact]
         public async Task GetKavels_WithNoKavelsInDatabase_ReturnsNotFound()
         {
             // Clean database

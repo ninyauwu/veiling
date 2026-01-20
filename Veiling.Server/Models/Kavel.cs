@@ -36,5 +36,6 @@
         public Veiling? Veiling { get; set; }   
         public Leverancier? Leverancier { get; set; }
         public ICollection<Bod> Boden { get; set; } = new List<Bod>();
+        public ICollection<KavelVeiling> KavelVeilingen { get; set; } = new List<KavelVeiling>();
     }
 }

@@ -103,11 +103,17 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// Networking
+builder.Services.AddCors();
+builder.Services.AddSignalR();
+
 builder.Services.AddIdentityCore<Gebruiker>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager()
     .AddApiEndpoints();
+
+builder.Services.AddScoped<CompleteBidService>();
 
 var app = builder.Build();
 
@@ -132,6 +138,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<VeilingHub>("/hubs/veiling");
 app.MapIdentityApi<Gebruiker>();
 app.MapFallbackToFile("/index.html");
 app.MapUserEndpoints();
