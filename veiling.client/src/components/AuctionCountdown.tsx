@@ -203,9 +203,10 @@ export default function AuctionCountdown({
 
   const isAdministrator = userRoles.includes("Administrator");
   const isVeilingmeester = userRoles.includes("Veilingmeester");
-  const isGebruiker = userRoles.includes("Gebruiker");
+  const isBedrijf = userRoles.includes("Bedrijfsvertegenwoordiger");
+  const isManager = userRoles.includes("BedrijfManager");
 
-  const canBid = isGebruiker || isAdministrator;
+  const canBid = isBedrijf || isManager || isAdministrator;
   const canStartVeiling = isVeilingmeester || isAdministrator;
 
   const countdown = (

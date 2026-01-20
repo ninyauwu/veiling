@@ -124,9 +124,9 @@ namespace Veiling.Server
 
             var gebruiker5 = new Gebruiker
             {
-                UserName = "buyer@user.nl",
-                Email = "buyer@user.nl",
-                Name = "Buyer User",
+                UserName = "bedrijfs@vertegenwoordiger.nl",
+                Email = "bedrijfs@vertegenwoordiger.nl",
+                Name = "bedrijfs vertegenwoordiger",
                 PhoneNumber = "612345678",
                 Bedrijfsbeheerder = true,
                 Geverifieerd = true,
@@ -162,7 +162,8 @@ namespace Veiling.Server
             await userManager.AddToRoleAsync(gebruiker2, nameof(Role.Administrator));
             await userManager.AddToRoleAsync(gebruiker3, nameof(Role.Leverancier));
             await userManager.AddToRoleAsync(gebruiker4, nameof(Role.Veilingmeester));
-            await userManager.AddToRoleAsync(gebruiker5, nameof(Role.Gebruiker));
+            await userManager.AddToRoleAsync(gebruiker5, nameof(Role.Bedrijfsvertegenwoordiger));
+            
 
 
             // Veilingmeesters
