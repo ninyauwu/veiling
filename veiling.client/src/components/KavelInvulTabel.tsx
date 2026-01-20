@@ -119,32 +119,39 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     </div>
     );
 
-    const renderColorPicker = (
-        label: string,
-        field: keyof typeof formData
-    ) => (
-        <div className="kavel-color-wrapper">
-            <div className="kavel-invul-label">{label}</div>
+const renderColorPicker = (
+  label: string,
+  field: keyof typeof formData
+) => (
+  <div className="kavel-invul-row">
+    <div className="kavel-invul-label">{label}</div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <input
-                    type="color"
-                    value={formData[field] || "#000000"}
-                    onChange={(e) => handleInputChange(field, e.target.value)}
-                    style={{ width: "50px", height: "36px", padding: 0, border: "none" }}
-                />
-                <input
-                    type="text"
-                    value={formData[field]}
-                    readOnly
-                    className="kavel-invul-input"
-                />
-            </div>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <input
+        type="color"
+        value={formData[field] || "#000000"}
+        onChange={(e) => handleInputChange(field, e.target.value)}
+        style={{
+          width: "50px",
+          height: "36px",
+          padding: 0,
+          border: "none",
+          cursor: "pointer",
+        }}
+      />
 
-            {errors[field] && <div className="error-text">{errors[field]}</div>}
-        </div>
-    );
+      <input
+        type="text"
+        className={`kavel-invul-input ${errors[field] ? 'input-error' : ''}`}
+        value={formData[field]}
+        onChange={(e) => handleInputChange(field, e.target.value)}
+        placeholder="#7A1F3D"
+      />
+    </div>
 
+    {errors[field] && <div className="error-text">{errors[field]}</div>}
+  </div>
+);
 
   return (
     <div className="kavel-invul-container">
