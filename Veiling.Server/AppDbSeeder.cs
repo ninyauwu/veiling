@@ -49,7 +49,14 @@ namespace Veiling.Server
                 Actief = true
             };
 
-            context.Locaties.AddRange(amsterdam, rotterdam, delft);
+            var zwolle = new Locatie
+            {
+                Naam = "Zwolle",
+                KlokId = 4,
+                Actief = false
+            };
+
+            context.Locaties.AddRange(amsterdam, rotterdam, delft, zwolle);
             context.SaveChanges();
 
             // Bedrijven
