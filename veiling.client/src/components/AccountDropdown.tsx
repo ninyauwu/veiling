@@ -117,6 +117,9 @@ export default function AccountDropdown({
         </div>
     );
 }
-export function AccountDropdownLine({ children }: { children: ReactNode }) {
+export interface AccountDropdownLineProps {
+    children: ReactNode;
+}
+export function AccountDropdownLine({ children }: AccountDropdownLineProps) {
     return <p className="pd-line">{children}</p>;
 }
