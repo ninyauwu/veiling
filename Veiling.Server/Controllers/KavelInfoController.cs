@@ -44,7 +44,7 @@ public class KavelInfoController : ControllerBase {
             .Include(k => k.Leverancier)
                 .ThenInclude(l => l.Bedrijf)
             .Include(k => k.Veiling)
-            .Where(k => k.Approved == null)
+            .Where(k => k.Approved == null && k.Veiling != null)
             .ToListAsync();
 
         if (kavels == null || !kavels.Any())
