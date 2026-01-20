@@ -6,6 +6,7 @@ import type { VeilingStartMessage } from "./PriceBar";
 import SimpeleKnop from "./SimpeleKnop";
 import Spacer from "./Spacer";
 import BidFeedback, { type BidFeedbackStatus } from "./BidFeedback";
+import { authFetch } from "../utils/AuthFetch";
 
 function getNextNov15(): Date {
   const now = new Date();
@@ -49,14 +50,14 @@ interface BodResponse {
 }
 
 export default function AuctionCountdown({
-  price,
-  quantity,
-  containers,
-  targetDate,
-  startMessage,
-  connection,
-  kavelId,
-}: AuctionCountdownProps) {
+                                           price,
+                                           quantity,
+                                           containers,
+                                           targetDate,
+                                           startMessage,
+                                           connection,
+                                           kavelId,
+                                         }: AuctionCountdownProps) {
   const [shouldInterrupt, setShouldInterrupt] = useState(false);
   const [isCountdown, setIsCountdown] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(price ?? 0);
@@ -67,6 +68,7 @@ export default function AuctionCountdown({
   const [feedbackStatus, setFeedbackStatus] =
     useState<BidFeedbackStatus | null>(null);
   const [awaitingBidResponse, setAwaitingBidResponse] = useState(false);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   const resolvedTarget = (() => {
     if (targetDate === null) return getNextNov15();
@@ -80,6 +82,22 @@ export default function AuctionCountdown({
 
   const [time, setTime] = useState(() => getTimePartsUntil(resolvedTarget));
   const formattedPrice = "€" + currentPrice.toFixed(2).toString();
+
+  useEffect(() => {
+    async function fetchUserRoles() {
+      try {
+        const response = await authFetch("/me");
+        if (response.ok) {
+          const data = await response.json();
+          setUserRoles(data.roles || []);
+        }
+      } catch (error) {
+        console.error("Error fetching user roles:", error);
+      }
+    }
+
+    fetchUserRoles();
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -183,6 +201,13 @@ export default function AuctionCountdown({
     setFeedbackStatus(null);
   };
 
+  const isAdministrator = userRoles.includes("Administrator");
+  const isVeilingmeester = userRoles.includes("Veilingmeester");
+  const isGebruiker = userRoles.includes("Gebruiker");
+
+  const canBid = isGebruiker || isAdministrator;
+  const canStartVeiling = isVeilingmeester || isAdministrator;
+
   const countdown = (
     <section
       className="auc-card"
@@ -237,16 +262,20 @@ export default function AuctionCountdown({
         serverReceivedTime={serverReceivedTime}
       />
       <div className="button-container">
-        <SimpeleKnop
-          onClick={placeBid}
-          appearance="primary"
-          disabled={isSubmittingBid}
-        >
-          {isSubmittingBid ? "Bezig..." : "Bieden"}
-        </SimpeleKnop>
-        <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
-          Start veiling
-        </SimpeleKnop>
+        {canBid && (
+          <SimpeleKnop
+            onClick={placeBid}
+            appearance="primary"
+            disabled={isSubmittingBid}
+          >
+            {isSubmittingBid ? "Bezig..." : "Bieden"}
+          </SimpeleKnop>
+        )}
+        {canStartVeiling && (
+          <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
+            Start veiling
+          </SimpeleKnop>
+        )}
       </div>
     </section>
   );
@@ -279,16 +308,20 @@ export default function AuctionCountdown({
       </div>
       <Spacer />
       <div className="button-container">
-        <SimpeleKnop
-          onClick={placeBid}
-          appearance="primary"
-          disabled={isSubmittingBid}
-        >
-          {isSubmittingBid ? "Bezig..." : "Bied"}
-        </SimpeleKnop>
-        <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
-          Start veiling
-        </SimpeleKnop>
+        {canBid && (
+          <SimpeleKnop
+            onClick={placeBid}
+            appearance="primary"
+            disabled={isSubmittingBid}
+          >
+            {isSubmittingBid ? "Bezig..." : "Bied"}
+          </SimpeleKnop>
+        )}
+        {canStartVeiling && (
+          <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
+            Start veiling
+          </SimpeleKnop>
+        )}
       </div>
     </section>
   );
