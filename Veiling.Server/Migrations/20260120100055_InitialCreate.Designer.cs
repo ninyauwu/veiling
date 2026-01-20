@@ -12,7 +12,7 @@ using Veiling.Server;
 namespace Veiling.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260119164257_InitialCreate")]
+    [Migration("20260120100055_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -398,6 +398,30 @@ namespace Veiling.Server.Migrations
                     b.ToTable("Kavels", "identity");
                 });
 
+            modelBuilder.Entity("Veiling.Server.Models.KavelVeiling", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DurationMs")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KavelId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KavelId");
+
+                    b.ToTable("KavelVeilingen", "identity");
+                });
+
             modelBuilder.Entity("Veiling.Server.Models.Leverancier", b =>
                 {
                     b.Property<int>("Id")
@@ -599,6 +623,17 @@ namespace Veiling.Server.Migrations
                     b.Navigation("Veiling");
                 });
 
+            modelBuilder.Entity("Veiling.Server.Models.KavelVeiling", b =>
+                {
+                    b.HasOne("Veiling.Server.Models.Kavel", "Kavel")
+                        .WithMany("KavelVeilingen")
+                        .HasForeignKey("KavelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kavel");
+                });
+
             modelBuilder.Entity("Veiling.Server.Models.Leverancier", b =>
                 {
                     b.HasOne("Veiling.Server.Models.Bedrijf", "Bedrijf")
@@ -650,6 +685,8 @@ namespace Veiling.Server.Migrations
             modelBuilder.Entity("Veiling.Server.Models.Kavel", b =>
                 {
                     b.Navigation("Boden");
+
+                    b.Navigation("KavelVeilingen");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Leverancier", b =>

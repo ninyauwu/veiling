@@ -40,7 +40,11 @@ interface KavelInfoProps {
   onSelectKavel?: (kavel: number) => void;
 }
 
-function KavelInfo({ locatieId = 1, sortOnApproval = false, onSelectKavel }: KavelInfoProps) {
+function KavelInfo({
+  locatieId = 1,
+  sortOnApproval = false,
+  onSelectKavel,
+}: KavelInfoProps) {
   const [kavels, setKavels] = useState<KavelInfoResponse[]>([]);
   const [selected, setSelected] = useState<number | null>(0);
   const [loading, setLoading] = useState(true);
@@ -86,13 +90,10 @@ function KavelInfo({ locatieId = 1, sortOnApproval = false, onSelectKavel }: Kav
 
   useEffect(() => {
     if (onSelectKavel && kavels.length > 0 && selected !== null) {
-      onSelectKavel(kavels[selected].kavel.id)
+      onSelectKavel(kavels[selected].kavel.id);
     }
   }, [selected, kavels, onSelectKavel]);
 
-  if (kavels.length < 1) {
-    return <div>Geen kavels gevonden</div>;
-  }
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("https://localhost:32274/hubs/veiling")

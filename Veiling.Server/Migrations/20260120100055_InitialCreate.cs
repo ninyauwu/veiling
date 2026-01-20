@@ -377,6 +377,29 @@ namespace Veiling.Server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "KavelVeilingen",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Start = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DurationMs = table.Column<int>(type: "int", nullable: false),
+                    KavelId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KavelVeilingen", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KavelVeilingen_Kavels_KavelId",
+                        column: x => x.KavelId,
+                        principalSchema: "identity",
+                        principalTable: "Kavels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 schema: "identity",
@@ -454,6 +477,12 @@ namespace Veiling.Server.Migrations
                 column: "VeilingId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_KavelVeilingen_KavelId",
+                schema: "identity",
+                table: "KavelVeilingen",
+                column: "KavelId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Leveranciers_BedrijfId",
                 schema: "identity",
                 table: "Leveranciers",
@@ -503,6 +532,10 @@ namespace Veiling.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Boden",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "KavelVeilingen",
                 schema: "identity");
 
             migrationBuilder.DropTable(

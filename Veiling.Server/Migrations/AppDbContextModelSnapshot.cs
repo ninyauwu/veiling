@@ -416,7 +416,7 @@ namespace Veiling.Server.Migrations
 
                     b.HasIndex("KavelId");
 
-                    b.ToTable("KavelVeilingen");
+                    b.ToTable("KavelVeilingen", "identity");
                 });
 
             modelBuilder.Entity("Veiling.Server.Models.Leverancier", b =>

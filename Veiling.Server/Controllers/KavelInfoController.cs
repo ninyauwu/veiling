@@ -33,7 +33,7 @@ public class KavelInfoController : ControllerBase {
         if (veiling == null) return NotFound($"No auctions at ${locatie.Naam} currently active.");
 
         var kavels = _context.Kavels
-            .Where(k => k.VeilingId == veilingId)
+            .Where(k => k.VeilingId == locatieId)
             .Include(k => k.Leverancier)
             .Include(k => k.Veiling)
             .Include(k => k.Leverancier.Bedrijf)
