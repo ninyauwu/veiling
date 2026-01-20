@@ -23,8 +23,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Leverancier) + ", " +
-        nameof(Role.Gebruiker)
+        nameof(Role.Leverancier)
         )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Locatie>>> GetLocaties()
@@ -38,8 +37,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Leverancier) + ", " +
-        nameof(Role.Gebruiker)
+        nameof(Role.Leverancier)
         )]
         [HttpGet("actief")]
         public async Task<ActionResult<IEnumerable<Locatie>>> GetActieveLocaties()
@@ -55,8 +53,7 @@ namespace Veiling.Server.Controllers
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Leverancier) + ", " +
-        nameof(Role.Gebruiker)
+        nameof(Role.Leverancier)
         )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Locatie>> GetLocatie(int id)

@@ -19,8 +19,7 @@ public class KavelInfoController : ControllerBase {
         nameof(Role.Veilingmeester) + ", " + 
         nameof(Role.BedrijfManager) + ", " + 
         nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
-        nameof(Role.Leverancier) + ", " +
-        nameof(Role.Gebruiker)
+        nameof(Role.Leverancier)
     )]
     [HttpGet("{locatieId}")]
     public async Task<ActionResult<IEnumerable<KavelLeverancier>>> GetKavels(int locatieId) {
