@@ -7,6 +7,7 @@ import KavelJudgement from "./pages/KavelJudgement.tsx";
 import RegistratiePagina from "./pages/RegistratiePagina";
 import KavelInvoer from "./pages/KavelInvoer.tsx";
 import VerkoperDashboard from "./pages/VerkoperDashboard.tsx";
+import Scheduler from "./pages/SchedulerPagina.tsx";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/judgement" element={<KavelJudgement />} />
         <Route path="/registreer" element={<RegistratiePagina />} />
         <Route path="/verkoper-dashboard" element={<VerkoperDashboard />} />
+        <Route path="/scheduler" element={<Scheduler />} />
       </Routes>
     </Router>
   );
