@@ -19,6 +19,7 @@ import {
   isAppointmentInPast,
   isSameDate,
 } from "./SchedulerUtil";
+import { authFetch } from "../../utils/AuthFetch";
 
 export default function Scheduler() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
@@ -47,7 +48,7 @@ export default function Scheduler() {
   useEffect(() => {
     const fetchKavels = async () => {
       try {
-        const response = await fetch("/api/kavels");
+        const response = await authFetch("/api/kavels");
         if (!response.ok) throw new Error("Failed to fetch kavels");
         const data = await response.json();
         setKavels(data);
@@ -73,7 +74,7 @@ export default function Scheduler() {
   useEffect(() => {
     const fetchVeilingen = async () => {
       try {
-        const response = await fetch("/api/veilingen");
+        const response = await authFetch("/api/veilingen");
         if (!response.ok) throw new Error("Failed to fetch veilingen");
         const data = await response.json();
 
@@ -112,7 +113,7 @@ export default function Scheduler() {
   useEffect(() => {
     const fetchVeilingenForWeek = async () => {
       try {
-        const response = await fetch("/api/veilingen");
+        const response = await authFetch("/api/veilingen");
         if (!response.ok) throw new Error("Failed to fetch veilingen");
         const data = await response.json();
 
@@ -396,7 +397,7 @@ export default function Scheduler() {
     };
 
     try {
-      const response = await fetch("/api/veilingen", {
+      const response = await authFetch("/api/veilingen", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -470,7 +471,7 @@ export default function Scheduler() {
     };
 
     try {
-      const response = await fetch(`/api/veilingen/${veilingId}`, {
+      const response = await authFetch(`/api/veilingen/${veilingId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
