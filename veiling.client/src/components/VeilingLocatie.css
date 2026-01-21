@@ -13,9 +13,9 @@
 
 .locatie-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
-    max-width: 1200px;
+    max-width: 1800px;
     margin: 0 auto;
 }
 
@@ -24,16 +24,17 @@
     border: 2px solid #d6d6d6;
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 7px;
 }
 
-.veiling-locatie:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+    .veiling-locatie:hover {
+     transform: translateY(-2px);
+     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
 .achtergrond {
     position: relative;
-    height: 420px;
+    height: 380px;
     background-size: cover;
     background-position: center;
     display: flex;
@@ -46,12 +47,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-            to bottom,
-            rgba(0, 0, 0, 0.1) 0%,
-            rgba(0, 0, 0, 0.3) 60%,
-            rgba(0, 0, 0, 0.5) 100%
-    );
+    background: linear-gradient( to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 60%, rgba(0, 0, 0, 0.5) 100% );
     z-index: 1;
 }
 
@@ -116,13 +112,7 @@
     letter-spacing: 0.05em;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
-    .locatie-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
     .locatie-naam {
         font-size: 2rem;
     }

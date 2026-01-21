@@ -28,28 +28,42 @@ namespace Veiling.Server
             var now = DateTime.UtcNow;
 
             // Locaties
-            var amsterdam = new Locatie
+            var aalsmeer = new Locatie
             {
-                Naam = "Amsterdam",
+                Naam = "Aalsmeer",
                 KlokId = 1,
                 Actief = true
             };
 
-            var rotterdam = new Locatie
+            var naaldwijk = new Locatie
             {
-                Naam = "Rotterdam",
+                Naam = "Naaldwijk",
                 KlokId = 2,
                 Actief = false
             };
 
-            var delft = new Locatie
+            var rijnsburg = new Locatie
             {
-                Naam = "Delft",
+                Naam = "Rijnsburg",
                 KlokId = 3,
                 Actief = true
             };
 
-            context.Locaties.AddRange(amsterdam, rotterdam, delft);
+            var eelde = new Locatie
+            {
+                Naam = "Eelde",
+                KlokId = 4,
+                Actief = false
+            };
+
+            var rhein_maas = new Locatie
+            {
+                Naam = "Rhein-Maas",
+                KlokId = 5,
+                Actief = false
+            };
+
+            context.Locaties.AddRange(aalsmeer, naaldwijk, rijnsburg, eelde, rhein_maas);
             context.SaveChanges();
 
             // Bedrijven
@@ -176,7 +190,7 @@ namespace Veiling.Server
                 EndTijd = today.AddHours(35), // eindigd morgen 11 uur sochtends
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
-                LocatieId = amsterdam.Id
+                LocatieId = aalsmeer.Id
             };
 
             var rotterdamVeiling1 = new Models.Veiling
@@ -187,7 +201,7 @@ namespace Veiling.Server
                 EndTijd = today.AddHours(15), // eindigd 15:00
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
-                LocatieId = rotterdam.Id
+                LocatieId = naaldwijk.Id
             };
 
             var delftVeiling = new Models.Veiling
@@ -198,7 +212,7 @@ namespace Veiling.Server
                 EndTijd = today.AddMinutes(45).AddHours(18), // eindigd 18:45
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
-                LocatieId = delft.Id
+                LocatieId = rijnsburg.Id
             };
 
             context.Veilingen.AddRange(amsterdamVeiling, rotterdamVeiling1, delftVeiling);
