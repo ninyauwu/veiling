@@ -108,14 +108,30 @@ export default function AuctionCountdown({
   }, [resolvedTarget]);
 
   useEffect(() => {
-    console.log("startMessage changed:", startMessage);
-    if (startMessage) {
-      console.log("startingPrice:", startMessage.startingPrice);
-      setIsCountdown(false);
-      setCurrentPrice(startMessage.startingPrice ?? 0);
-      setShouldInterrupt(false);
-      setServerReceivedTime(null);
-    }
+    // Check of we in countdown mode moeten zijn
+    const checkCountdownStatus = () => {
+      if (!startMessage) {
+        setIsCountdown(true); // Geen veiling gepland = countdown mode
+        return;
+      }
+
+      const now = new Date();
+      const veilingStart = new Date(startMessage.startTime);
+
+      // Als de veiling nog niet begonnen is, toon countdown
+      if (now < veilingStart) {
+        setIsCountdown(true);
+      } else {
+        setIsCountdown(false);
+      }
+    };
+
+    checkCountdownStatus();
+
+    // Check elke seconde of we moeten switchen van countdown naar bidding
+    const interval = setInterval(checkCountdownStatus, 1000);
+
+    return () => clearInterval(interval);
   }, [startMessage]);
 
   useEffect(() => {
