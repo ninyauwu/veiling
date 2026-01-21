@@ -57,10 +57,11 @@ function Login() {
         }
 
         if (me.roles.includes("Leverancier")) {
-            navigate("/verkoper-dashboard");
+            window.location.href = "/verkoper-dashboard";
         } else {
-            navigate("/locaties");
+            window.location.href = "/locaties";
         }
+
 
 
     } catch (error) {
