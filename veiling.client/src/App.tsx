@@ -17,17 +17,17 @@ function App() {
     <Router>
       <Routes>
         <Route element={<Layout />}>
-        <Route path="/" element={<LandingsPagina />} /> 
-        <Route path="/invoer" element={<KavelInvoer />} />
-        <Route path="/login" element={<LoginPagina />} />
-        <Route path="/veiling/:locatieId" element={<Veiling />} />
-        <Route path="/locaties" element={<LocatiePagina />} />
-        <Route path="/judgement" element={<KavelJudgement />} />
-        <Route path="/registreer" element={<RegistratiePagina />} />
-        <Route path="/verkoper-dashboard" element={<VerkoperDashboard />} />
-        <Route path="/scheduler" element={<Scheduler />} />
+          <Route path="/" element={<LandingsPagina />} /> 
+          <Route path="/invoer" element={<KavelInvoer />} />
+          <Route path="/login" element={<LoginPagina />} />
+          <Route path="/veiling/:locatieId" element={<Veiling />} />
+          <Route path="/locaties" element={<LocatiePagina />} />
+          <Route path="/judgement" element={<KavelJudgement />} />
+          <Route path="/registreer" element={<RegistratiePagina />} />
+          <Route path="/verkoper-dashboard" element={<VerkoperDashboard />} />
+          <Route path="/scheduler" element={<Scheduler />} />
+          <Route path="/veilingmeester" element={<VeilingMeesterKeuzePagina />} />
         </Route>
-        <Route path="/veilingmeester" element={<VeilingMeesterKeuzePagina />} />
       </Routes>
     </Router>
   );
