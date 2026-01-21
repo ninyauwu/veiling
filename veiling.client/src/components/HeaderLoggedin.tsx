@@ -1,11 +1,23 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import LocationDropdown from "./LocationDropdown";
 import AccountDropdown, { AccountDropdownLine } from "./AccountDropdown";
+import bloomifyLogo from "../assets/bloomify_naam_logo.png";
 
-type LoggedInHeaderProps = {
+interface HeaderLoggedInProps {
     email: string;
     roles: string[];
-};
+    showLocationDropdown?: boolean;
+}
 
-export default function LoggedInHeader({ email, roles }: LoggedInHeaderProps) {
+function HeaderLoggedIn({
+    email,
+    roles,
+    showLocationDropdown = true,
+}: HeaderLoggedInProps) {
+    const [selectedLocation, setSelectedLocation] = useState("");
+    const navigate = useNavigate();
+
     function handleLogout() {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
@@ -13,29 +25,57 @@ export default function LoggedInHeader({ email, roles }: LoggedInHeaderProps) {
     }
 
     return (
-        <header
-            style={{
-                padding: "10px 20px",
-                backgroundColor: "#4caf50",
-                color: "#fff",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-            }}
-        >
-            <div>
-                <strong>Welkom,</strong> {email}
+        <header>
+            <div style={containerStyle}>
+                <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
+                    <img
+                        src={bloomifyLogo}
+                        alt="Naar Bloomify hoofdpagina"
+                        style={logoStyle}
+                        onClick={() => navigate("/")}
+                    />
+
+                    {showLocationDropdown && (
+                        <LocationDropdown
+                            value={selectedLocation}
+                            onChange={setSelectedLocation}
+                        />
+                    )}
+                </div>
+
+                <AccountDropdown align="right" onLogout={handleLogout}>
+                    <AccountDropdownLine>
+                        <strong>{email}</strong>
+                    </AccountDropdownLine>
+
+                    <AccountDropdownLine>
+                        Rollen: {roles.join(", ")}
+                    </AccountDropdownLine>
+                </AccountDropdown>
             </div>
-
-            <AccountDropdown align="right" onLogout={handleLogout}>
-                <AccountDropdownLine>
-                    <strong>{email}</strong>
-                </AccountDropdownLine>
-
-                <AccountDropdownLine>
-                    Rollen: {roles.join(", ")}
-                </AccountDropdownLine>
-            </AccountDropdown>
         </header>
     );
 }
+
+const containerStyle = {
+    width: "100%",
+    height: "80px",
+    backgroundColor: "white",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 40px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    position: "fixed" as const,
+    top: 0,
+    left: 0,
+    zIndex: 1000,
+};
+
+const logoStyle = {
+    height: "80px",
+    cursor: "pointer",
+    marginTop: "4px",
+};
+
+export default HeaderLoggedIn;
