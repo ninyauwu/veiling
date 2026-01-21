@@ -122,22 +122,30 @@ interface TimeRemaining {
 
 // Actieve locatie afbeeldingen
 const locatieAfbeeldingen: Record<string, string> = {
-  Amsterdam:
-    "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=500&h=300&fit=crop",
-  Rotterdam:
-    "https://www.spido.nl/wp-content/smush-webp/2025/02/Spido-zonsondergang3-scaled.jpeg.webp",
-  Delft:
-    "https://www.discoverholland.com/product-images/948e5a43-41f5-4d1d-ae2a-4e79ecaed08a.jpg",
+  Aalsmeer:
+    "https://www.visitaalsmeer.nl/wp-content/uploads/2024/02/historische_tuin_aalsmeer_01-1920x1280.jpg",
+  Naaldwijk:
+    "https://www.naaldwijkwinkelrijk.nl/media/djllsmbl/foto-plein.jpg",
+  Rijnsburg:
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2a/d2/25/71/caption.jpg?w=600&h=-1&s=1",
+  Eelde:
+        "https://images.fd.nl/v0s0N2Yyzp5oGTP4Rts2BwuarfE.jpg?auto=format&w=1280&q=45",
+  RheinMaas:
+        "https://www.veilingrheinmaas.com/fileadmin/_processed_/6/3/csm_Inkoopkanalen_en_diensten_bij_Veiling_Rhein_Maas_2892109269.png",
 };
 
 // Inactieve locatie afbeeldingen
 const inactieveAfbeeldingen: Record<string, string> = {
-  Amsterdam:
-    "https://keeskrick.com/wp-content/uploads/2019/01/amsterdam-nachtfoto-herengracht-blauwburgwal-02.jpg",
-  Rotterdam:
-    "https://www.ms-fotografie.nl/wp-content/gallery/24034/cache/erasmusbrug-rood-wit-blauw-stadscentrum-rotterdam-24034-1.jpg-nggid043983-ngg0dyn-0x0x100-00f0w010c010r110f110r010t010.jpg",
-  Delft:
-    "https://cdn-thumbs.ohmyprints.net/1/0337c93a0e09cded409b3075d7db0f83/817x600/thumbnail/fit.jpg",
+    Aalsmeer:
+        "https://radioaalsmeer.nl/wp-content/uploads/2016/09/aalsmeer-nacht-5371-1200x630.jpg",
+    Naaldwijk:
+        "https://images.ad.nl/NDcyYzQ0MmFmMjQxMDM5NzllMTUvZGlvLzI2NjIzMjYwNy9maXQtd2lkdGgvMTIwMA/het-gemeentehuis-aan-de-verdilaan-in-naaldwijk-kleurt-oranje-vanwege-de-wereldwijde-campagne-orange-the-world-die-zich-richt-op-geweld-tegen-vrouwen-en-meisjes",
+    Rijnsburg:
+        "https://www.ovrijnsburg.nl/wp-content/uploads/2021/04/kerk-background-rijnsburg.jpg",
+    Eelde:
+        "https://avondwinkel.nu/wp-content/uploads/2024/01/Avondwinkel-mpg_plaats.jpg",
+    "Rhein-Maas":
+        "https://mp.reshift.nl/zoom/7c47c652-3827-45df-8413-dd1e30d7d325-donkere-wolken-boven-de-maas.jpg?w=1200",
 };
 
 interface VeilingLocatieOverzichtProps {

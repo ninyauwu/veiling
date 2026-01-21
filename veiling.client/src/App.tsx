@@ -9,6 +9,8 @@ import KavelInvoer from "./pages/KavelInvoer.tsx";
 import VerkoperDashboard from "./pages/VerkoperDashboard.tsx";
 import Scheduler from "./pages/SchedulerPagina.tsx";
 import Layout from "./layout/Layout.tsx";
+import VeilingMeesterKeuzePagina from "./pages/VeilingMeesterKeuzePagina";
+
 
 function App() {
   return (
@@ -25,6 +27,7 @@ function App() {
         <Route path="/verkoper-dashboard" element={<VerkoperDashboard />} />
         <Route path="/scheduler" element={<Scheduler />} />
         </Route>
+        <Route path="/veilingmeester" element={<VeilingMeesterKeuzePagina />} />
       </Routes>
     </Router>
   );
