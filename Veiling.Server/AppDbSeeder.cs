@@ -124,6 +124,28 @@ namespace Veiling.Server
                 Geverifieerd = true,
                 BedrijfId = bedrijf1.Bedrijfscode
             };
+            
+            var gebruiker4 = new Gebruiker
+            {
+                UserName = "veiling@meester.nl",
+                Email = "veiling@meester.nl",
+                Name = "Veiling Meester",
+                PhoneNumber = "612345678",
+                Bedrijfsbeheerder = true,
+                Geverifieerd = true,
+                BedrijfId = bedrijf1.Bedrijfscode
+            };
+
+            var gebruiker5 = new Gebruiker
+            {
+                UserName = "bedrijfs@vertegenwoordiger.nl",
+                Email = "bedrijfs@vertegenwoordiger.nl",
+                Name = "bedrijfs vertegenwoordiger",
+                PhoneNumber = "612345678",
+                Bedrijfsbeheerder = true,
+                Geverifieerd = true,
+                BedrijfId = bedrijf1.Bedrijfscode
+            };
 
             //Give default password
             if (await userManager.FindByEmailAsync(gebruiker1.Email) == null)
@@ -134,17 +156,28 @@ namespace Veiling.Server
 
             if (await userManager.FindByEmailAsync(gebruiker3.Email) == null)
                 await userManager.CreateAsync(gebruiker3, "Password123!");
+            
+            if (await userManager.FindByEmailAsync(gebruiker4.Email) == null)
+                await userManager.CreateAsync(gebruiker4, "Password123!");
+            
+            if (await userManager.FindByEmailAsync(gebruiker5.Email) == null)
+                await userManager.CreateAsync(gebruiker5, "Password123!");
 
             //Reload users
             gebruiker1 = await userManager.FindByEmailAsync(gebruiker1.Email);
             gebruiker2 = await userManager.FindByEmailAsync(gebruiker2.Email);
             gebruiker3 = await userManager.FindByEmailAsync(gebruiker3.Email);
+            gebruiker4 = await userManager.FindByEmailAsync(gebruiker4.Email);
+            gebruiker5 = await userManager.FindByEmailAsync(gebruiker5.Email);
 
 
             //Give roles
             await userManager.AddToRoleAsync(gebruiker1, nameof(Role.Gebruiker));
             await userManager.AddToRoleAsync(gebruiker2, nameof(Role.Administrator));
             await userManager.AddToRoleAsync(gebruiker3, nameof(Role.Leverancier));
+            await userManager.AddToRoleAsync(gebruiker4, nameof(Role.Veilingmeester));
+            await userManager.AddToRoleAsync(gebruiker5, nameof(Role.Bedrijfsvertegenwoordiger));
+            
 
 
             // Veilingmeesters

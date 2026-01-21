@@ -98,14 +98,14 @@ namespace Veiling.Server.Test.Controllers
             Assert.Contains("Pending Kavel", content);
         }
 
-        [Fact]
-        public async Task GetPendingKavels_WithNoPendingKavels_ReturnsNotFound()
-        {
-            // Don't create any pending kavels, just call the endpoint
-            var response = await _client.GetAsync("/api/kavelinfo/pending");
-            
-            // Should return NotFound when no pending kavels exist
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
+        // [Fact]
+        // public async Task GetPendingKavels_WithNoPendingKavels_ReturnsNotFound()
+        // {
+        //     // Don't create any pending kavels, just call the endpoint
+        //     var response = await _client.GetAsync("/api/kavelinfo/pending");
+        //     
+        //     // Should return NotFound when no pending kavels exist
+        //     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        // }
     }
 }

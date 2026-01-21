@@ -6,6 +6,7 @@ import type { VeilingStartMessage } from "./PriceBar";
 import SimpeleKnop from "./SimpeleKnop";
 import Spacer from "./Spacer";
 import BidFeedback, { type BidFeedbackStatus } from "./BidFeedback";
+import { authFetch } from "../utils/AuthFetch";
 
 function getNextNov15(): Date {
   const now = new Date();
@@ -26,6 +27,7 @@ function getTimePartsUntil(target: Date) {
   const seconds = totalSec % 60;
   return { days, hours, minutes, seconds };
 }
+
 interface AuctionCountdownProps {
   price?: number;
   quantity?: number;
@@ -67,6 +69,7 @@ export default function AuctionCountdown({
   const [feedbackStatus, setFeedbackStatus] =
     useState<BidFeedbackStatus | null>(null);
   const [awaitingBidResponse, setAwaitingBidResponse] = useState(false);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   const resolvedTarget = (() => {
     if (targetDate === null) return getNextNov15();
@@ -82,6 +85,22 @@ export default function AuctionCountdown({
   const formattedPrice = "€" + currentPrice.toFixed(2).toString();
 
   useEffect(() => {
+    async function fetchUserRoles() {
+      try {
+        const response = await authFetch("/me");
+        if (response.ok) {
+          const data = await response.json();
+          setUserRoles(data.roles || []);
+        }
+      } catch (error) {
+        console.error("Error fetching user roles:", error);
+      }
+    }
+
+    fetchUserRoles();
+  }, []);
+
+  useEffect(() => {
     const id = setInterval(() => {
       setTime(getTimePartsUntil(resolvedTarget));
     }, 1000);
@@ -90,13 +109,39 @@ export default function AuctionCountdown({
   }, [resolvedTarget]);
 
   useEffect(() => {
+    const checkCountdownStatus = () => {
+      if (!startMessage) {
+        setIsCountdown(false);
+        return;
+      }
+
+      const now = new Date();
+      const veilingStart = new Date(startMessage.startTime);
+
+      if (now < veilingStart) {
+        setIsCountdown(false);
+      } else {
+        setIsCountdown(false);
+      }
+    };
+
+    checkCountdownStatus();
+
+    const interval = setInterval(checkCountdownStatus, 1000);
+
+    return () => clearInterval(interval);
+  }, [startMessage]);
+
+  useEffect(() => {
     console.log("startMessage changed:", startMessage);
     if (startMessage) {
       console.log("startingPrice:", startMessage.startingPrice);
-      setIsCountdown(false);
       setCurrentPrice(startMessage.startingPrice ?? 0);
       setShouldInterrupt(false);
       setServerReceivedTime(null);
+      setFeedbackStatus(null);
+      setAwaitingBidResponse(false);
+      setIsSubmittingBid(false);
     }
   }, [startMessage]);
 
@@ -119,7 +164,6 @@ export default function AuctionCountdown({
   const simulateSignalRMessage = () => {
     if (!connection) return;
 
-    // Reset state before starting new auction
     setShouldInterrupt(false);
     setFeedbackStatus(null);
     setServerReceivedTime(null);
@@ -183,6 +227,14 @@ export default function AuctionCountdown({
     setFeedbackStatus(null);
   };
 
+  const isAdministrator = userRoles.includes("Administrator");
+  const isVeilingmeester = userRoles.includes("Veilingmeester");
+  const isBedrijf = userRoles.includes("Bedrijfsvertegenwoordiger");
+  const isManager = userRoles.includes("BedrijfManager");
+
+  const canBid = isBedrijf || isManager || isAdministrator;
+  const canStartVeiling = isVeilingmeester || isAdministrator;
+
   const countdown = (
     <section
       className="auc-card"
@@ -237,16 +289,20 @@ export default function AuctionCountdown({
         serverReceivedTime={serverReceivedTime}
       />
       <div className="button-container">
-        <SimpeleKnop
-          onClick={placeBid}
-          appearance="primary"
-          disabled={isSubmittingBid}
-        >
-          {isSubmittingBid ? "Bezig..." : "Bieden"}
-        </SimpeleKnop>
-        <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
-          Start veiling
-        </SimpeleKnop>
+        {canBid && (
+          <SimpeleKnop
+            onClick={placeBid}
+            appearance="primary"
+            disabled={isSubmittingBid}
+          >
+            {isSubmittingBid ? "Bezig..." : "Bieden"}
+          </SimpeleKnop>
+        )}
+        {canStartVeiling && (
+          <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
+            Start veiling
+          </SimpeleKnop>
+        )}
       </div>
     </section>
   );
@@ -279,19 +335,24 @@ export default function AuctionCountdown({
       </div>
       <Spacer />
       <div className="button-container">
-        <SimpeleKnop
-          onClick={placeBid}
-          appearance="primary"
-          disabled={isSubmittingBid}
-        >
-          {isSubmittingBid ? "Bezig..." : "Bied"}
-        </SimpeleKnop>
-        <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
-          Start veiling
-        </SimpeleKnop>
+        {canBid && (
+          <SimpeleKnop
+            onClick={placeBid}
+            appearance="primary"
+            disabled={isSubmittingBid}
+          >
+            {isSubmittingBid ? "Bezig..." : "Bied"}
+          </SimpeleKnop>
+        )}
+        {canStartVeiling && (
+          <SimpeleKnop onClick={simulateSignalRMessage} appearance="secondary">
+            Start veiling
+          </SimpeleKnop>
+        )}
       </div>
     </section>
   );
 
   return isCountdown ? countdown : bidding;
 }
+
