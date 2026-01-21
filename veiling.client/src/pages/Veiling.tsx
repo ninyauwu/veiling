@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import SimpeleKnop from "../components/SimpeleKnop.tsx";
 import "../components/KavelInfo.css";
 import KavelInfo from "../components/KavelInfo";
-import HeaderLoggedout from "../components/HeaderLoggedout";
 import { KavelHistoryWidget } from "../components/KavelHistoryWidget";
 import { useParams } from "react-router-dom";
 
@@ -23,7 +22,6 @@ function Veiling() {
 
   return (
     <div>
-      <HeaderLoggedout />
       <div style={{ height: "96px" }} />
 
       <KavelInfo locatieId={locatie} onSelectKavel={handleSelectKavel} />

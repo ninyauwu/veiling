@@ -1,11 +1,8 @@
-import Header from "../components/HeaderLoggedout";
 import Scheduler from "../components/scheduler/Scheduler.tsx";
 
 function SchedulerPagina() {
     return (
         <div className="bg-white w-full overflow-x-hidden">
-            <Header />
-
             <div
                 className="w-screen bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center relative"
                 style={{

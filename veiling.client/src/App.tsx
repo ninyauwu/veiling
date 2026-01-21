@@ -8,6 +8,7 @@ import RegistratiePagina from "./pages/RegistratiePagina";
 import KavelInvoer from "./pages/KavelInvoer.tsx";
 import VerkoperDashboard from "./pages/VerkoperDashboard.tsx";
 import Scheduler from "./pages/SchedulerPagina.tsx";
+import Layout from "./layout/Layout.tsx";
 import VeilingMeesterKeuzePagina from "./pages/VeilingMeesterKeuzePagina";
 
 
@@ -15,16 +16,18 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingsPagina />} /> 
-        <Route path="/invoer" element={<KavelInvoer />} />
-        <Route path="/login" element={<LoginPagina />} />
-        <Route path="/veiling/:locatieId" element={<Veiling />} />
-        <Route path="/locaties" element={<LocatiePagina />} />
-        <Route path="/judgement" element={<KavelJudgement />} />
-        <Route path="/registreer" element={<RegistratiePagina />} />
-        <Route path="/verkoper-dashboard" element={<VerkoperDashboard />} />
-        <Route path="/scheduler" element={<Scheduler />} />
-        <Route path="/veilingmeester" element={<VeilingMeesterKeuzePagina />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<LandingsPagina />} /> 
+          <Route path="/invoer" element={<KavelInvoer />} />
+          <Route path="/login" element={<LoginPagina />} />
+          <Route path="/veiling/:locatieId" element={<Veiling />} />
+          <Route path="/locaties" element={<LocatiePagina />} />
+          <Route path="/judgement" element={<KavelJudgement />} />
+          <Route path="/registreer" element={<RegistratiePagina />} />
+          <Route path="/verkoper-dashboard" element={<VerkoperDashboard />} />
+          <Route path="/scheduler" element={<Scheduler />} />
+          <Route path="/veilingmeester" element={<VeilingMeesterKeuzePagina />} />
+        </Route>
       </Routes>
     </Router>
   );

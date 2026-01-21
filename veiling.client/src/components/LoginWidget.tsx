@@ -2,15 +2,12 @@ import React, { useState} from 'react';
 import bloomifyLogo from '../assets/bloomify_naam_logo.png';
 import emailIcon from '../assets/login/email.png';
 import keyIcon from '../assets/login/key.png';
-import { useNavigate } from "react-router-dom";
 import './LoginWidget.css';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const navigate = useNavigate();
-
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -57,10 +54,11 @@ function Login() {
         }
 
         if (me.roles.includes("Leverancier")) {
-            navigate("/verkoper-dashboard");
+            window.location.href = "/verkoper-dashboard";
         } else {
-            navigate("/locaties");
+            window.location.href = "/locaties";
         }
+
 
 
     } catch (error) {
