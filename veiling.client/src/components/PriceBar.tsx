@@ -52,21 +52,25 @@ export default function PriceInterpolator({
   const timeOffsetRef = useRef<number>(0);
 
   useEffect(() => {
-    if (serverReceivedTime && startMessage) {
-      const clientTime = Date.now();
-      const serverTime = serverReceivedTime.getTime();
-      const offset = serverTime - clientTime;
-      timeOffsetRef.current = offset;
+    if (!startMessage) {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      setCurrentValue(0);
+      setProgress(0);
+      setRemaining(0);
+      startTimeRef.current = null;
+      previousMessageRef.current = null;
+      timeOffsetRef.current = 0;
+      return;
     }
-  }, [serverReceivedTime, startMessage]);
 
-  useEffect(() => {
-    if (!startMessage || startMessage === previousMessageRef.current) {
+    if (startMessage === previousMessageRef.current) {
       return;
     }
 
     previousMessageRef.current = startMessage;
-
     const { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
 
     if (animationFrameRef.current !== null) {
@@ -91,7 +95,6 @@ export default function PriceInterpolator({
       const elapsed = adjustedNow - startTimestamp;
       const progressValue = Math.min(elapsed / durationMs, 1);
       const remainingValue = Math.max((durationMs - elapsed) / 1000, 0);
-
       const priceValue = Math.max(
         (1 - progressValue) * (startingPrice - minimumPrice) + minimumPrice,
         minimumPrice,
@@ -118,6 +121,15 @@ export default function PriceInterpolator({
 
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [startMessage, onChange]);
+
+  useEffect(() => {
+    if (serverReceivedTime && startMessage) {
+      const clientTime = Date.now();
+      const serverTime = serverReceivedTime.getTime();
+      const offset = serverTime - clientTime;
+      timeOffsetRef.current = offset;
+    }
+  }, [serverReceivedTime, startMessage]);
 
   useEffect(() => {
     if (shouldInterrupt && animationFrameRef.current !== null) {

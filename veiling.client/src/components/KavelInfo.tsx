@@ -52,7 +52,10 @@ function KavelInfo({
   const [startMessage, setStartMessage] = useState<VeilingStartMessage | null>(
     null,
   );
+  const [auctionKey, setAuctionKey] = useState(0);
   const connectionRef = useRef<signalR.HubConnection | null>(null);
+  const currentKavelIdRef = useRef<number | null>(null);
+  const removalTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     async function fetchKavels() {
@@ -79,7 +82,7 @@ function KavelInfo({
         }
       } catch (err) {
         console.error("Kon kavels niet laden:", err);
-        setKavels([]); // ensure kavels is empty on error
+        setKavels([]);
       } finally {
         setLoading(false);
       }
@@ -90,8 +93,15 @@ function KavelInfo({
 
   useEffect(() => {
     if (onSelectKavel && kavels.length > 0 && selected !== null) {
-      onSelectKavel(kavels[selected].kavel.id);
+      const newKavelId = kavels[selected].kavel.id;
+      onSelectKavel(newKavelId);
+
+      if (currentKavelIdRef.current !== newKavelId) {
+        setStartMessage(null);
+        currentKavelIdRef.current = newKavelId;
+      }
     }
+    setAuctionKey((prev) => prev + 1);
   }, [selected, kavels, onSelectKavel]);
 
   useEffect(() => {
@@ -123,9 +133,46 @@ function KavelInfo({
       },
     );
 
+    connection.on("BidPlaced", (kavelId: number) => {
+      console.log(`Bid placed for Kavel ${kavelId}`);
+
+      if (removalTimeoutRef.current !== null) {
+        clearTimeout(removalTimeoutRef.current);
+      }
+
+      removalTimeoutRef.current = window.setTimeout(() => {
+        setKavels((currentKavels) => {
+          const kavelIndex = currentKavels.findIndex(
+            (k) => k.kavel.id === kavelId,
+          );
+
+          if (kavelIndex === -1) return currentKavels;
+
+          const newKavels = currentKavels.filter((k) => k.kavel.id !== kavelId);
+
+          if (selected === kavelIndex) {
+            if (newKavels.length === 0) {
+              setSelected(null);
+            } else if (kavelIndex >= newKavels.length) {
+              setSelected(newKavels.length - 1);
+            } else {
+              setSelected(kavelIndex);
+            }
+          } else if (selected !== null && selected > kavelIndex) {
+            setSelected(selected - 1);
+          }
+
+          return newKavels;
+        });
+      }, 2000);
+    });
+
     connection.start().catch((err) => console.error("SignalR error:", err));
 
     return () => {
+      if (removalTimeoutRef.current !== null) {
+        clearTimeout(removalTimeoutRef.current);
+      }
       connection.stop();
     };
   }, []);
@@ -166,6 +213,7 @@ function KavelInfo({
     />
   ) : (
     <AuctionCountdown
+      key={auctionKey}
       price={kavel.maximumPrijs}
       startMessage={startMessage}
       connection={connectionRef.current}

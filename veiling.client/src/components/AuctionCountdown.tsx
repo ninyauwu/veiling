@@ -27,6 +27,7 @@ function getTimePartsUntil(target: Date) {
   const seconds = totalSec % 60;
   return { days, hours, minutes, seconds };
 }
+
 interface AuctionCountdownProps {
   price?: number;
   quantity?: number;
@@ -48,7 +49,7 @@ interface BodResponse {
   acceptedPrice: number;
   receivedAt: string;
 }
- 
+
 export default function AuctionCountdown({
   price,
   quantity,
@@ -108,17 +109,15 @@ export default function AuctionCountdown({
   }, [resolvedTarget]);
 
   useEffect(() => {
-    // Check of we in countdown mode moeten zijn
     const checkCountdownStatus = () => {
       if (!startMessage) {
-        setIsCountdown(true); // Geen veiling gepland = countdown mode
+        setIsCountdown(true);
         return;
       }
 
       const now = new Date();
       const veilingStart = new Date(startMessage.startTime);
 
-      // Als de veiling nog niet begonnen is, toon countdown
       if (now < veilingStart) {
         setIsCountdown(true);
       } else {
@@ -128,10 +127,22 @@ export default function AuctionCountdown({
 
     checkCountdownStatus();
 
-    // Check elke seconde of we moeten switchen van countdown naar bidding
     const interval = setInterval(checkCountdownStatus, 1000);
 
     return () => clearInterval(interval);
+  }, [startMessage]);
+
+  useEffect(() => {
+    console.log("startMessage changed:", startMessage);
+    if (startMessage) {
+      console.log("startingPrice:", startMessage.startingPrice);
+      setCurrentPrice(startMessage.startingPrice ?? 0);
+      setShouldInterrupt(false);
+      setServerReceivedTime(null);
+      setFeedbackStatus(null);
+      setAwaitingBidResponse(false);
+      setIsSubmittingBid(false);
+    }
   }, [startMessage]);
 
   useEffect(() => {
@@ -153,7 +164,6 @@ export default function AuctionCountdown({
   const simulateSignalRMessage = () => {
     if (!connection) return;
 
-    // Reset state before starting new auction
     setShouldInterrupt(false);
     setFeedbackStatus(null);
     setServerReceivedTime(null);
@@ -345,3 +355,4 @@ export default function AuctionCountdown({
 
   return isCountdown ? countdown : bidding;
 }
+
