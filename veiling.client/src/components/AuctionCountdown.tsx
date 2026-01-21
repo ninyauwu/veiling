@@ -48,7 +48,7 @@ interface BodResponse {
   acceptedPrice: number;
   receivedAt: string;
 }
-
+ 
 export default function AuctionCountdown({
   price,
   quantity,
