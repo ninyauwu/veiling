@@ -255,7 +255,7 @@ function KavelInfo({
 const formatKavelData = (kavels: KavelInfoResponse[]) => {
   return kavels.map((kavel) => ({
     Naam: kavel?.kavel?.naam ?? "NA",
-    "Max Prijs": `€${kavel?.kavel?.minimumPrijs?.toLocaleString() ?? "N/A"}`,
+    "Max Prijs": `€${kavel?.kavel?.maximumPrijs?.toLocaleString() ?? "N/A"}`,
     Leverancier: kavel?.leverancier?.bedrijf?.bedrijfsnaam ?? "N/A",
     QI: kavel?.leverancier?.indexOfReliabilityOfInformation ?? "N/A",
     Kwaliteit: kavel?.kavel?.keurcode ?? "N/A",
