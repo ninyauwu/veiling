@@ -111,7 +111,7 @@ export default function AuctionCountdown({
   useEffect(() => {
     const checkCountdownStatus = () => {
       if (!startMessage) {
-        setIsCountdown(true);
+        setIsCountdown(false);
         return;
       }
 
@@ -119,7 +119,7 @@ export default function AuctionCountdown({
       const veilingStart = new Date(startMessage.startTime);
 
       if (now < veilingStart) {
-        setIsCountdown(true);
+        setIsCountdown(false);
       } else {
         setIsCountdown(false);
       }
