@@ -289,7 +289,7 @@ namespace Veiling.Server.Test.Controllers
                 Assert.All(result, kavelInfo =>
                 {
                     Assert.NotNull(kavelInfo.Kavel);
-                    Assert.Equal("Test Kavel", kavelInfo.Kavel.Naam);
+                    Assert.Equal("Pending Kavel", kavelInfo.Kavel.Naam);
                     Assert.Null(kavelInfo.Kavel.Approved);
                 });
 
