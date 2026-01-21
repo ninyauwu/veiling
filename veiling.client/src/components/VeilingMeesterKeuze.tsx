@@ -17,7 +17,7 @@ const keuzes: Keuze[] = [
     },
     {
         titel: "Kavel Beoordelen",
-        route: "/kavel-beoordelen",
+        route: "/judgement",
         afbeelding:
             "https://media.istockphoto.com/id/2203944828/vector/trendy-halftone-collage-banner-with-hand-showing-thumb-up-gesture-positive-hand-sign-modern.jpg?s=612x612&w=0&k=20&c=FZyO3ucMmd2QXL6JABMlSwEmTGDJD2VaGVKKbIVes0k=",
     },
