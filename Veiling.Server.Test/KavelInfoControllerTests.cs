@@ -280,9 +280,19 @@ namespace Veiling.Server.Test.Controllers
             var response = await _client.GetAsync("/api/kavelinfo/pending");
             
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            
-            var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains("\"kavel\"", content);
+
+            var result = await response.Content.ReadFromJsonAsync<List<KavelInfo>>();
+
+                Assert.NotNull(result);
+                Assert.NotEmpty(result);
+
+                Assert.All(result, kavelInfo =>
+                {
+                    Assert.NotNull(kavelInfo.Kavel);
+                    Assert.Equal("Test Kavel", kavelInfo.Kavel.Naam);
+                    Assert.Null(kavelInfo.Kavel.Approved);
+                });
+
             }
 
             [Fact]
