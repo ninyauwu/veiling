@@ -8,11 +8,13 @@ import RegistratiePagina from "./pages/RegistratiePagina";
 import KavelInvoer from "./pages/KavelInvoer.tsx";
 import VerkoperDashboard from "./pages/VerkoperDashboard.tsx";
 import Scheduler from "./pages/SchedulerPagina.tsx";
+import Layout from "./layout/Layout.tsx";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route element={<Layout />}>
         <Route path="/" element={<LandingsPagina />} /> 
         <Route path="/invoer" element={<KavelInvoer />} />
         <Route path="/login" element={<LoginPagina />} />
@@ -22,6 +24,7 @@ function App() {
         <Route path="/registreer" element={<RegistratiePagina />} />
         <Route path="/verkoper-dashboard" element={<VerkoperDashboard />} />
         <Route path="/scheduler" element={<Scheduler />} />
+        </Route>
       </Routes>
     </Router>
   );
