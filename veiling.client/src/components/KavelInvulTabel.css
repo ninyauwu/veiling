@@ -1,0 +1,99 @@
+.kavel-invul-container {
+    width: 100%;
+    max-width: 600px;
+    border: 1px solid #ccc;
+}
+
+.kavel-invul-header {
+    background-color: #6b2c3e;
+    color: white;
+    padding: 0.75rem;
+    text-align: right;
+    font-weight: normal;
+    font-size: 1rem;
+}
+
+.kavel-invul-row {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+
+.kavel-invul-row:last-child {
+    border-bottom: none;
+}
+
+.kavel-invul-label {
+    background-color: #e0e0e0;
+    padding: 0.75rem;
+    text-align: right;
+    font-weight: normal;
+    color: #000;
+    border-right: 1px solid #ccc;
+    flex: 0 0 200px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.kavel-invul-input {
+    background-color: white;
+    padding: 0.75rem;
+    text-align: right;
+    border: none;
+    outline: none;
+    color: #000000;
+    font-size: 1rem;
+    flex: 1;
+}
+
+.input-error {
+    border-color: #ff1900 !important;
+    background-color: #fff6f6;
+}
+
+.error-text {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.kavel-invul-input::placeholder {
+    color: #999;
+}
+
+select.kavel-invul-input {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}
+
+select.kavel-invul-input:focus {
+    outline: 2px solid #6b2c3e;
+    outline-offset: -2px;
+}
+
+select.kavel-invul-input option {
+    background-color: white;
+    color: #000;
+    padding: 0.5rem;
+}
+
+input[type="color"] {
+    width: 50px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.kavel-color-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}

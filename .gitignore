@@ -1,5 +1,5 @@
 .env
-
+OmniSharp
 **/.vs
 **/.vscode
 **/node_modules
@@ -8,3 +8,5 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/bin
+*:Zone.Identifier
+Veiling.Server.Test/coverage-report/

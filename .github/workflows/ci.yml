@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    env:
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD_KEY }}
+      CERT_PASSWORD: ${{ secrets.CERT_PASSWORD_KEY }}
+      CERT_PATH: ./Veiling.Server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate temporary dev certificate
+        run: |
+          sudo mkdir -p /https
+          sudo dotnet dev-certs https --export-path /https/veiling.client.pfx -p $CERT_PASSWORD
+          echo "CERT_PATH=/https" >> $GITHUB_ENV
+
+      - name: Build and run tests
+        run: |
+          dotnet test Veiling.Server.Test
+
+      - name: Build Docker images
+        run: |
+          docker compose -f docker-compose.yml build \
+            --build-arg BUILD_CONFIGURATION=Release \
+            --build-arg CERT_PATH=$CERT_PATH \
+            --build-arg CERT_PASSWORD=$CERT_PASSWORD \
+            --build-arg DB_PASSWORD=$DB_PASSWORD
+
+      - name: Start services in background
+        run: docker compose -f docker-compose.yml up -d
+
+      - name: Wait for veiling to become healthy
+        run: |
+          echo "Waiting for veiling container to become healthy..."
+          for i in {1..30}; do
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' veiling)
+            
+            # If healthy, break loop
+            if [ "$STATUS" = "healthy" ]; then
+              echo "veiling is healthy!"
+              break
+            fi
+            
+            # If container has exited/crashed, fail immediately
+            EXIT_CODE=$(docker inspect --format='{{.State.ExitCode}}' veiling)
+            if [ "$EXIT_CODE" -ne 0 ]; then
+              echo "veiling crashed with exit code $EXIT_CODE"
+              docker logs veiling || true
+              docker compose -f docker-compose.yml down -v
+              exit $EXIT_CODE
+            fi
+
+            echo "Waiting for veiling to become healthy..."
+            sleep 2
+          done
+
+      - name: Show veiling logs
+        run: docker logs veiling || true
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml down -v

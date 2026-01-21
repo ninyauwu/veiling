@@ -1,7 +1,7 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -20,7 +20,7 @@ WORKDIR /src
 RUN npm install --no-update-notifier --save-dev @types/node@latest
 COPY ["Veiling.Server/Veiling.Server.csproj", "Veiling.Server/"]
 COPY ["veiling.client/veiling.client.esproj", "veiling.client/"]
-RUN dotnet dev-certs https --trust 
+RUN dotnet dev-certs https -ep --trust 
 RUN dotnet restore "./Veiling.Server/Veiling.Server.csproj"
 
 # Copy source code

@@ -1,0 +1,96 @@
+:root {
+  --primary: #7a1f3d;
+  --primary-dark: #64192f;
+  --background: #f9fafb;
+}
+
+.verkoper-page {
+  min-height: 100vh;
+  padding: 24px;
+  background-color: var(--background);
+}
+
+.verkoper-container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.verkoper-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.verkoper-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.primary-button a {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background-color: var(--primary);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.primary-button a:hover {
+  background-color: var(--primary-dark);
+}
+
+.empty-text {
+  color: #6b7280;
+}
+
+.kavels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.kavel-card {
+  border-left: 4px solid var(--primary);
+  transition: box-shadow 0.2s ease;
+}
+
+.kavel-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.kavel-content {
+  padding: 20px;
+}
+
+.kavel-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.kavel-location {
+  color: #4b5563;
+}
+
+.kavel-price {
+  font-weight: 500;
+}
+
+.secondary-button a {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 14px;
+  background-color: white;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.secondary-button a:hover {
+  background-color: rgba(122, 31, 61, 0.1);
+}
