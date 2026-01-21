@@ -1,6 +1,5 @@
 import ImageUpload from "../components/ImageUpload";
 import KavelDescription from "../components/KavelDescription";
-import HeaderLoggedout from "../components/HeaderLoggedout";
 import KavelInvulTabel from "../components/KavelInvulTabel";
 import SimpeleKnop from "../components/SimpeleKnop";
 import { useNavigate } from "react-router-dom";
@@ -119,7 +118,6 @@ function KavelInvoer() {
             padding: '0 40px',    
             width: '100%'
         }}>
-            <HeaderLoggedout />
             <div style={{ height: "96px" }} />
             
             <div style={{

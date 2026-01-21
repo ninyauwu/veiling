@@ -1,10 +1,8 @@
-﻿import Header from "../components/HeaderLoggedout";
-import VeilingLocatie from "../components/VeilingLocatie";
+﻿import VeilingLocatie from "../components/VeilingLocatie";
 
 function LocatiePagina() {
     return (
         <div className="bg-white w-full overflow-x-hidden">
-            <Header />
 
             <div
                 className="w-screen bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center relative"

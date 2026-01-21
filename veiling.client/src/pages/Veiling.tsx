@@ -4,7 +4,6 @@ import "../components/KavelInfo.css";
 import KavelInfo from "../components/KavelInfo";
 import { KavelHistoryWidget } from "../components/KavelHistoryWidget";
 import { useParams } from "react-router-dom";
-import Header from "../components/Header.tsx";
 
 function Veiling() {
   const [showHistory, setShowHistory] = useState(false);
@@ -23,7 +22,6 @@ function Veiling() {
 
   return (
     <div>
-      <Header />
       <div style={{ height: "96px" }} />
 
       <KavelInfo locatieId={locatie} onSelectKavel={handleSelectKavel} />

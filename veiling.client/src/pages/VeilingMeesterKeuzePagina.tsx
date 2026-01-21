@@ -1,11 +1,8 @@
-import Header from "../components/HeaderLoggedout";
 import VeilingMeesterKeuze from "../components/VeilingMeesterKeuze";
 
 function VeilingMeesterKeuzePagina() {
     return (
         <div className="bg-white w-full overflow-x-hidden">
-            <Header />
-
             <div
                 className="w-screen bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center relative"
                 style={{

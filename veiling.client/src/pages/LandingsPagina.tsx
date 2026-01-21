@@ -1,10 +1,6 @@
-﻿import Header from "../components/HeaderLoggedout";
-
-function LandingsPagina() {
+﻿function LandingsPagina() {
   return (
     <div className="bg-white w-full overflow-x-hidden">
-      <Header />
-
       <div
         className="w-screen bg-cover bg-center bg-no-repeat flex items-center justify-center"
         style={{
