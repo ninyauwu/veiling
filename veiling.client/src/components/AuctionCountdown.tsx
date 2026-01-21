@@ -50,14 +50,14 @@ interface BodResponse {
 }
 
 export default function AuctionCountdown({
-                                           price,
-                                           quantity,
-                                           containers,
-                                           targetDate,
-                                           startMessage,
-                                           connection,
-                                           kavelId,
-                                         }: AuctionCountdownProps) {
+  price,
+  quantity,
+  containers,
+  targetDate,
+  startMessage,
+  connection,
+  kavelId,
+}: AuctionCountdownProps) {
   const [shouldInterrupt, setShouldInterrupt] = useState(false);
   const [isCountdown, setIsCountdown] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(price ?? 0);
