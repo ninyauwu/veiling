@@ -113,6 +113,10 @@ namespace Veiling.Server.Controllers
             return kavel;
         }
 
+        [Authorize(Roles =
+        nameof(Role.Administrator) + ", " +
+        nameof(Role.Veilingmeester)
+        )]
         [HttpPatch("{id}/approve")]
     public async Task<IActionResult> ApproveKavel(int id, [FromBody] ApprovalDto approvalDto)
     {
