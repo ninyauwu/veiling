@@ -55,6 +55,8 @@ function Login() {
 
         if (me.roles.includes("Leverancier")) {
             window.location.href = "/verkoper-dashboard";
+        } else if (me.roles.includes("Veilingmeester")) {
+            window.location.href = "/veilingmeester";
         } else {
             window.location.href = "/locaties";
         }
