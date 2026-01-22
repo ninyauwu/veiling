@@ -2,10 +2,8 @@ export async function authFetch(url: string, options: RequestInit = {}) {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    // Redirect to login if no token
-    window.location.href = "/login";
-    throw new Error("No authentication token found");
-  }
+        throw new Error("No authentication token found");
+    }
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string> || {}),
@@ -30,13 +28,12 @@ export async function authFetch(url: string, options: RequestInit = {}) {
     if (refreshed) {
       // Retry original request with new token
       return authFetch(url, options);
-    } else {
-      // Refresh failed, redirect to login
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      window.location.href = "/login";
-      throw new Error("Authentication failed");
-    }
+      } else {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          throw new Error("Authentication failed");
+      }
+
   }
 
   return response;
