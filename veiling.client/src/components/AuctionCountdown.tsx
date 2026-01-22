@@ -188,7 +188,7 @@ export default function AuctionCountdown({
         KavelId: kavelId,
       };
 
-      const response = await fetch("/api/Bod", {
+      const response = await authFetch("/api/Bod", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

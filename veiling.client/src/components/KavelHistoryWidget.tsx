@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, TrendingUp, Clock, Package } from 'lucide-react';
 import './KavelHistoryWidget.css';
+import { authFetch } from '../utils/AuthFetch';
 
 interface HistorischePrijs {
   prijs: number;
@@ -39,7 +40,7 @@ export function KavelHistoryWidget({ kavelId, onClose }: KavelHistoryWidgetProps
         setError(null);
 
         console.log(`Fetching history for kavel ${kavelId}...`);
-        const response = await fetch(`/api/kavelhistory/${kavelId}`);
+        const response = await authFetch(`/api/kavelhistory/${kavelId}`);
         
         console.log('Response status:', response.status);
         console.log('Response ok:', response.ok);
