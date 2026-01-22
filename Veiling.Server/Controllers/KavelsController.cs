@@ -113,7 +113,29 @@ namespace Veiling.Server.Controllers
             return kavel;
         }
 
+        [HttpPatch("{id}/approve")]
+    public async Task<IActionResult> ApproveKavel(int id, [FromBody] ApprovalDto approvalDto)
+    {
+        // Find the kavel
+        var kavel = await _context.Kavels.FindAsync(id);
+        
+        if (kavel == null)
+            return NotFound(new { message = "Kavel not found" });
 
+        // Update the approval status
+        kavel.Approved = approvalDto.Approval;
+        
+        // Optionally store the reasoning if you have a field for it
+        kavel.Reasoning = approvalDto.Reasoning;
+
+        await _context.SaveChangesAsync();
+        
+        return Ok(new { 
+            message = "Kavel approval updated successfully",
+            kavelId = id,
+            approval = kavel.Approved
+        });
+    }
 
         // GET: api/kavels/veiling/5
         [Authorize(Roles = 
@@ -356,4 +378,9 @@ public async Task<IActionResult> UpdateKavel(
         [Range(0.01, float.MaxValue, ErrorMessage = "Gewicht moet groter dan 0 zijn")]
         public float GewichtVanBloemen { get; set; }
     }
+    public class ApprovalDto
+{
+    public bool Approval { get; set; }
+    public string? Reasoning { get; set; }
+}
 }
