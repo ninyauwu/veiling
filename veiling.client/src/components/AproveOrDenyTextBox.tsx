@@ -1,6 +1,7 @@
 import { useState } from "react";
 import SimpeleKnop from "./SimpeleKnop";
 import "./ApproveOrDenyTextBox.css";
+import { authFetch } from "../utils/AuthFetch";
 
 interface ApproveOrDenyProps {
   currentKavelId: number;
@@ -27,7 +28,7 @@ export default function ApproveOrDeny({
     }
 
     try {
-      const response = await fetch(`/api/kavels/${currentKavelId}/approve`, {
+      const response = await authFetch(`/api/kavels/${currentKavelId}/approve`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

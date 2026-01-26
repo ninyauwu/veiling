@@ -1,6 +1,7 @@
 ﻿import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LocationDropdown.css";
+import { authFetch } from "../utils/AuthFetch";
 
 interface LocationDropdownProps {
   value: string;
@@ -23,7 +24,7 @@ function LocationDropdown({ value, onChange }: LocationDropdownProps) {
   useEffect(() => {
     async function fetchLocaties() {
       try {
-        const response = await fetch("/api/locaties");
+        const response = await authFetch("/api/locaties");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
