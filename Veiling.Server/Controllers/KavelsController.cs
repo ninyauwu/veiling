@@ -128,6 +128,9 @@ namespace Veiling.Server.Controllers
 
         // Update the approval status
         kavel.Approved = approvalDto.Approval;
+
+        // Update the maximum price
+        kavel.MaximumPrijs = approvalDto.MaximumPrijs;
         
         // Optionally store the reasoning if you have a field for it
         kavel.Reasoning = approvalDto.Reasoning;
@@ -137,7 +140,8 @@ namespace Veiling.Server.Controllers
         return Ok(new { 
             message = "Kavel approval updated successfully",
             kavelId = id,
-            approval = kavel.Approved
+            approval = kavel.Approved,
+            maximumPrice = kavel.MaximumPrijs
         });
     }
 
@@ -386,5 +390,6 @@ public async Task<IActionResult> UpdateKavel(
 {
     public bool Approval { get; set; }
     public string? Reasoning { get; set; }
+    public float MaximumPrijs { get; set; }
 }
 }
