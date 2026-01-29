@@ -85,6 +85,12 @@ export default function ApproveOrDeny({
             placeholder="Enter your reasoning here..."
           />
 
+          <label
+            htmlFor="maximumPrijs"
+            className="block text-xl font-medium text-gray-400 mb-4"
+          >
+            Maximum Prijs (€)
+          </label>
           <input
             type="number"
             id="maximumPrijs"
