@@ -90,6 +90,30 @@ namespace Veiling.Server.Controllers
             }
         }
 
+        // Get: api/kavels/approved
+        [Authorize(Roles =
+        nameof(Role.Administrator) + ", " +
+        nameof(Role.Veilingmeester)
+        )]
+        [HttpGet("approved")]
+        public async Task<ActionResult<IEnumerable<Kavel>>> GetApprovedKavels()
+        {
+            try
+            {
+                return await _context.Kavels
+                    .Where(k => k.Approved == true && k.Approved != null)
+                    .Include(k => k.Veiling)
+                    .Include(k => k.Leverancier)
+                    .Include(k => k.Boden)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fout bij ophalen goedgekeurde kavels");
+                return StatusCode(500, new { error = "Fout bij ophalen goedgekeurde kavels" });
+            }
+        }
+
         // GET: api/kavels/5
         [Authorize(Roles = 
         nameof(Role.Administrator) + ", " + 
