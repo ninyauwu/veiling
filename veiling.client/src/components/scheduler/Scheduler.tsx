@@ -48,7 +48,7 @@ export default function Scheduler() {
   useEffect(() => {
     const fetchKavels = async () => {
       try {
-        const response = await authFetch("/api/kavels");
+        const response = await authFetch("/api/kavels/approved");
         if (!response.ok) throw new Error("Failed to fetch kavels");
         const data = await response.json();
         setKavels(data);
