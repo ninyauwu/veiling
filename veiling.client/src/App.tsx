@@ -16,78 +16,79 @@ import ProtectedRoute from "./utils/ProtectedRoute.tsx";
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<LandingsPagina />} /> 
-          <Route path="/registreer" element={<RegistratiePagina />} />
-          <Route path="/login" element={<LoginPagina />} />
+  <Routes>
+    <Route path="/" element={<Layout />}>
+      
+      <Route index element={<LandingsPagina />} />
+      <Route path="login" element={<LoginPagina />} />
+      <Route path="registreer" element={<RegistratiePagina />} />
 
-          <Route
-            path="/invoer"
-            element={
-              <ProtectedRoute>
-                <KavelInvoer />
-              </ProtectedRoute>
-            }
-          />
+      <Route
+        path="invoer"
+        element={
+          <ProtectedRoute>
+            <KavelInvoer />
+          </ProtectedRoute>
+        }
+      />
 
-          <Route
-            path="/veiling/locatieId"
-            element={
-              <ProtectedRoute>
-                <Veiling />
-              </ProtectedRoute>
-            }
-          />
+      <Route
+        path="veiling/:locatieId"
+        element={
+          <ProtectedRoute>
+            <Veiling />
+          </ProtectedRoute>
+        }
+      />
 
-          <Route
-            path="/locaties"
-            element={
-              <ProtectedRoute>
-                <LocatiePagina />
-              </ProtectedRoute>
-            }
-          />
+      <Route
+        path="locaties"
+        element={
+          <ProtectedRoute>
+            <LocatiePagina />
+          </ProtectedRoute>
+        }
+      />
 
-          <Route
-            path="/judgement"
-            element={
-              <ProtectedRoute>
-                <KavelJudgement />
-              </ProtectedRoute>
-            }
-          />
+      <Route
+        path="judgement"
+        element={
+          <ProtectedRoute>
+            <KavelJudgement />
+          </ProtectedRoute>
+        }
+      />
 
-          <Route
-            path="/verkoper-dashboard"
-            element={
-              <ProtectedRoute>
-                <VerkoperDashboard />
-              </ProtectedRoute>
-            }
-          />
+      <Route
+        path="verkoper-dashboard"
+        element={
+          <ProtectedRoute>
+            <VerkoperDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-          <Route
-            path="/scheduler"
-            element={
-              <ProtectedRoute>
-                <Scheduler />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/veilingmeester"
-            element={
-              <ProtectedRoute>
-                <VeilingMeesterKeuzePagina />
-              </ProtectedRoute>
-            }
-          />
-        </Route>
-      </Routes>
-    </Router>
+      <Route
+        path="scheduler"
+        element={
+          <ProtectedRoute>
+            <Scheduler />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="veilingmeester"
+        element={
+          <ProtectedRoute>
+            <VeilingMeesterKeuzePagina />
+          </ProtectedRoute>
+        }
+      />
+
+    </Route>
+  </Routes>
+</Router>
   );
 }
-
 export default App;
