@@ -13,12 +13,10 @@ export default function ApproveOrDeny({
   onApprovalResponse,
 }: ApproveOrDenyProps) {
   const [reasoning, setReasoning] = useState("");
-  const [approval, setApproval] = useState(Boolean);
 
   const handleApprove = () => {
-    setApproval(true);
     console.log("Approved with reasoning:", reasoning);
-    onSubmitApproval(approval, reasoning);
+    onSubmitApproval(true, reasoning);
   };
 
   const onSubmitApproval = async (approval: boolean, reasoning: string) => {
@@ -54,9 +52,8 @@ export default function ApproveOrDeny({
   };
 
   const handleDeny = () => {
-    setApproval(false);
     console.log("Denied with reasoning:", reasoning);
-    onSubmitApproval(approval, reasoning);
+    onSubmitApproval(false, reasoning);
   };
 
   return (
