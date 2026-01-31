@@ -41,10 +41,10 @@ interface KavelInfoProps {
 }
 
 function KavelInfo({
-  locatieId = 1,
-  sortOnApproval = false,
-  onSelectKavel,
-}: KavelInfoProps) {
+                     locatieId = 1,
+                     sortOnApproval = false,
+                     onSelectKavel,
+                   }: KavelInfoProps) {
   const [kavels, setKavels] = useState<KavelInfoResponse[]>([]);
   const [selected, setSelected] = useState<number | null>(0);
   const [loading, setLoading] = useState(true);
@@ -223,11 +223,7 @@ function KavelInfo({
 
   return (
     <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        gap: "60px",
-      }}
+      className="kavel-info-fixed-layout"
     >
       <div className="flex-column">
         <h1 className="hidden">Veilingpagina</h1>
@@ -284,7 +280,9 @@ function KavelInfo({
           <p>{kavel.beschrijving}</p>
         </span>
 
-        <ImageSet images={imagePaths} />
+        <div className="kavel-image-container-fixed">
+          <ImageSet images={imagePaths} />
+        </div>
         <Spacer />
         <NavigationBar
           onPrevious={handlePrevious}

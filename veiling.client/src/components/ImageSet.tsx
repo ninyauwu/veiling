@@ -9,11 +9,11 @@ interface AspectRatioImageGridProps {
 }
 
 const AspectRatioImageGrid: FC<AspectRatioImageGridProps> = ({
-  images,
-  className = "",
-  gap = 8,
-  objectFit = "cover",
-}) => {
+                                                               images,
+                                                               className = "",
+                                                               gap = 8,
+                                                               objectFit = "contain",
+                                                             }  ) => {
   if (!images || images.length === 0) {
     return null;
   }
@@ -25,6 +25,7 @@ const AspectRatioImageGrid: FC<AspectRatioImageGridProps> = ({
     display: "flex",
     justifyContent: "center",
     width: "100%",
+    height: "100%",
   };
 
   const gridStyle: CSSProperties = {
@@ -32,18 +33,24 @@ const AspectRatioImageGrid: FC<AspectRatioImageGridProps> = ({
     gridTemplateColumns: `repeat(${imageCount}, 1fr)`,
     gap: `${gap}px`,
     width: "100%",
+    height: "100%",
     maxWidth: `${maxWidthPercent}%`,
   };
 
   const imageContainerStyle: CSSProperties = {
     position: "relative",
     width: "100%",
-    aspectRatio: "1 / 1",
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   };
 
   const imageStyle: CSSProperties = {
-    width: "100%",
-    height: "100%",
+    maxWidth: "100%",
+    maxHeight: "100%",
+    width: "auto",
+    height: "auto",
     objectFit: objectFit,
     borderRadius: "4px",
   };
