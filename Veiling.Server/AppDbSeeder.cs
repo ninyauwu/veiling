@@ -287,7 +287,7 @@ namespace Veiling.Server
                 MaximumPrijs = 0.8f,
                 Minimumhoeveelheid = 20,
                 Foto = "https://rurallivingtoday.com/wp-content/uploads/Purple-Tulips.jpg",
-                Kavelkleur = "#FF0000",
+                Kavelkleur = "#a200ff",
                 Karnummer = 1,
                 Rijnummer = 1,
                 HoeveelheidContainers = 50,
