@@ -217,7 +217,7 @@ namespace Veiling.Server
             // veilingen
             var amsterdamVeiling = new Models.Veiling
             {
-                Naam = "Amsterdam Ochtend Veiling",
+                Naam = "Aalsmeer Ochtend Veiling",
                 Klokduur = 5.0f,
                 StartTijd = today.AddHours(33), // start morgen 9 uur sochtends
                 EndTijd = today.AddHours(35), // eindigd morgen 11 uur sochtends
@@ -228,7 +228,7 @@ namespace Veiling.Server
 
             var rotterdamVeiling1 = new Models.Veiling
             {
-                Naam = "Rotterdam Middag Veiling",
+                Naam = "Naaldwijk Middag Veiling",
                 Klokduur = 5.0f,
                 StartTijd = today.AddHours(14), // start 14:00
                 EndTijd = today.AddHours(15), // eindigd 15:00
@@ -239,7 +239,7 @@ namespace Veiling.Server
 
             var delftVeiling = new Models.Veiling
             {
-                Naam = "Delft Avond Veiling",
+                Naam = "Rijnsburg Avond Veiling",
                 Klokduur = 5.0f,
                 StartTijd = today.AddHours(18), // start 18:00
                 EndTijd = today.AddMinutes(45).AddHours(18), // eindigd 18:45
