@@ -218,6 +218,7 @@ export default function AuctionCountdown({
     const handleBidPlaced = (bidKavelId: number) => {
       if (bidKavelId === kavelId && !awaitingBidResponse && !feedbackStatus) {
         setFeedbackStatus("outbid");
+        setShouldInterrupt(true); // Freeze the price bar for other users
       }
     };
 
