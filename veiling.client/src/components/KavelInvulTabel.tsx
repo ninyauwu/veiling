@@ -158,7 +158,7 @@ const renderColorPicker = (
       <div className="kavel-invul-header">Invullen</div>
 
       {renderInput('Naam', 'naam', 'Naam')}
-      {renderInput('Prijs (€)', 'prijs', 'Bijv. 12.50')}
+      {renderInput('Minimum Prijs (€)', 'prijs', 'Bijv. 12.50')}
       {renderInput('Aantal containers', 'aantal', 'Bijv. 25')}
       {renderDropdown('Ql', 'ql', QI)}
       {renderDropdown('Plaats van verkoop', 'plaats', locations)}

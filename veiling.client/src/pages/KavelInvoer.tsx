@@ -115,7 +115,7 @@ function KavelInvoer() {
         <div style={{
             maxWidth: '1400px',  
             margin: '0 auto',     
-            padding: '0 40px',    
+            padding: '0 40px 140px',
             width: '100%'
         }}>
             <div style={{ height: "96px" }} />
@@ -152,6 +152,7 @@ function KavelInvoer() {
                 
                 <div style={{
                     display: 'flex',
+                    flexDirection: 'column',
                     position: 'fixed',
                     gap: '10px',
                     right: '2vw',
