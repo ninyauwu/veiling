@@ -24,6 +24,7 @@ export interface Locatie {
 export interface Kavel {
   id: number;
   naam: string;
+  locatieId: number;
   beschrijving: string;
   minimumPrijs: number;
   maximumPrijs: number;
