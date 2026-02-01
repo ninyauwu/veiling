@@ -98,28 +98,33 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     </div>
   );
 
-  const renderDropdown = (
-    label: string, 
-    field: keyof typeof formData, 
-    information: Array<{ id: string; name: string }>
-  ) => (
-    <div className="kavel-invul-row">
-      <div className="kavel-invul-label">{label}</div>
-      <select
-        className={`kavel-invul-input ${errors[field] ? 'input-error' : ''}`}
-        value={formData[field]}
-        onChange={(e) => handleInputChange(field, e.target.value)}
-      >
-        <option value="">Selecteer</option>
-        {information.map(loc => (
-          <option key={loc.id} value={loc.id}>
-            {loc.name}
-          </option>
-        ))}
-      </select>
-      {errors[field] && <div className="error-text">{errors[field]}</div>}
-    </div>
-    );
+const renderDropdown = (
+  label: string,
+  field: keyof typeof formData,
+  information: Array<{ id: string; name: string }>,
+  valueType: 'id' | 'name'
+) => (
+  <div className="kavel-invul-row">
+    <div className="kavel-invul-label">{label}</div>
+    <select
+      className={`kavel-invul-input ${errors[field] ? 'input-error' : ''}`}
+      value={formData[field]}
+      onChange={(e) => handleInputChange(field, e.target.value)}
+    >
+      <option value="">Selecteer</option>
+      {information.map(item => (
+        <option
+          key={item.id}
+          value={valueType === 'id' ? item.id : item.name}
+        >
+          {item.name}
+        </option>
+      ))}
+    </select>
+    {errors[field] && <div className="error-text">{errors[field]}</div>}
+  </div>
+);
+
 
 const renderColorPicker = (
   label: string,
@@ -162,8 +167,8 @@ const renderColorPicker = (
       {renderInput('Naam', 'naam', 'Naam')}
       {renderInput('Prijs (€)', 'prijs', 'Bijv. 12.50')}
       {renderInput('Aantal containers', 'aantal', 'Bijv. 25')}
-      {renderDropdown('Ql', 'ql', QI)}
-      {renderDropdown('Plaats van verkoop', 'locatieId', locations)}
+      {renderDropdown('Ql', 'ql', QI, 'name')}
+      {renderDropdown('Plaats van verkoop', 'locatieId', locations, 'id')}
       {renderInput('Stadium', 'stadium', 'Stadium')}
       {renderColorPicker('Kleur', 'kleur')}
       {renderInput('Fustcode', 'fustcode', 'Fustcode')}
