@@ -11,7 +11,7 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
     prijs: '',
     aantal: '',
     ql: '',
-    plaats: '',
+    locatieId: '',
     stadium: '',
     lengte: '',
     kleur: '',
@@ -163,7 +163,7 @@ const renderColorPicker = (
       {renderInput('Prijs (€)', 'prijs', 'Bijv. 12.50')}
       {renderInput('Aantal containers', 'aantal', 'Bijv. 25')}
       {renderDropdown('Ql', 'ql', QI)}
-      {renderDropdown('Plaats van verkoop', 'plaats', locations)}
+      {renderDropdown('Plaats van verkoop', 'locatieId', locations)}
       {renderInput('Stadium', 'stadium', 'Stadium')}
       {renderColorPicker('Kleur', 'kleur')}
       {renderInput('Fustcode', 'fustcode', 'Fustcode')}
