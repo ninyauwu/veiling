@@ -268,7 +268,7 @@ function KavelInfo({
                 value: (
                   <div
                     style={{
-                      backgroundColor: "#" + kavel.kavelkleur,
+                      backgroundColor: kavel.kavelkleur,
                       width: "24px",
                       height: "24px",
                     }}

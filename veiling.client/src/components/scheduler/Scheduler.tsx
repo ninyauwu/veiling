@@ -43,7 +43,24 @@ export default function Scheduler() {
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const today = new Date();
-  const weekDays = getWeekDays(weekOffset);
+    const weekDays = getWeekDays(weekOffset);
+    const getWeekMonthLabel = (days: Date[]) => {
+        const months = Array.from(
+            new Set(
+                days.map((d) =>
+                    d.toLocaleDateString("nl-NL", {
+                        month: "long",
+                        year: "numeric",
+                    })
+                )
+            )
+        );
+
+        return months.length === 1
+            ? months[0]
+            : `${months[0]} – ${months[months.length - 1]}`;
+    };
+
 
   useEffect(() => {
     const fetchKavels = async () => {
@@ -568,6 +585,12 @@ export default function Scheduler() {
           </div>
 
           <div className="lg:col-span-3 bg-white rounded-lg shadow-lg overflow-hidden">
+                      <div
+                          className="text-center py-3 font-bold text-lg"
+                          style={{ color: "#7A1F3D" }}
+                      >
+                          {getWeekMonthLabel(weekDays)}
+                      </div>
             <div
               className="grid grid-cols-8 border-b-2"
               style={{ borderColor: "#7A1F3D" }}
