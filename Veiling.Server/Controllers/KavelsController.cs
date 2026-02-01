@@ -224,7 +224,7 @@ namespace Veiling.Server.Controllers
                     AantalProductenPerContainer = dto.AantalProductenPerContainer,
                     GewichtVanBloemen = dto.GewichtVanBloemen,
                     ArtikelKenmerken = string.Empty,
-                    MaximumPrijs = dto.MinimumPrijs * 5f,
+                    MaximumPrijs = dto.MinimumPrijs,
                     GekochtPrijs = 0,
                     GekochteContainers = 0,
                     Minimumhoeveelheid = 1,
