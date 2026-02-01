@@ -10,27 +10,85 @@ import VerkoperDashboard from "./pages/VerkoperDashboard.tsx";
 import Scheduler from "./pages/SchedulerPagina.tsx";
 import Layout from "./layout/Layout.tsx";
 import VeilingMeesterKeuzePagina from "./pages/VeilingMeesterKeuzePagina";
+import ProtectedRoute from "./utils/ProtectedRoute.tsx";
 
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<LandingsPagina />} /> 
-          <Route path="/invoer" element={<KavelInvoer />} />
-          <Route path="/login" element={<LoginPagina />} />
-          <Route path="/veiling/:locatieId" element={<Veiling />} />
-          <Route path="/locaties" element={<LocatiePagina />} />
-          <Route path="/judgement" element={<KavelJudgement />} />
-          <Route path="/registreer" element={<RegistratiePagina />} />
-          <Route path="/verkoper-dashboard" element={<VerkoperDashboard />} />
-          <Route path="/scheduler" element={<Scheduler />} />
-          <Route path="/veilingmeester" element={<VeilingMeesterKeuzePagina />} />
-        </Route>
-      </Routes>
-    </Router>
+  <Routes>
+    <Route path="/" element={<Layout />}>
+      
+      <Route index element={<LandingsPagina />} />
+      <Route path="login" element={<LoginPagina />} />
+      <Route path="registreer" element={<RegistratiePagina />} />
+
+      <Route
+        path="invoer"
+        element={
+          <ProtectedRoute>
+            <KavelInvoer />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="veiling/:locatieId"
+        element={
+          <ProtectedRoute>
+            <Veiling />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="locaties"
+        element={
+          <ProtectedRoute>
+            <LocatiePagina />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="judgement"
+        element={
+          <ProtectedRoute>
+            <KavelJudgement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="verkoper-dashboard"
+        element={
+          <ProtectedRoute>
+            <VerkoperDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="scheduler"
+        element={
+          <ProtectedRoute>
+            <Scheduler />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="veilingmeester"
+        element={
+          <ProtectedRoute>
+            <VeilingMeesterKeuzePagina />
+          </ProtectedRoute>
+        }
+      />
+
+    </Route>
+  </Routes>
+</Router>
   );
 }
-
 export default App;

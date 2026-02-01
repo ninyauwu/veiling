@@ -2,23 +2,34 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import "./AccountDropdown.css";
 
+type UserRole = "Veilingmeester" | "Bedrijfsvertegenwoordiger" | "Leverancier";
+
 export interface AccountDropdownProps {
     className?: string;
     align?: "left" | "right";
     avatarUrl?: string;
     children?: ReactNode;
     onLogout?: () => void;
+    role?: UserRole;
 }
+
 export default function AccountDropdown({
     className = "",
     align = "right",
     avatarUrl,
     children,
     onLogout,
+    role = "Bedrijfsvertegenwoordiger",
 }: AccountDropdownProps) {
     const [open, setOpen] = useState(false);
     const btnRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+
+    const homeRouteByRole: Record<UserRole, string> = {
+        Veilingmeester: "/veilingmeester",
+        Bedrijfsvertegenwoordiger: "/locaties",
+        Leverancier: "/verkoper-dashboard",
+    };
 
     useEffect(() => {
         function onDocClick(e: MouseEvent) {
@@ -100,24 +111,33 @@ export default function AccountDropdown({
                         <div className="pd-header__right">{children}</div>
                     </div>
 
-                    {onLogout && (
                     <div className="pd-actions">
                         <button
-                            className="pd-action pd-action--danger"
+                            className="pd-action"
                             role="menuitem"
                             tabIndex={0}
-                            onClick={onLogout}
+                            onClick={() => (window.location.href = homeRouteByRole[role])}
                         >
-                            Uitloggen
+                            Terug naar homepagina
                         </button>
-                    </div>
-                )}
 
+                        {onLogout && (
+                            <button
+                                className="pd-action pd-action--danger"
+                                role="menuitem"
+                                tabIndex={0}
+                                onClick={onLogout}
+                            >
+                                Uitloggen
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
     );
 }
+
 export function AccountDropdownLine({ children }: { children: ReactNode }) {
     return <p className="pd-line">{children}</p>;
 }
