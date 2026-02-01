@@ -23,9 +23,11 @@ function KavelInvulTabel({ onDataChange }: KavelInvulTabelProps) {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   
   const locations = [
-    { id: '1', name: 'Amsterdam' },
-    { id: '2', name: 'Rotterdam' },
-    { id: '3', name: 'Delft' }
+    { id: '1', name: 'Aalsmeer' },
+    { id: '2', name: 'Naaldwijk' },
+    { id: '3', name: 'Rijnsburg' },
+    { id: '4', name: 'Eelde' },
+    { id: '5', name: 'Rhein-Maas' },
   ];
 
   const QI = [
