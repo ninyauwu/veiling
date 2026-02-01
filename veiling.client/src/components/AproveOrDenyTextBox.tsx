@@ -13,7 +13,6 @@ export default function ApproveOrDeny({
   onApprovalResponse,
 }: ApproveOrDenyProps) {
   const [reasoning, setReasoning] = useState("");
-  const [approval, setApproval] = useState(Boolean);
   const [maximumPrijs, setMaximumPrijs] = useState<number | "">("");
 
   const isMaxPriceValid = typeof maximumPrijs === "number" && maximumPrijs > 0;
