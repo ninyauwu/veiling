@@ -2,12 +2,10 @@ import ImageUpload from "../components/ImageUpload";
 import KavelDescription from "../components/KavelDescription";
 import KavelInvulTabel from "../components/KavelInvulTabel";
 import SimpeleKnop from "../components/SimpeleKnop";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { authFetch } from "../utils/AuthFetch";
 
 function KavelInvoer() {
-    const navigate = useNavigate();
     const [description, setDescription] = useState<string>('');
     const [imageFile, setImageFile] = useState<string | File | null>();
     const [formData, setFormData] = useState({
@@ -158,11 +156,6 @@ function KavelInvoer() {
                     right: '2vw',
                     bottom: '2vh'
                 }}>
-                    <SimpeleKnop
-                        label="Terug naar dashboard"
-                        appearance="primary"
-                        onClick={() => navigate("/verkoper-dashboard")}
-                    />
                     <SimpeleKnop 
                         label="Submit"
                         appearance="primary"
