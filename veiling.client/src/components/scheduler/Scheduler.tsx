@@ -62,7 +62,7 @@ export default function Scheduler() {
             id: 1,
             naam: "Kavel A",
             beschrijving: "Test kavel",
-            locatieId: 1,
+            locatieId: -1,
             minimumPrijs: 100,
             maximumPrijs: 200,
             hoeveelheidContainers: 5,

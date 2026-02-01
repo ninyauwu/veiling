@@ -49,6 +49,13 @@ export default function AppointmentFormPopup({
     });
   };
 
+  const filteredKavels = formData.locationId
+  ? kavels.filter(
+      (kavel) => kavel.locatieId === formData.locationId
+    )
+  : [];
+
+
   if (!isOpen) return null;
 
   return (
@@ -76,6 +83,7 @@ export default function AppointmentFormPopup({
             onFormDataChange({
               ...formData,
               locationId: Number(e.target.value),
+              kavelIds: [],
             })
           }
           className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2"
@@ -97,12 +105,18 @@ export default function AppointmentFormPopup({
       </div>
 
 
-      <KavelOrderingList
-        kavels={kavels}
-        selectedKavelIds={formData.kavelIds}
-        onKavelToggle={handleKavelToggle}
-        onReorder={handleReorder}
-      />
+      {formData.locationId ? (
+        <KavelOrderingList
+          kavels={filteredKavels}
+          selectedKavelIds={formData.kavelIds}
+          onKavelToggle={handleKavelToggle}
+          onReorder={handleReorder}
+        />
+      ) : (
+        <p className="text-gray-400 italic">
+          Selecteer eerst een locatie om kavels te zien
+        </p>
+      )}
 
       <div className="mb-4">
         <label
