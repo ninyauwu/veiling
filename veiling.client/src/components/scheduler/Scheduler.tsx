@@ -6,6 +6,7 @@ import type {
   AppointmentFormData,
   DragState,
   Kavel,
+  Locatie,
 } from "./AppointmentTypes";
 import AppointmentFormPopup from "./AppointmentFormPopup";
 import {
@@ -27,11 +28,13 @@ export default function Scheduler() {
   const [editingAppointment, setEditingAppointment] =
     useState<AppointmentData | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [locations, setLocations] = useState<Locatie[]>([]);
   const [formData, setFormData] = useState<AppointmentFormData>({
     startTime: "",
     endTime: "",
     name: "",
     kavelIds: [],
+    locationId: null,
   });
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
@@ -59,6 +62,7 @@ export default function Scheduler() {
             id: 1,
             naam: "Kavel A",
             beschrijving: "Test kavel",
+            locatieId: 1,
             minimumPrijs: 100,
             maximumPrijs: 200,
             hoeveelheidContainers: 5,
@@ -70,6 +74,23 @@ export default function Scheduler() {
 
     fetchKavels();
   }, []);
+
+  useEffect(() => {
+  const fetchLocations = async () => {
+    try {
+      const response = await authFetch("/api/locaties");
+      if (!response.ok) throw new Error("Failed to fetch locaties");
+
+      const data = await response.json();
+      setLocations(data);
+    } catch (error) {
+      console.error("Error fetching locaties:", error);
+    }
+  };
+
+  fetchLocations();
+}, []);
+
 
   useEffect(() => {
     const fetchVeilingen = async () => {
@@ -308,6 +329,7 @@ export default function Scheduler() {
       durationHours: 1,
       name: "",
       kavelIds: [],
+      locationId: 0,
     };
 
     setEditingAppointment(newAppointment);
@@ -316,6 +338,7 @@ export default function Scheduler() {
       endTime: formatTime(validStartHour + 1),
       name: "",
       kavelIds: [],
+      locationId: 0,
     });
     setIsPopupOpen(true);
   };
@@ -350,6 +373,7 @@ export default function Scheduler() {
       endTime: formatTime(appointment.startHour + appointment.durationHours),
       name: appointment.name,
       kavelIds: appointment.kavelIds,
+      locationId: appointment.locationId || null,
     });
     setIsPopupOpen(true);
   };
@@ -725,6 +749,7 @@ export default function Scheduler() {
         editingAppointment={editingAppointment}
         appointments={appointments}
         kavels={kavels}
+        locaties={locations}
         formData={formData}
         onFormDataChange={setFormData}
         onSubmit={handleFormSubmit}
