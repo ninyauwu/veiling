@@ -90,6 +90,30 @@ namespace Veiling.Server.Controllers
             }
         }
 
+        // Get: api/kavels/approved
+        [Authorize(Roles =
+        nameof(Role.Administrator) + ", " +
+        nameof(Role.Veilingmeester)
+        )]
+        [HttpGet("approved")]
+        public async Task<ActionResult<IEnumerable<Kavel>>> GetApprovedKavels()
+        {
+            try
+            {
+                return await _context.Kavels
+                    .Where(k => k.Approved == true && k.Approved != null)
+                    .Include(k => k.Veiling)
+                    .Include(k => k.Leverancier)
+                    .Include(k => k.Boden)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fout bij ophalen goedgekeurde kavels");
+                return StatusCode(500, new { error = "Fout bij ophalen goedgekeurde kavels" });
+            }
+        }
+
         // GET: api/kavels/5
         [Authorize(Roles = 
         nameof(Role.Administrator) + ", " + 
@@ -215,7 +239,7 @@ namespace Veiling.Server.Controllers
                     MinimumPrijs = dto.MinimumPrijs,
                     HoeveelheidContainers = dto.Aantal,
                     Keurcode = dto.Ql,
-                    LocatieId = dto.VeilingId, 
+                    LocatieId = dto.LocatieId, 
                     LeverancierId = leverancier.Id,
                     StageOfMaturity = dto.Stadium,
                     LengteVanBloemen = dto.Lengte,
@@ -362,7 +386,9 @@ public async Task<IActionResult> UpdateKavel(
         [Required(ErrorMessage = "Ql is verplicht")]
         public string Ql { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Veiling ID is verplicht")]
+        [Required]
+        public int LocatieId { get; set; } 
+
         public int VeilingId { get; set; }
 
         [Required(ErrorMessage = "Stadium is verplicht")]

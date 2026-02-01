@@ -13,15 +13,13 @@ export default function ApproveOrDeny({
   onApprovalResponse,
 }: ApproveOrDenyProps) {
   const [reasoning, setReasoning] = useState("");
-  const [approval, setApproval] = useState(Boolean);
   const [maximumPrijs, setMaximumPrijs] = useState<number | "">("");
 
   const isMaxPriceValid = typeof maximumPrijs === "number" && maximumPrijs > 0;
 
   const handleApprove = () => {
-    setApproval(true);
     console.log("Approved with reasoning:", reasoning);
-    onSubmitApproval(approval, reasoning, Number(maximumPrijs));
+    onSubmitApproval(true, reasoning, Number(maximumPrijs));
   };
 
   const onSubmitApproval = async (approval: boolean, reasoning: string, maximumPrijs: number | "") => {
@@ -58,9 +56,8 @@ export default function ApproveOrDeny({
   };
 
   const handleDeny = () => {
-    setApproval(false);
     console.log("Denied with reasoning:", reasoning);
-    onSubmitApproval(approval, reasoning, Number(maximumPrijs));
+    onSubmitApproval(false, reasoning, Number(maximumPrijs));
   };
 
   return (

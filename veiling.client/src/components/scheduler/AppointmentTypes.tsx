@@ -5,6 +5,7 @@ export interface AppointmentData {
   durationHours: number;
   name: string;
   kavelIds: number[];
+  locationId: number;
 }
 
 export interface AppointmentFormData {
@@ -12,11 +13,18 @@ export interface AppointmentFormData {
   endTime: string;
   name: string;
   kavelIds: number[];
+  locationId: number | null;
+}
+
+export interface Locatie {
+  id: number;
+  naam: string;
 }
 
 export interface Kavel {
   id: number;
   naam: string;
+  locatieId: number;
   beschrijving: string;
   minimumPrijs: number;
   maximumPrijs: number;
