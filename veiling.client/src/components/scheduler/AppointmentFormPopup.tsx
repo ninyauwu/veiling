@@ -92,7 +92,7 @@ export default function AppointmentFormPopup({
             color: "#000000",
           }}
         >
-          <option value="" disabled>
+          <option value="">
             -- Kies een locatie --
           </option>
 
