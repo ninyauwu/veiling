@@ -69,7 +69,8 @@ export default function Popup({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 pt-30 pb-4"
+      className="fixed inset-0 flex items-start justify-center z-50 pt-30 pb-4
+             bg-black/10 backdrop-blur-sm"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
