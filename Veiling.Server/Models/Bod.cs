@@ -10,10 +10,12 @@
         
         // Foreign Keys
         public string? GebruikerId { get; set; }
-        public int? KavelId { get; set; }
+        public int? KavelVeilingId { get; set; }
+        public int? AankoopId { get; set; }
         
         // Relaties
         public Gebruiker? Gebruiker { get; set; }
-        public Kavel? Kavel { get; set; }
+        public KavelVeiling? KavelVeiling { get; set; }
+        public Aankoop? Aankoop { get; set; }
     }
 }

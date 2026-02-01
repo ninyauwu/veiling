@@ -6,6 +6,7 @@ export interface VeilingStartMessage {
   minimumPrice: number;
   durationMs: number;
   startTime: Date;
+  kavelVeilingId: number;
 }
 
 interface PriceBarProps {
@@ -50,6 +51,7 @@ export default function PriceInterpolator({
   const startTimeRef = useRef<number | null>(null);
   const previousMessageRef = useRef<VeilingStartMessage | null>(null);
   const timeOffsetRef = useRef<number>(0);
+  const frozenProgressRef = useRef<number>(0);
 
   useEffect(() => {
     if (!startMessage) {
@@ -63,6 +65,7 @@ export default function PriceInterpolator({
       startTimeRef.current = null;
       previousMessageRef.current = null;
       timeOffsetRef.current = 0;
+      frozenProgressRef.current = 0;
       return;
     }
 
@@ -73,6 +76,12 @@ export default function PriceInterpolator({
     previousMessageRef.current = startMessage;
     const { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
 
+    // If the bar was frozen mid-auction, shift startTime back so that
+    // elapsed immediately resumes from the frozen point.
+    const frozenOffset = frozenProgressRef.current * durationMs;
+    const effectiveStartTime = new Date(startTime.getTime() - frozenOffset);
+    frozenProgressRef.current = 0;
+
     if (animationFrameRef.current !== null) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -81,7 +90,7 @@ export default function PriceInterpolator({
 
     const animate = (timestamp: number) => {
       const adjustedNow = Date.now() + timeOffsetRef.current;
-      const startTimestamp = startTime.getTime();
+      const startTimestamp = effectiveStartTime.getTime();
 
       if (adjustedNow < startTimestamp) {
         animationFrameRef.current = requestAnimationFrame(animate);
@@ -133,6 +142,7 @@ export default function PriceInterpolator({
 
   useEffect(() => {
     if (shouldInterrupt && animationFrameRef.current !== null) {
+      frozenProgressRef.current = progress;
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }

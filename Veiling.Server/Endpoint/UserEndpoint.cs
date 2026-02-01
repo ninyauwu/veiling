@@ -24,7 +24,8 @@ public static class UserEndpoints
             {
                 email = appUser.Email,
                 isEmailConfirmed = appUser.EmailConfirmed,
-                roles
+                roles,
+                appUser.Id
             });
         })
         .RequireAuthorization();

@@ -9,9 +9,13 @@ public class CompleteBidService
         _hub = hub;
     }
 
-    public async Task NotifyClients(int kavelId, DateTime time)
+    public async Task NotifyBid(int kavelId, DateTime time)
     {
         Console.WriteLine("Clients notified");
         await _hub.Clients.All.SendAsync("BidPlaced", kavelId);
+    }
+
+    public async Task NotifyPurchase(int kavelId, int hoeveelheidGekocht, int hoeveelheidOver) {
+        await _hub.Clients.All.SendAsync("ContainersPurchased", kavelId, hoeveelheidOver);
     }
 }

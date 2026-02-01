@@ -11,6 +11,7 @@ import { authFetch } from "../utils/AuthFetch";
 import AuctionCountdown from "./AuctionCountdown";
 import ApproveOrDeny from "./AproveOrDenyTextBox";
 import type { VeilingStartMessage } from "./PriceBar";
+import { authCheckFetch } from "../utils/AuthCheckFetch";
 
 type KavelInfoResponse = {
   kavel: {
@@ -40,6 +41,13 @@ interface KavelInfoProps {
   onSelectKavel?: (kavel: number) => void;
 }
 
+interface MeResponse {
+  email: string;
+  isEmailConfirmed: boolean;
+  roles: string[];
+  id: string;
+}
+
 function KavelInfo({
   locatieId = 1,
   sortOnApproval = false,
@@ -53,6 +61,8 @@ function KavelInfo({
     null,
   );
   const [auctionKey, setAuctionKey] = useState(0);
+  const [user, setUser] = useState<MeResponse>();
+
   const connectionRef = useRef<signalR.HubConnection | null>(null);
   const currentKavelIdRef = useRef<number | null>(null);
   const removalTimeoutRef = useRef<number | null>(null);
@@ -79,6 +89,17 @@ function KavelInfo({
           const data: KavelInfoResponse[] = await res.json();
           setKavels(data);
           if (data.length > 0) setSelected(0);
+          const checkAuth = async () => {
+            const me = await authCheckFetch("/me");
+            if (me == undefined) {
+              throw new Error(`Kon gebruiker niet ophalen.`);
+            }
+            setUser(me);
+            setLoading(false);
+            console.log(user?.email);
+          };
+
+          checkAuth();
         }
       } catch (err) {
         console.error("Kon kavels niet laden:", err);
@@ -119,12 +140,14 @@ function KavelInfo({
         minimumPrice: number,
         durationMs: number,
         startTime: string,
+        kavelVeilingId: number,
       ) => {
         setStartMessage({
           startingPrice,
           minimumPrice,
           durationMs,
           startTime: new Date(startTime),
+          kavelVeilingId,
         });
 
         console.log(
@@ -133,39 +156,50 @@ function KavelInfo({
       },
     );
 
-    connection.on("BidPlaced", (kavelId: number) => {
-      console.log(`Bid placed for Kavel ${kavelId}`);
+    // Listen for ContainersPurchased - updated to only 2 parameters
+    // Only remove the kavel when hoeveelheidOver is 0 (no containers left).
+    connection.on(
+      "ContainersPurchased",
+      (kavelId: number, hoeveelheidOver: number) => {
+        console.log(
+          `ContainersPurchased: kavelId=${kavelId}, over=${hoeveelheidOver}`,
+        );
 
-      if (removalTimeoutRef.current !== null) {
-        clearTimeout(removalTimeoutRef.current);
-      }
+        if (hoeveelheidOver !== 0) return;
 
-      removalTimeoutRef.current = window.setTimeout(() => {
-        setKavels((currentKavels) => {
-          const kavelIndex = currentKavels.findIndex(
-            (k) => k.kavel.id === kavelId,
-          );
+        if (removalTimeoutRef.current !== null) {
+          clearTimeout(removalTimeoutRef.current);
+        }
 
-          if (kavelIndex === -1) return currentKavels;
+        removalTimeoutRef.current = window.setTimeout(() => {
+          setKavels((currentKavels) => {
+            const kavelIndex = currentKavels.findIndex(
+              (k) => k.kavel.id === kavelId,
+            );
 
-          const newKavels = currentKavels.filter((k) => k.kavel.id !== kavelId);
+            if (kavelIndex === -1) return currentKavels;
 
-          if (selected === kavelIndex) {
-            if (newKavels.length === 0) {
-              setSelected(null);
-            } else if (kavelIndex >= newKavels.length) {
-              setSelected(newKavels.length - 1);
-            } else {
-              setSelected(kavelIndex);
+            const newKavels = currentKavels.filter(
+              (k) => k.kavel.id !== kavelId,
+            );
+
+            if (selected === kavelIndex) {
+              if (newKavels.length === 0) {
+                setSelected(null);
+              } else if (kavelIndex >= newKavels.length) {
+                setSelected(newKavels.length - 1);
+              } else {
+                setSelected(kavelIndex);
+              }
+            } else if (selected !== null && selected > kavelIndex) {
+              setSelected(selected - 1);
             }
-          } else if (selected !== null && selected > kavelIndex) {
-            setSelected(selected - 1);
-          }
 
-          return newKavels;
-        });
-      }, 2000);
-    });
+            return newKavels;
+          });
+        }, 2000);
+      },
+    );
 
     connection.start().catch((err) => console.error("SignalR error:", err));
 
@@ -218,6 +252,39 @@ function KavelInfo({
       startMessage={startMessage}
       connection={connectionRef.current}
       kavelId={kavel.id}
+      gebruikerId={user?.id ?? ""}
+      onPriceReachedZero={() => {
+        // Remove kavel when price reaches 0, similar to when containers run out
+        const kavelIdToRemove = kavel.id;
+
+        setTimeout(() => {
+          setKavels((currentKavels) => {
+            const kavelIndex = currentKavels.findIndex(
+              (k) => k.kavel.id === kavelIdToRemove,
+            );
+
+            if (kavelIndex === -1) return currentKavels;
+
+            const newKavels = currentKavels.filter(
+              (k) => k.kavel.id !== kavelIdToRemove,
+            );
+
+            if (selected === kavelIndex) {
+              if (newKavels.length === 0) {
+                setSelected(null);
+              } else if (kavelIndex >= newKavels.length) {
+                setSelected(newKavels.length - 1);
+              } else {
+                setSelected(kavelIndex);
+              }
+            } else if (selected !== null && selected > kavelIndex) {
+              setSelected(selected - 1);
+            }
+
+            return newKavels;
+          });
+        }, 2000);
+      }}
     />
   );
 
