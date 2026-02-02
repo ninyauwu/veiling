@@ -78,7 +78,7 @@ export default function AuctionCountdown({
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [serverReceivedTime, setServerReceivedTime] = useState<Date | null>(
     null,
-  );
+    );
   const [feedbackStatus, setFeedbackStatus] =
     useState<BidFeedbackStatus | null>(null);
   const [awaitingBidResponse, setAwaitingBidResponse] = useState(false);
@@ -88,7 +88,10 @@ export default function AuctionCountdown({
   >(null);
 
   // Track if we've already triggered removal for this auction
-  const hasTriggeredRemovalRef = useRef(false);
+    const hasTriggeredRemovalRef = useRef(false);
+    const lastKnownPriceRef = useRef<number | null>(null);
+    const lastRemainingMsRef = useRef<number | null>(null);
+
 
   // Purchase popup state
   const [showPurchasePopup, setShowPurchasePopup] = useState(false);
@@ -198,19 +201,29 @@ export default function AuctionCountdown({
     return () => clearInterval(interval);
   }, [startMessage]);
 
-  useEffect(() => {
-    console.log("startMessage changed:", startMessage);
-    if (startMessage) {
-      console.log("startingPrice:", startMessage.startingPrice);
-      setCurrentPrice(startMessage.startingPrice ?? 0);
-      setShouldInterrupt(false);
-      setServerReceivedTime(null);
-      setFeedbackStatus(null);
-      setAwaitingBidResponse(false);
-      setIsSubmittingBid(false);
-      hasTriggeredRemovalRef.current = false; // Reset removal trigger for new auction
-    }
-  }, [startMessage]);
+    useEffect(() => {
+        console.log("startMessage changed:", startMessage);
+        if (startMessage) {
+            setCurrentPrice(startMessage.startingPrice ?? 0);
+            setShouldInterrupt(false);
+            setServerReceivedTime(null);
+            setFeedbackStatus(null);
+            setAwaitingBidResponse(false);
+            setIsSubmittingBid(false);
+            lastKnownPriceRef.current = null;
+            lastRemainingMsRef.current = null;
+
+            hasTriggeredRemovalRef.current = false;
+        }
+    }, [startMessage]);
+
+    useEffect(() => {
+        if (!startMessage) return;
+        setShouldInterrupt(false);
+        setServerReceivedTime(new Date());
+    }, [startMessage?.startTime]);
+
+
 
   useEffect(() => {
     if (!connection) return;
@@ -261,25 +274,39 @@ export default function AuctionCountdown({
       console.log(
         `Price reached minimum for kavelId: ${kavelId}, triggering removal`,
       );
-      hasTriggeredRemovalRef.current = true; // Mark as triggered
+      hasTriggeredRemovalRef.current = true;
       onPriceReachedZero();
     }
   }, [currentPrice, startMessage, onPriceReachedZero, kavelId]);
 
-  const simulateSignalRMessage = () => {
-    if (!connection) return;
+    const simulateSignalRMessage = () => {
+        if (!connection) return;
 
-    setShouldInterrupt(false);
-    setFeedbackStatus(null);
-    setServerReceivedTime(null);
+        setShouldInterrupt(false);
+        setFeedbackStatus(null);
+        setServerReceivedTime(null);
 
-    const startTime = new Date();
-    startTime.setSeconds(startTime.getSeconds() + 1);
+        const startTime = new Date();
+        startTime.setSeconds(startTime.getSeconds() + 1);
 
-    connection
-      .invoke("SendVeilingStart", kavelId, price ?? 0.8, 0.3, 5000, startTime)
-      .catch((err) => console.error("Failed to send message:", err));
-  };
+        const effectiveStartingPrice =
+            lastKnownPriceRef.current ?? price ?? 0.8;
+
+        const effectiveDurationMs =
+            lastRemainingMsRef.current ?? 30000;
+
+        connection
+            .invoke(
+                "SendVeilingStart",
+                kavelId,
+                effectiveStartingPrice,
+                0.3,
+                effectiveDurationMs,
+                startTime,
+            )
+            .catch((err) => console.error("Failed to send message:", err));
+    };
+
 
   const placeBid = async () => {
     setIsSubmittingBid(true);
@@ -522,7 +549,10 @@ export default function AuctionCountdown({
       <PriceInterpolator
         startMessage={startMessage}
         shouldInterrupt={shouldInterrupt}
-        onChange={(pr) => setCurrentPrice(pr)}
+              onChange={(pr) => {
+                  setCurrentPrice(pr);
+                  lastKnownPriceRef.current = pr;
+              }}
         serverReceivedTime={serverReceivedTime}
       />
       <Spacer />

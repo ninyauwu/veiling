@@ -51,7 +51,8 @@ export default function PriceInterpolator({
   const startTimeRef = useRef<number | null>(null);
   const previousMessageRef = useRef<VeilingStartMessage | null>(null);
   const timeOffsetRef = useRef<number>(0);
-  const frozenProgressRef = useRef<number>(0);
+    const frozenProgressRef = useRef<number>(0);
+    const frozenPriceRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!startMessage) {
@@ -69,18 +70,31 @@ export default function PriceInterpolator({
       return;
     }
 
-    if (startMessage === previousMessageRef.current) {
-      return;
-    }
+      if (
+          previousMessageRef.current &&
+          previousMessageRef.current.kavelVeilingId ===
+          startMessage.kavelVeilingId
+      ) {
+          return;
+      }
+
 
     previousMessageRef.current = startMessage;
-    const { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
+      let { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
+      if (frozenPriceRef.current !== null) {
+          startingPrice = frozenPriceRef.current;
+          durationMs = durationMs * (1 - frozenProgressRef.current);
+      }
+
+
 
     // If the bar was frozen mid-auction, shift startTime back so that
     // elapsed immediately resumes from the frozen point.
     const frozenOffset = frozenProgressRef.current * durationMs;
     const effectiveStartTime = new Date(startTime.getTime() - frozenOffset);
-    frozenProgressRef.current = 0;
+      frozenProgressRef.current = 0;
+      frozenPriceRef.current = null;
+
 
     if (animationFrameRef.current !== null) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -140,13 +154,24 @@ export default function PriceInterpolator({
     }
   }, [serverReceivedTime, startMessage]);
 
-  useEffect(() => {
-    if (shouldInterrupt && animationFrameRef.current !== null) {
-      frozenProgressRef.current = progress;
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  }, [shouldInterrupt]);
+    useEffect(() => {
+        if (shouldInterrupt && animationFrameRef.current !== null && startMessage) {
+            frozenProgressRef.current = progress;
+            frozenPriceRef.current =
+                startMessage.startingPrice -
+                (startMessage.startingPrice - startMessage.minimumPrice) * progress;
+
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+        }
+    }, [shouldInterrupt, progress, startMessage]);
+
+    useEffect(() => {
+        if (!shouldInterrupt && startMessage) {
+            previousMessageRef.current = null;
+        }
+    }, [shouldInterrupt, startMessage]);
+
 
   useEffect(() => {
     return () => {
