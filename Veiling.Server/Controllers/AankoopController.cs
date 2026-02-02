@@ -16,9 +16,9 @@ public class AankoopController : ControllerBase {
         _completeBidService = completeBidService;
     }
 
-
     [HttpPost]
-    public async Task<ActionResult<Aankoop>> KoopContainer(AankoopContainers aankoop) {
+    public async Task<ActionResult<Aankoop>> KoopContainer(AankoopContainers aankoop) 
+    {
         // Valideer dat hoeveelheid positief is
         if (aankoop.Hoeveelheid <= 0) {
             return BadRequest("Hoeveelheid moet groter zijn dan 0");
@@ -68,6 +68,28 @@ public class AankoopController : ControllerBase {
         };
         
         await _context.Aankopen.AddAsync(dbAankoop);
+        
+        // ALS ER NOG CONTAINERS OVER ZIJN, PAUZEER DE VEILING IN DE BACKEND
+        if ((remaining - aankoop.Hoeveelheid) > 0)
+        {
+            // Haal de actieve KavelVeiling op
+            var now = DateTime.Now;
+            var kavelVeiling = await _context.KavelVeilingen
+                .Where(kv => kv.KavelId == aankoop.KavelId)
+                .Where(kv => kv.Start < now && kv.Start.AddMilliseconds(kv.DurationMs) > now)
+                .FirstOrDefaultAsync();
+            
+            if (kavelVeiling != null)
+            {
+                // Verschuif de start tijd met 5 seconden in de toekomst
+                // Dit zorgt ervoor dat de veiling effectief 5 seconden pauzeert
+                kavelVeiling.Start = kavelVeiling.Start.AddSeconds(5);
+                _context.KavelVeilingen.Update(kavelVeiling);
+                
+                Console.WriteLine($"Veiling gepauzeerd: nieuwe start tijd = {kavelVeiling.Start}");
+            }
+        }
+        
         await _context.SaveChangesAsync();
 
         await _completeBidService.NotifyPurchase(aankoop.KavelId, aankoop.Hoeveelheid, remaining - aankoop.Hoeveelheid);
