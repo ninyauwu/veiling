@@ -72,7 +72,7 @@ export default function AuctionCountdown({
   gebruikerId,
   onPriceReachedZero,
 }: AuctionCountdownProps) {
-  const [shouldInterrupt, setShouldInterrupt] = useState(false);
+    const [shouldInterrupt, setShouldInterrupt] = useState(false);
   const [isCountdown, setIsCountdown] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(price ?? 0);
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
@@ -91,6 +91,11 @@ export default function AuctionCountdown({
     const hasTriggeredRemovalRef = useRef(false);
     const lastKnownPriceRef = useRef<number | null>(null);
     const lastRemainingMsRef = useRef<number | null>(null);
+    const handlePriceChange = (price: number, remainingMs: number) => {
+        setCurrentPrice(price);
+        lastKnownPriceRef.current = price;
+        lastRemainingMsRef.current = remainingMs;
+    };
 
 
   // Purchase popup state
@@ -205,7 +210,6 @@ export default function AuctionCountdown({
         console.log("startMessage changed:", startMessage);
         if (startMessage) {
             setCurrentPrice(startMessage.startingPrice ?? 0);
-            setShouldInterrupt(false);
             setServerReceivedTime(null);
             setFeedbackStatus(null);
             setAwaitingBidResponse(false);
@@ -295,6 +299,7 @@ export default function AuctionCountdown({
         const effectiveDurationMs =
             lastRemainingMsRef.current ?? 30000;
 
+
         connection
             .invoke(
                 "SendVeilingStart",
@@ -337,12 +342,35 @@ export default function AuctionCountdown({
       console.log("Bid response data:", data);
       setServerReceivedTime(new Date(data.receivedAt));
 
-      if (data.accepted) {
+        if (data.accepted) {
+            setShouldInterrupt(true);
         setFeedbackStatus("accepted");
         setRemainingContainers(data.remainingContainers);
         setContainerCountStr("1");
         setPurchaseError(null);
-        setShowPurchasePopup(true);
+            setShowPurchasePopup(true);
+            setTimeout(() => {
+                if (!connection) return;
+
+                const effectiveStartingPrice =
+                    lastKnownPriceRef.current ?? startMessage?.startingPrice ?? 0;
+
+                const effectiveDurationMs =
+                    lastRemainingMsRef.current ?? startMessage?.durationMs ?? 30000;
+
+                const startTime = new Date();
+
+                connection.invoke(
+                    "SendVeilingStart",
+                    kavelId,
+                    effectiveStartingPrice,
+                    startMessage?.minimumPrice ?? 0,
+                    effectiveDurationMs,
+                    startTime
+                );
+
+                setShouldInterrupt(false);
+            }, 5000);
       } else {
         setFeedbackStatus("rejected");
       }
@@ -508,11 +536,12 @@ export default function AuctionCountdown({
           <span className="auc-qty__sub">{containers}</span>
         </div>
       </div>
-      <PriceInterpolator
-        startMessage={startMessage}
-        shouldInterrupt={shouldInterrupt}
-        serverReceivedTime={serverReceivedTime}
-      />
+          <PriceInterpolator
+              startMessage={startMessage}
+              shouldInterrupt={shouldInterrupt}
+              onChange={handlePriceChange}
+              serverReceivedTime={serverReceivedTime}
+          />
       <div className="button-container">
         {canBid && (
           <SimpeleKnop
@@ -546,15 +575,17 @@ export default function AuctionCountdown({
       <header className="auc-card__head">
         <h3 className="auc-card__title">Bieden</h3>
       </header>
-      <PriceInterpolator
-        startMessage={startMessage}
-        shouldInterrupt={shouldInterrupt}
-              onChange={(pr) => {
+          <PriceInterpolator
+              startMessage={startMessage}
+              onChange={(pr, remainingMs) => {
                   setCurrentPrice(pr);
                   lastKnownPriceRef.current = pr;
+                  lastRemainingMsRef.current = remainingMs;
               }}
-        serverReceivedTime={serverReceivedTime}
-      />
+              serverReceivedTime={serverReceivedTime}
+              shouldInterrupt={shouldInterrupt}
+          />
+
       <Spacer />
       <div className="auc-field">
         <div className="auc-label">Prijs per eenheid</div>
