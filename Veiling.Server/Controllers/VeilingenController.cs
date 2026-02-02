@@ -19,8 +19,11 @@ namespace Veiling.Server.Controllers
 
         // GET: api/veilingen
         [Authorize(Roles = 
-        nameof(Role.Administrator) + ", " + 
-        nameof(Role.Veilingmeester)
+            nameof(Role.Administrator) + ", " + 
+            nameof(Role.Veilingmeester) + ", " + 
+            nameof(Role.BedrijfManager) + ", " + 
+            nameof(Role.Bedrijfsvertegenwoordiger) + ", " + 
+            nameof(Role.Leverancier)
         )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Models.Veiling>>> GetVeilingen()
