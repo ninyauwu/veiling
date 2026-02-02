@@ -90,6 +90,30 @@ namespace Veiling.Server.Controllers
             }
         }
 
+        // Get: api/kavels/approved
+        [Authorize(Roles =
+        nameof(Role.Administrator) + ", " +
+        nameof(Role.Veilingmeester)
+        )]
+        [HttpGet("approved")]
+        public async Task<ActionResult<IEnumerable<Kavel>>> GetApprovedKavels()
+        {
+            try
+            {
+                return await _context.Kavels
+                    .Where(k => k.Approved == true && k.Approved != null)
+                    .Include(k => k.Veiling)
+                    .Include(k => k.Leverancier)
+                    .Include(k => k.Boden)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fout bij ophalen goedgekeurde kavels");
+                return StatusCode(500, new { error = "Fout bij ophalen goedgekeurde kavels" });
+            }
+        }
+
         // GET: api/kavels/5
         [Authorize(Roles = 
         nameof(Role.Administrator) + ", " + 
@@ -128,6 +152,9 @@ namespace Veiling.Server.Controllers
 
         // Update the approval status
         kavel.Approved = approvalDto.Approval;
+
+        // Update the maximum price
+        kavel.MaximumPrijs = approvalDto.MaximumPrijs;
         
         // Optionally store the reasoning if you have a field for it
         kavel.Reasoning = approvalDto.Reasoning;
@@ -137,7 +164,8 @@ namespace Veiling.Server.Controllers
         return Ok(new { 
             message = "Kavel approval updated successfully",
             kavelId = id,
-            approval = kavel.Approved
+            approval = kavel.Approved,
+            maximumPrice = kavel.MaximumPrijs
         });
     }
 
@@ -211,7 +239,7 @@ namespace Veiling.Server.Controllers
                     MinimumPrijs = dto.MinimumPrijs,
                     HoeveelheidContainers = dto.Aantal,
                     Keurcode = dto.Ql,
-                    LocatieId = dto.VeilingId, 
+                    LocatieId = dto.LocatieId, 
                     LeverancierId = leverancier.Id,
                     StageOfMaturity = dto.Stadium,
                     LengteVanBloemen = dto.Lengte,
@@ -220,7 +248,7 @@ namespace Veiling.Server.Controllers
                     AantalProductenPerContainer = dto.AantalProductenPerContainer,
                     GewichtVanBloemen = dto.GewichtVanBloemen,
                     ArtikelKenmerken = string.Empty,
-                    MaximumPrijs = dto.MinimumPrijs * 5f,
+                    MaximumPrijs = dto.MinimumPrijs,
                     GekochtPrijs = 0,
                     GekochteContainers = 0,
                     Minimumhoeveelheid = 1,
@@ -358,7 +386,9 @@ public async Task<IActionResult> UpdateKavel(
         [Required(ErrorMessage = "Ql is verplicht")]
         public string Ql { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Veiling ID is verplicht")]
+        [Required]
+        public int LocatieId { get; set; } 
+
         public int VeilingId { get; set; }
 
         [Required(ErrorMessage = "Stadium is verplicht")]
@@ -386,5 +416,6 @@ public async Task<IActionResult> UpdateKavel(
 {
     public bool Approval { get; set; }
     public string? Reasoning { get; set; }
+    public float MaximumPrijs { get; set; }
 }
 }

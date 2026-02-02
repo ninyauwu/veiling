@@ -2,12 +2,10 @@ import ImageUpload from "../components/ImageUpload";
 import KavelDescription from "../components/KavelDescription";
 import KavelInvulTabel from "../components/KavelInvulTabel";
 import SimpeleKnop from "../components/SimpeleKnop";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { authFetch } from "../utils/AuthFetch";
 
 function KavelInvoer() {
-    const navigate = useNavigate();
     const [description, setDescription] = useState<string>('');
     const [imageFile, setImageFile] = useState<string | File | null>();
     const [formData, setFormData] = useState({
@@ -15,7 +13,7 @@ function KavelInvoer() {
     prijs: '',
     aantal: '',
     ql: '',
-    plaats: '',
+    locatieId: '',
     stadium: '',
     lengte: '',
     kleur: '',
@@ -77,7 +75,7 @@ function KavelInvoer() {
             MinimumPrijs: formData.prijs,
             Aantal: formData.aantal, 
             Ql: formData.ql, 
-            Plaats: formData.plaats, 
+            LocatieId: Number(formData.locatieId), 
             Stadium: formData.stadium, 
             Lengte: formData.lengte, 
             Kleur: formData.kleur,
@@ -115,7 +113,7 @@ function KavelInvoer() {
         <div style={{
             maxWidth: '1400px',  
             margin: '0 auto',     
-            padding: '0 40px',    
+            padding: '0 40px 140px',
             width: '100%'
         }}>
             <div style={{ height: "96px" }} />
@@ -152,16 +150,12 @@ function KavelInvoer() {
                 
                 <div style={{
                     display: 'flex',
+                    flexDirection: 'column',
                     position: 'fixed',
                     gap: '10px',
                     right: '2vw',
                     bottom: '2vh'
                 }}>
-                    <SimpeleKnop
-                        label="Terug naar dashboard"
-                        appearance="primary"
-                        onClick={() => navigate("/verkoper-dashboard")}
-                    />
                     <SimpeleKnop 
                         label="Submit"
                         appearance="primary"

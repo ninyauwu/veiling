@@ -217,7 +217,7 @@ namespace Veiling.Server
             // veilingen
             var amsterdamVeiling = new Models.Veiling
             {
-                Naam = "Amsterdam Ochtend Veiling",
+                Naam = "Aalsmeer Ochtend Veiling",
                 Klokduur = 5.0f,
                 StartTijd = today.AddHours(33), // start morgen 9 uur sochtends
                 EndTijd = today.AddHours(35), // eindigd morgen 11 uur sochtends
@@ -228,7 +228,7 @@ namespace Veiling.Server
 
             var rotterdamVeiling1 = new Models.Veiling
             {
-                Naam = "Rotterdam Middag Veiling",
+                Naam = "Naaldwijk Middag Veiling",
                 Klokduur = 5.0f,
                 StartTijd = today.AddHours(14), // start 14:00
                 EndTijd = today.AddHours(15), // eindigd 15:00
@@ -239,7 +239,7 @@ namespace Veiling.Server
 
             var delftVeiling = new Models.Veiling
             {
-                Naam = "Delft Avond Veiling",
+                Naam = "Rijnsburg Avond Veiling",
                 Klokduur = 5.0f,
                 StartTijd = today.AddHours(18), // start 18:00
                 EndTijd = today.AddMinutes(45).AddHours(18), // eindigd 18:45
@@ -262,7 +262,7 @@ namespace Veiling.Server
                 MaximumPrijs = 25.0f,
                 Minimumhoeveelheid = 10,
                 Foto = "https://thypix.com/wp-content/uploads/bouquets-of-roses-64.jpg",
-                Kavelkleur = "FF0000",
+                Kavelkleur = "#FF0000",
                 Karnummer = 1,
                 Rijnummer = 1,
                 LeverancierId = leverancier1.Id,
@@ -287,7 +287,7 @@ namespace Veiling.Server
                 MaximumPrijs = 0.8f,
                 Minimumhoeveelheid = 20,
                 Foto = "https://rurallivingtoday.com/wp-content/uploads/Purple-Tulips.jpg",
-                Kavelkleur = "FF0000",
+                Kavelkleur = "#a200ff",
                 Karnummer = 1,
                 Rijnummer = 1,
                 HoeveelheidContainers = 50,
@@ -312,7 +312,7 @@ namespace Veiling.Server
                 GekochtPrijs = 0.5f,
                 MaximumPrijs = 0.8f,
                 Minimumhoeveelheid = 20,
-                Foto = "/images/rozen.jpg",
+                Foto = "https://cdn.myonlinestore.eu/940bbdce-6be1-11e9-a722-44a8421b9960/image/cache/full/5fbed4dc3e621398e9829862e6d1670f1ab6f0aa.jpg?20260127102802",
                 Kavelkleur = "800080",
                 Karnummer = 1,
                 Rijnummer = 1,
@@ -338,7 +338,7 @@ namespace Veiling.Server
                 GekochtPrijs = 30.0f,
                 MaximumPrijs = 80.0f,
                 Minimumhoeveelheid = 20,
-                Foto = "/images/rozen.jpg",
+                Foto = "https://www.homeandgarden.nl/app/uploads/2014/08/zonnebloem-scaled.jpg",
                 Kavelkleur = "FFF017",
                 Karnummer = 1,
                 Rijnummer = 1,
@@ -364,7 +364,7 @@ namespace Veiling.Server
                 GekochtPrijs = 70.0f,
                 MaximumPrijs = 80.0f,
                 Minimumhoeveelheid = 20,
-                Foto = "/images/rozen.jpg",
+                Foto = "https://www.jansenzaden.nl/cdn/shop/collections/zonnebloemen.jpg?v=1741349258&width=1280",
                 Kavelkleur = "FFF017",
                 Karnummer = 1,
                 Rijnummer = 1,
