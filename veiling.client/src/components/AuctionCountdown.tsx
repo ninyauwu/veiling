@@ -290,10 +290,11 @@ export default function AuctionCountdown({
         // Na 5 seconden: herstart de veiling
         pauseTimeoutRef.current = window.setTimeout(() => {
           console.log("Herstart veiling met resterende containers...");
-
-          // Reset pauze state
           setIsPaused(false);
           setShouldInterrupt(false);
+
+          // Automatisch herstart veiling met huidige prijs/tijd
+          simulateSignalRMessage();
 
           pauseTimeoutRef.current = null;
         }, 5000);

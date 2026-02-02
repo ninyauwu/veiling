@@ -39,11 +39,11 @@ interface PriceInterpolatorProps {
 }
 
 export default function PriceInterpolator({
-  startMessage,
-  shouldInterrupt,
-  onChange,
-  serverReceivedTime,
-}: PriceInterpolatorProps) {
+                                            startMessage,
+                                            shouldInterrupt,
+                                            onChange,
+                                            serverReceivedTime,
+                                          }: PriceInterpolatorProps) {
   const [, setCurrentValue] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
   const [remaining, setRemaining] = useState<number | undefined>(0);
@@ -51,10 +51,13 @@ export default function PriceInterpolator({
   const startTimeRef = useRef<number | null>(null);
   const previousMessageRef = useRef<VeilingStartMessage | null>(null);
   const timeOffsetRef = useRef<number>(0);
-    const frozenProgressRef = useRef<number>(0);
-    const frozenPriceRef = useRef<number | null>(null);
+  const frozenProgressRef = useRef<number>(0);
+  const frozenPriceRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (shouldInterrupt) {
+      return;
+    }
     if (!startMessage) {
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -70,31 +73,26 @@ export default function PriceInterpolator({
       return;
     }
 
-      if (
-          previousMessageRef.current &&
-          previousMessageRef.current.kavelVeilingId ===
-          startMessage.kavelVeilingId
-      ) {
-          return;
-      }
-
+    if (
+      previousMessageRef.current &&
+      previousMessageRef.current.kavelVeilingId === startMessage.kavelVeilingId &&
+      frozenPriceRef.current === null  // <-- Alleen skippen als we NIET bevroren waren
+    ) {
+      return;
+    }
 
     previousMessageRef.current = startMessage;
-      let { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
-      if (frozenPriceRef.current !== null) {
-          startingPrice = frozenPriceRef.current;
-          durationMs = durationMs * (1 - frozenProgressRef.current);
-      }
+    let { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
 
+// Als we bevroren waren, herstart dan vanaf NU
+    if (frozenPriceRef.current !== null) {
+      startingPrice = frozenPriceRef.current;
+      durationMs = durationMs * (1 - frozenProgressRef.current);
 
-
-    // If the bar was frozen mid-auction, shift startTime back so that
-    // elapsed immediately resumes from the frozen point.
-    const frozenOffset = frozenProgressRef.current * durationMs;
-    const effectiveStartTime = new Date(startTime.getTime() - frozenOffset);
-      frozenProgressRef.current = 0;
-      frozenPriceRef.current = null;
-
+      // Nieuwe starttijd = NU + 100ms
+      const now = new Date();
+      startTime = new Date(now.getTime() + 100);
+    }
 
     if (animationFrameRef.current !== null) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -102,7 +100,15 @@ export default function PriceInterpolator({
 
     startTimeRef.current = null;
 
+    const effectiveStartTime = startTime;
+
     const animate = (timestamp: number) => {
+      // Reset frozen state HIER, niet eerder
+      if (frozenProgressRef.current > 0) {
+        frozenProgressRef.current = 0;
+        frozenPriceRef.current = null;
+      }
+
       const adjustedNow = Date.now() + timeOffsetRef.current;
       const startTimestamp = effectiveStartTime.getTime();
 
@@ -143,7 +149,7 @@ export default function PriceInterpolator({
     };
 
     animationFrameRef.current = requestAnimationFrame(animate);
-  }, [startMessage, onChange]);
+  }, [startMessage, onChange, shouldInterrupt]);
 
   useEffect(() => {
     if (serverReceivedTime && startMessage) {
@@ -154,24 +160,19 @@ export default function PriceInterpolator({
     }
   }, [serverReceivedTime, startMessage]);
 
-    useEffect(() => {
-        if (shouldInterrupt && animationFrameRef.current !== null && startMessage) {
-            frozenProgressRef.current = progress;
-            frozenPriceRef.current =
-                startMessage.startingPrice -
-                (startMessage.startingPrice - startMessage.minimumPrice) * progress;
+  useEffect(() => {
+    if (shouldInterrupt && animationFrameRef.current !== null && startMessage) {
+      // Bevries de huidige progress en prijs
+      frozenProgressRef.current = progress;
+      frozenPriceRef.current =
+        startMessage.startingPrice -
+        (startMessage.startingPrice - startMessage.minimumPrice) * progress;
 
-            cancelAnimationFrame(animationFrameRef.current);
-            animationFrameRef.current = null;
-        }
-    }, [shouldInterrupt, progress, startMessage]);
-
-    useEffect(() => {
-        if (!shouldInterrupt && startMessage) {
-            previousMessageRef.current = null;
-        }
-    }, [shouldInterrupt, startMessage]);
-
+      // Stop de animatie
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  }, [shouldInterrupt, progress, startMessage]);
 
   useEffect(() => {
     return () => {
