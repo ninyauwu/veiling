@@ -33,7 +33,7 @@ public class KavelInfoController : ControllerBase {
         if (veiling == null) return NotFound($"No auctions at ${locatie.Naam} currently active.");
 
         var kavels = _context.Kavels
-            .Where(k => k.VeilingId == locatieId)
+            .Where(k => k.VeilingId == locatieId && !k.SoldOut)
             .Include(k => k.Leverancier)
             .Include(k => k.Veiling)
             .Include(k => k.Leverancier.Bedrijf)
@@ -65,5 +65,23 @@ public class KavelInfoController : ControllerBase {
         var result = kavels.Select(k => new KavelLeverancier(k, k.Leverancier)).ToList();
         
         return Ok(result);
+    }
+
+    [Authorize]
+    [HttpGet("remainingcontainers/{kavelId}")]
+    public async Task<ActionResult<int>> GetRemainingContainers(int kavelId) {
+        var kavel = await _context.Kavels.FirstOrDefaultAsync(k => k.Id == kavelId);
+        if (kavel == null) {
+            return NotFound("No kavel with id " + kavelId);
+        }
+        
+        // Voorkom dat gebruiker meer koopt dan beschikbaar is
+        var aankoopSom = _context.Aankopen
+            .Where(a => a.Bod.KavelVeiling.KavelId == kavelId)
+            .Sum(a => a.Hoeveelheid);
+        
+        var remaining = kavel.HoeveelheidContainers - aankoopSom;
+
+        return remaining;
     }
 }

@@ -21,6 +21,7 @@ namespace Veiling.Server
         public DbSet<Kavel> Kavels { get; set; }
         public DbSet<KavelVeiling> KavelVeilingen { get; set; }
         public DbSet<Bod> Boden { get; set; }
+        public DbSet<Aankoop> Aankopen { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -83,12 +84,6 @@ namespace Veiling.Server
                 .HasKey(k => k.Id);
 
             modelBuilder.Entity<Kavel>()
-                .HasMany(k => k.Boden)
-                .WithOne(b => b.Kavel)
-                .HasForeignKey(b => b.KavelId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Kavel>()
                 .HasMany(k => k.KavelVeilingen)
                 .WithOne(k => k.Kavel);
 
@@ -100,9 +95,24 @@ namespace Veiling.Server
                 .WithMany(k => k.KavelVeilingen)
                 .HasForeignKey(kv => kv.KavelId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<KavelVeiling>()
+                .HasOne(kv => kv.Bod)
+                .WithOne(b => b.KavelVeiling)
+                .HasForeignKey<KavelVeiling>(kv => kv.BodId)
+                .OnDelete(DeleteBehavior.Cascade);
             
             modelBuilder.Entity<Bod>()
                 .HasKey(b => b.Id);
+
+            modelBuilder.Entity<Aankoop>()
+                .HasKey(a => a.Id);
+
+            modelBuilder.Entity<Aankoop>()
+                .HasOne(a => a.Bod)
+                .WithOne(b => b.Aankoop)
+                .HasForeignKey<Aankoop>(a => a.BodId)
+                .OnDelete(DeleteBehavior.SetNull);
             
             modelBuilder.Entity<Locatie>()
                 .HasKey(l => l.Id);

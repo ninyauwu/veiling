@@ -1,5 +1,5 @@
 import "./AuctionCountdown.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type * as signalR from "@microsoft/signalr";
 import PriceInterpolator from "./PriceBar";
 import type { VeilingStartMessage } from "./PriceBar";
@@ -7,6 +7,7 @@ import SimpeleKnop from "./SimpeleKnop";
 import Spacer from "./Spacer";
 import BidFeedback, { type BidFeedbackStatus } from "./BidFeedback";
 import { authFetch } from "../utils/AuthFetch";
+import Popup from "./Popup";
 
 function getNextNov15(): Date {
   const now = new Date();
@@ -36,29 +37,41 @@ interface AuctionCountdownProps {
   startMessage: VeilingStartMessage | null;
   connection: signalR.HubConnection | null;
   kavelId: number;
+  gebruikerId: string;
+  onPriceReachedZero?: () => void;
 }
 
 interface GeplaatstBod {
   HoeveelheidContainers: number | null;
   GebruikerId: string;
   KavelId: number;
+  KavelVeilingId: number;
 }
 
 interface BodResponse {
   accepted: boolean;
   acceptedPrice: number;
   receivedAt: string;
+  remainingContainers: number;
+}
+
+interface AankoopContainers {
+  GebruikerId: string;
+  KavelId: number;
+  Hoeveelheid: number;
 }
 
 export default function AuctionCountdown({
-  price,
-  quantity,
-  containers,
-  targetDate,
-  startMessage,
-  connection,
-  kavelId,
-}: AuctionCountdownProps) {
+                                           price,
+                                           quantity,
+                                           containers,
+                                           targetDate,
+                                           startMessage,
+                                           connection,
+                                           kavelId,
+                                           gebruikerId,
+                                           onPriceReachedZero,
+                                         }: AuctionCountdownProps) {
   const [shouldInterrupt, setShouldInterrupt] = useState(false);
   const [isCountdown, setIsCountdown] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(price ?? 0);
@@ -70,6 +83,26 @@ export default function AuctionCountdown({
     useState<BidFeedbackStatus | null>(null);
   const [awaitingBidResponse, setAwaitingBidResponse] = useState(false);
   const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [biddingRemainingContainers, setBiddingRemainingContainers] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [pauseSecondsLeft, setPauseSecondsLeft] = useState(5);
+
+// Track if we've already triggered removal for this auction
+  const hasTriggeredRemovalRef = useRef(false);
+  const lastKnownPriceRef = useRef<number | null>(null);
+  const lastRemainingMsRef = useRef<number | null>(null);
+  const pauseTimeoutRef = useRef<number | null>(null);
+  const pauseCountdownIntervalRef = useRef<number | null>(null);
+
+  // Purchase popup state
+  const [showPurchasePopup, setShowPurchasePopup] = useState(false);
+  const [remainingContainers, setRemainingContainers] = useState(0);
+  const [containerCountStr, setContainerCountStr] = useState("1");
+  const [isSubmittingPurchase, setIsSubmittingPurchase] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+
+  const containerCount =
+    containerCountStr === "" ? 0 : parseInt(containerCountStr, 10) || 0;
 
   const resolvedTarget = (() => {
     if (targetDate === null) return getNextNov15();
@@ -83,6 +116,43 @@ export default function AuctionCountdown({
 
   const [time, setTime] = useState(() => getTimePartsUntil(resolvedTarget));
   const formattedPrice = "€" + currentPrice.toFixed(2).toString();
+
+  // Fetch initial remaining containers when component mounts or kavelId changes
+  useEffect(() => {
+    async function fetchRemainingContainers() {
+      try {
+        console.log(`Fetching remaining containers for kavelId: ${kavelId}`);
+        const response = await authFetch(
+          `/api/KavelInfo/remainingcontainers/${kavelId}`,
+        );
+        console.log(`Response status: ${response.status}`);
+
+        if (response.ok) {
+          const text = await response.text();
+          console.log(`Response text: "${text}"`);
+          const remaining = parseInt(text, 10);
+          console.log(
+            `Parsed remaining: ${remaining}, isNaN: ${isNaN(remaining)}`,
+          );
+
+          if (!isNaN(remaining)) {
+            console.log(`Setting biddingRemainingContainers to: ${remaining}`);
+            setBiddingRemainingContainers(remaining);
+          } else {
+            console.error(`Failed to parse remaining containers: "${text}"`);
+          }
+        } else {
+          console.error(
+            `Failed to fetch: ${response.status} ${response.statusText}`,
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching remaining containers:", error);
+      }
+    }
+
+    fetchRemainingContainers();
+  }, [kavelId]);
 
   useEffect(() => {
     async function fetchUserRoles() {
@@ -135,15 +205,24 @@ export default function AuctionCountdown({
   useEffect(() => {
     console.log("startMessage changed:", startMessage);
     if (startMessage) {
-      console.log("startingPrice:", startMessage.startingPrice);
       setCurrentPrice(startMessage.startingPrice ?? 0);
       setShouldInterrupt(false);
       setServerReceivedTime(null);
       setFeedbackStatus(null);
       setAwaitingBidResponse(false);
       setIsSubmittingBid(false);
+      lastKnownPriceRef.current = null;
+      lastRemainingMsRef.current = null;
+
+      hasTriggeredRemovalRef.current = false;
     }
   }, [startMessage]);
+
+  useEffect(() => {
+    if (!startMessage) return;
+    setShouldInterrupt(false);
+    setServerReceivedTime(new Date());
+  }, [startMessage?.startTime]);
 
   useEffect(() => {
     if (!connection) return;
@@ -151,6 +230,7 @@ export default function AuctionCountdown({
     const handleBidPlaced = (bidKavelId: number) => {
       if (bidKavelId === kavelId && !awaitingBidResponse && !feedbackStatus) {
         setFeedbackStatus("outbid");
+        setShouldInterrupt(true);
       }
     };
 
@@ -160,6 +240,97 @@ export default function AuctionCountdown({
       connection.off("BidPlaced", handleBidPlaced);
     };
   }, [connection, kavelId, awaitingBidResponse, feedbackStatus]);
+
+  // Listen for ContainersPurchased SignalR event to update remaining containers
+  useEffect(() => {
+    if (!connection) return;
+
+    const handleContainersPurchased = (
+      eventKavelId: number,
+      hoeveelheidOver: number,
+    ) => {
+      if (eventKavelId !== kavelId) return;
+
+      // Update het aantal resterende containers
+      setBiddingRemainingContainers(hoeveelheidOver);
+
+      // Als er nog containers over zijn, pauzeer 5 seconden en herstart
+      if (hoeveelheidOver > 0) {
+        console.log(
+          `Containers gekocht, ${hoeveelheidOver} over. Pauzeer 5 seconden...`,
+        );
+
+        // Pauzeer de veiling
+        setShouldInterrupt(true);
+        setIsPaused(true);
+        setPauseSecondsLeft(5);
+
+        // Clear eventuele vorige timeouts
+        if (pauseTimeoutRef.current !== null) {
+          clearTimeout(pauseTimeoutRef.current);
+        }
+        if (pauseCountdownIntervalRef.current !== null) {
+          clearInterval(pauseCountdownIntervalRef.current);
+        }
+
+        // Start countdown voor visuele feedback
+        pauseCountdownIntervalRef.current = window.setInterval(() => {
+          setPauseSecondsLeft((prev) => {
+            if (prev <= 1) {
+              if (pauseCountdownIntervalRef.current !== null) {
+                clearInterval(pauseCountdownIntervalRef.current);
+                pauseCountdownIntervalRef.current = null;
+              }
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        // Na 5 seconden: herstart de veiling
+        pauseTimeoutRef.current = window.setTimeout(() => {
+          console.log("Herstart veiling met resterende containers...");
+          setIsPaused(false);
+          setShouldInterrupt(false);
+
+          // Automatisch herstart veiling met huidige prijs/tijd
+          simulateSignalRMessage();
+
+          pauseTimeoutRef.current = null;
+        }, 5000);
+      }
+    };
+
+    connection.on("ContainersPurchased", handleContainersPurchased);
+
+    return () => {
+      connection.off("ContainersPurchased", handleContainersPurchased);
+      // Cleanup timeouts bij unmount
+      if (pauseTimeoutRef.current !== null) {
+        clearTimeout(pauseTimeoutRef.current);
+      }
+      if (pauseCountdownIntervalRef.current !== null) {
+        clearInterval(pauseCountdownIntervalRef.current);
+      }
+    };
+  }, [connection, kavelId]);
+
+  // Call callback when price reaches minimum price (auction ends)
+  useEffect(() => {
+    if (!startMessage || !onPriceReachedZero || hasTriggeredRemovalRef.current)
+      return;
+
+    const minPrice = startMessage.minimumPrice ?? 0;
+    console.log(`Current price: ${currentPrice}, Minimum price: ${minPrice}`);
+
+    if (currentPrice <= minPrice) {
+      console.log(
+        `Price reached minimum for kavelId: ${kavelId}, triggering removal`,
+      );
+      hasTriggeredRemovalRef.current = true;
+      onPriceReachedZero();
+    }
+  }, [currentPrice, startMessage, onPriceReachedZero, kavelId]);
 
   const simulateSignalRMessage = () => {
     if (!connection) return;
@@ -171,8 +342,19 @@ export default function AuctionCountdown({
     const startTime = new Date();
     startTime.setSeconds(startTime.getSeconds() + 1);
 
+    const effectiveStartingPrice = lastKnownPriceRef.current ?? price ?? 0.8;
+
+    const effectiveDurationMs = lastRemainingMsRef.current ?? 30000;
+
     connection
-      .invoke("SendVeilingStart", kavelId, 0.8, 0.3, 5000, startTime)
+      .invoke(
+        "SendVeilingStart",
+        kavelId,
+        effectiveStartingPrice,
+        0.3,
+        effectiveDurationMs,
+        startTime,
+      )
       .catch((err) => console.error("Failed to send message:", err));
   };
 
@@ -184,8 +366,9 @@ export default function AuctionCountdown({
     try {
       const bod: GeplaatstBod = {
         HoeveelheidContainers: containers ?? null,
-        GebruikerId: "",
+        GebruikerId: gebruikerId,
         KavelId: kavelId,
+        KavelVeilingId: startMessage?.kavelVeilingId ?? 0,
       };
 
       const response = await authFetch("/api/Bod", {
@@ -202,24 +385,58 @@ export default function AuctionCountdown({
 
       const data: BodResponse = await response.json();
       console.log("Bid response data:", data);
-      console.log("data.accepted:", data.accepted);
       setServerReceivedTime(new Date(data.receivedAt));
 
       if (data.accepted) {
-        console.log("Setting feedback to accepted");
         setFeedbackStatus("accepted");
+        setRemainingContainers(data.remainingContainers);
+        setContainerCountStr("1");
+        setPurchaseError(null);
+        setShowPurchasePopup(true);
       } else {
-        console.log("Setting feedback to rejected");
         setFeedbackStatus("rejected");
       }
-
-      console.log("Bid response:", data);
     } catch (err) {
       console.error("Failed to place bid:", err);
       setFeedbackStatus("rejected");
     } finally {
       setIsSubmittingBid(false);
       setAwaitingBidResponse(false);
+    }
+  };
+
+  const submitPurchase = async () => {
+    setIsSubmittingPurchase(true);
+    setPurchaseError(null);
+
+    try {
+      const aankoop: AankoopContainers = {
+        GebruikerId: gebruikerId,
+        KavelId: kavelId,
+        Hoeveelheid: containerCount,
+      };
+
+      const response = await authFetch("/api/Aankoop", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(aankoop),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        setPurchaseError(errorText || "Aankoop mislukt.");
+        return;
+      }
+
+      // Purchase succeeded — close popup.
+      setShowPurchasePopup(false);
+    } catch (err) {
+      console.error("Failed to purchase containers:", err);
+      setPurchaseError("Er is een fout opgetreden bij de aankoop.");
+    } finally {
+      setIsSubmittingPurchase(false);
     }
   };
 
@@ -235,12 +452,69 @@ export default function AuctionCountdown({
   const canBid = isBedrijf || isManager || isAdministrator;
   const canStartVeiling = isVeilingmeester || isAdministrator;
 
+  const purchasePopup = showPurchasePopup ? (
+    <Popup allowManualClose={false} onClose={() => setShowPurchasePopup(false)}>
+      <h3 style={{ marginBottom: "12px" }}>Containers kopen</h3>
+      <p style={{ marginBottom: "16px" }}>
+        Hoeveel containers wilt u kopen? (max {remainingContainers})
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <input
+          type="number"
+          min={0}
+          max={remainingContainers}
+          value={containerCountStr}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (raw === "") {
+              setContainerCountStr("");
+              return;
+            }
+            const val = parseInt(raw, 10);
+            if (!isNaN(val)) {
+              setContainerCountStr(
+                String(Math.max(0, Math.min(val, remainingContainers))),
+              );
+            }
+          }}
+          style={{
+            padding: "8px 12px",
+            borderRadius: "6px",
+            border: "1px solid #ccc",
+            fontSize: "16px",
+            width: "120px",
+          }}
+        />
+        {purchaseError && (
+          <p style={{ color: "#c0392b", margin: 0 }}>{purchaseError}</p>
+        )}
+        <div style={{ display: "flex", gap: "8px" }}>
+          <SimpeleKnop
+            onClick={submitPurchase}
+            appearance="primary"
+            disabled={isSubmittingPurchase || containerCount < 1}
+          >
+            {isSubmittingPurchase ? "Bezig..." : "Kopen"}
+          </SimpeleKnop>
+          <SimpeleKnop
+            onClick={() => setShowPurchasePopup(false)}
+            appearance="secondary"
+            disabled={isSubmittingPurchase}
+          >
+            Annuleren
+          </SimpeleKnop>
+        </div>
+      </div>
+    </Popup>
+  ) : null;
+
   const countdown = (
     <section
       className="auc-card"
       aria-label="Veiling info"
       style={{ position: "relative" }}
     >
+      {purchasePopup}
       <BidFeedback
         status={feedbackStatus}
         onFadeComplete={handleFeedbackComplete}
@@ -313,6 +587,57 @@ export default function AuctionCountdown({
       aria-label="Veiling info"
       style={{ position: "relative" }}
     >
+      {purchasePopup}
+      {isPaused && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1001,
+            borderRadius: "0px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#7A1F3D",
+              color: "white",
+              padding: "2rem 3rem",
+              borderRadius: "12px",
+              textAlign: "center",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                marginBottom: "1rem",
+              }}
+            >
+              Veiling gepauzeerd
+            </div>
+            <div
+              style={{
+                fontSize: "3rem",
+                fontWeight: "bold",
+                marginBottom: "0.5rem",
+              }}
+            >
+              {pauseSecondsLeft}
+            </div>
+            <div style={{ fontSize: "1rem", opacity: 0.9 }}>
+              seconden tot herstart
+            </div>
+          </div>
+        </div>
+      )}
       <BidFeedback
         status={feedbackStatus}
         onFadeComplete={handleFeedbackComplete}
@@ -323,7 +648,10 @@ export default function AuctionCountdown({
       <PriceInterpolator
         startMessage={startMessage}
         shouldInterrupt={shouldInterrupt}
-        onChange={(pr) => setCurrentPrice(pr)}
+        onChange={(pr) => {
+          setCurrentPrice(pr);
+          lastKnownPriceRef.current = pr;
+        }}
         serverReceivedTime={serverReceivedTime}
       />
       <Spacer />
@@ -331,6 +659,17 @@ export default function AuctionCountdown({
         <div className="auc-label">Prijs per eenheid</div>
         <div className="auc-price">
           <span className="auc-price__main">{formattedPrice}</span>
+        </div>
+      </div>
+      <Spacer />
+      <div className="auc-field">
+        <div className="auc-label">Beschikbare containers</div>
+        <div className="auc-qty">
+          <span className="auc-qty__main">
+            {biddingRemainingContainers !== null
+              ? biddingRemainingContainers
+              : "..."}
+          </span>
         </div>
       </div>
       <Spacer />
@@ -355,4 +694,3 @@ export default function AuctionCountdown({
 
   return isCountdown ? countdown : bidding;
 }
-

@@ -356,6 +356,8 @@ namespace Veiling.Server.Migrations
                     Koopprijs = table.Column<float>(type: "real", nullable: false),
                     Betaald = table.Column<bool>(type: "bit", nullable: false),
                     GebruikerId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    KavelVeilingId = table.Column<int>(type: "int", nullable: true),
+                    AankoopId = table.Column<int>(type: "int", nullable: true),
                     KavelId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -373,8 +375,29 @@ namespace Veiling.Server.Migrations
                         column: x => x.KavelId,
                         principalSchema: "identity",
                         principalTable: "Kavels",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Aankopen",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Hoeveelheid = table.Column<int>(type: "int", nullable: false),
+                    BodId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Aankopen", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Aankopen_Boden_BodId",
+                        column: x => x.BodId,
+                        principalSchema: "identity",
+                        principalTable: "Boden",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -386,11 +409,19 @@ namespace Veiling.Server.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Start = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DurationMs = table.Column<int>(type: "int", nullable: false),
-                    KavelId = table.Column<int>(type: "int", nullable: false)
+                    KavelId = table.Column<int>(type: "int", nullable: false),
+                    BodId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_KavelVeilingen", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KavelVeilingen_Boden_BodId",
+                        column: x => x.BodId,
+                        principalSchema: "identity",
+                        principalTable: "Boden",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_KavelVeilingen_Kavels_KavelId",
                         column: x => x.KavelId,
@@ -399,6 +430,14 @@ namespace Veiling.Server.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Aankopen_BodId",
+                schema: "identity",
+                table: "Aankopen",
+                column: "BodId",
+                unique: true,
+                filter: "[BodId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -477,6 +516,14 @@ namespace Veiling.Server.Migrations
                 column: "VeilingId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_KavelVeilingen_BodId",
+                schema: "identity",
+                table: "KavelVeilingen",
+                column: "BodId",
+                unique: true,
+                filter: "[BodId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_KavelVeilingen_KavelId",
                 schema: "identity",
                 table: "KavelVeilingen",
@@ -511,6 +558,10 @@ namespace Veiling.Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Aankopen",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims",
                 schema: "identity");
 
@@ -531,15 +582,15 @@ namespace Veiling.Server.Migrations
                 schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Boden",
-                schema: "identity");
-
-            migrationBuilder.DropTable(
                 name: "KavelVeilingen",
                 schema: "identity");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "Boden",
                 schema: "identity");
 
             migrationBuilder.DropTable(

@@ -17,7 +17,6 @@ public sealed class VeilingHub : Hub
         if (kavel == null) return;
 
         var kv = new KavelVeiling() {
-            Id = 0,
             KavelId = kavelId,
             Kavel = kavel,
             Start = time,
@@ -31,6 +30,6 @@ public sealed class VeilingHub : Hub
 
         await _context.KavelVeilingen.AddAsync(kv);
         await _context.SaveChangesAsync();
-        await Clients.All.SendAsync("VeilingStart", startingPrice, minimumPrice, durationMs, time);
+        await Clients.All.SendAsync("VeilingStart", startingPrice, minimumPrice, durationMs, time, kv.Id);
     }
 }

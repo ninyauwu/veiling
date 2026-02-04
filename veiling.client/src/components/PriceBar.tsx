@@ -6,6 +6,7 @@ export interface VeilingStartMessage {
   minimumPrice: number;
   durationMs: number;
   startTime: Date;
+  kavelVeilingId: number;
 }
 
 interface PriceBarProps {
@@ -38,11 +39,11 @@ interface PriceInterpolatorProps {
 }
 
 export default function PriceInterpolator({
-  startMessage,
-  shouldInterrupt,
-  onChange,
-  serverReceivedTime,
-}: PriceInterpolatorProps) {
+                                            startMessage,
+                                            shouldInterrupt,
+                                            onChange,
+                                            serverReceivedTime,
+                                          }: PriceInterpolatorProps) {
   const [, setCurrentValue] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
   const [remaining, setRemaining] = useState<number | undefined>(0);
@@ -50,8 +51,13 @@ export default function PriceInterpolator({
   const startTimeRef = useRef<number | null>(null);
   const previousMessageRef = useRef<VeilingStartMessage | null>(null);
   const timeOffsetRef = useRef<number>(0);
+  const frozenProgressRef = useRef<number>(0);
+  const frozenPriceRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (shouldInterrupt) {
+      return;
+    }
     if (!startMessage) {
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -63,15 +69,30 @@ export default function PriceInterpolator({
       startTimeRef.current = null;
       previousMessageRef.current = null;
       timeOffsetRef.current = 0;
+      frozenProgressRef.current = 0;
       return;
     }
 
-    if (startMessage === previousMessageRef.current) {
+    if (
+      previousMessageRef.current &&
+      previousMessageRef.current.kavelVeilingId === startMessage.kavelVeilingId &&
+      frozenPriceRef.current === null  // <-- Alleen skippen als we NIET bevroren waren
+    ) {
       return;
     }
 
     previousMessageRef.current = startMessage;
-    const { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
+    let { startingPrice, minimumPrice, durationMs, startTime } = startMessage;
+
+// Als we bevroren waren, herstart dan vanaf NU
+    if (frozenPriceRef.current !== null) {
+      startingPrice = frozenPriceRef.current;
+      durationMs = durationMs * (1 - frozenProgressRef.current);
+
+      // Nieuwe starttijd = NU + 100ms
+      const now = new Date();
+      startTime = new Date(now.getTime() + 100);
+    }
 
     if (animationFrameRef.current !== null) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -79,9 +100,17 @@ export default function PriceInterpolator({
 
     startTimeRef.current = null;
 
+    const effectiveStartTime = startTime;
+
     const animate = (timestamp: number) => {
+      // Reset frozen state HIER, niet eerder
+      if (frozenProgressRef.current > 0) {
+        frozenProgressRef.current = 0;
+        frozenPriceRef.current = null;
+      }
+
       const adjustedNow = Date.now() + timeOffsetRef.current;
-      const startTimestamp = startTime.getTime();
+      const startTimestamp = effectiveStartTime.getTime();
 
       if (adjustedNow < startTimestamp) {
         animationFrameRef.current = requestAnimationFrame(animate);
@@ -120,7 +149,7 @@ export default function PriceInterpolator({
     };
 
     animationFrameRef.current = requestAnimationFrame(animate);
-  }, [startMessage, onChange]);
+  }, [startMessage, onChange, shouldInterrupt]);
 
   useEffect(() => {
     if (serverReceivedTime && startMessage) {
@@ -132,11 +161,18 @@ export default function PriceInterpolator({
   }, [serverReceivedTime, startMessage]);
 
   useEffect(() => {
-    if (shouldInterrupt && animationFrameRef.current !== null) {
+    if (shouldInterrupt && animationFrameRef.current !== null && startMessage) {
+      // Bevries de huidige progress en prijs
+      frozenProgressRef.current = progress;
+      frozenPriceRef.current =
+        startMessage.startingPrice -
+        (startMessage.startingPrice - startMessage.minimumPrice) * progress;
+
+      // Stop de animatie
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-  }, [shouldInterrupt]);
+  }, [shouldInterrupt, progress, startMessage]);
 
   useEffect(() => {
     return () => {

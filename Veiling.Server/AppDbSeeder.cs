@@ -219,8 +219,8 @@ namespace Veiling.Server
             {
                 Naam = "Aalsmeer Ochtend Veiling",
                 Klokduur = 5.0f,
-                StartTijd = today.AddHours(33), // start morgen 9 uur sochtends
-                EndTijd = today.AddHours(35), // eindigd morgen 11 uur sochtends
+                StartTijd = now.AddHours(-1), // Started 1 uur geleden
+                EndTijd = now.AddHours(2), // eindigd morgen 11 uur sochtends
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
                 LocatieId = aalsmeer.Id
@@ -230,8 +230,8 @@ namespace Veiling.Server
             {
                 Naam = "Naaldwijk Middag Veiling",
                 Klokduur = 5.0f,
-                StartTijd = today.AddHours(14), // start 14:00
-                EndTijd = today.AddHours(15), // eindigd 15:00
+                StartTijd = now.AddMinutes(-30), // Started 30 min geleden
+                EndTijd = now.AddHours(1.5), 
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
                 LocatieId = naaldwijk.Id
@@ -241,14 +241,37 @@ namespace Veiling.Server
             {
                 Naam = "Rijnsburg Avond Veiling",
                 Klokduur = 5.0f,
-                StartTijd = today.AddHours(18), // start 18:00
-                EndTijd = today.AddMinutes(45).AddHours(18), // eindigd 18:45
+                StartTijd = now.AddHours(3),  // Start over 3 uur
+                EndTijd = now.AddHours(5),
                 GeldPerTickCode = 0.5f,
                 VeilingmeesterId = veilingmeester1.Id,
                 LocatieId = rijnsburg.Id
             };
+            
+            var eeldeVeiling = new Models.Veiling
+            {
+                Naam = "Eelde Bloemen Veiling",
+                Klokduur = 5.0f,
+                StartTijd = now.AddHours(6),   // Start over 6 uur
+                EndTijd = now.AddHours(8),     // Eindigt over 8 uur
+                GeldPerTickCode = 0.5f,
+                VeilingmeesterId = veilingmeester1.Id,
+                LocatieId = eelde.Id
+            };
+            
+            var rheinMaasVeiling = new Models.Veiling
+            {
+                Naam = "Rhein-Maas Avond Veiling",
+                Klokduur = 5.0f,
+                StartTijd = now.AddHours(10),  // Start over 10 uur
+                EndTijd = now.AddHours(12),    // Eindigt over 12 uur
+                GeldPerTickCode = 0.5f,
+                VeilingmeesterId = veilingmeester1.Id,
+                LocatieId = rhein_maas.Id
+            };
 
-            context.Veilingen.AddRange(amsterdamVeiling, rotterdamVeiling1, delftVeiling);
+            context.Veilingen.AddRange(amsterdamVeiling, rotterdamVeiling1, delftVeiling,     eeldeVeiling, 
+                rheinMaasVeiling);
             context.SaveChanges();
 
 
