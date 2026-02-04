@@ -5,4 +5,8 @@ public class GeplaatstBod {
 
     [Required]
     public int KavelId { get; set; }
+
+    public string GebruikerId { get; set; }
+
+    public int KavelVeilingId { get; set; }
 }

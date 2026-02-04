@@ -6,6 +6,7 @@ import type {
   AppointmentFormData,
   DragState,
   Kavel,
+  Locatie,
 } from "./AppointmentTypes";
 import AppointmentFormPopup from "./AppointmentFormPopup";
 import {
@@ -27,11 +28,13 @@ export default function Scheduler() {
   const [editingAppointment, setEditingAppointment] =
     useState<AppointmentData | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [locations, setLocations] = useState<Locatie[]>([]);
   const [formData, setFormData] = useState<AppointmentFormData>({
     startTime: "",
     endTime: "",
     name: "",
     kavelIds: [],
+    locationId: null,
   });
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
@@ -43,12 +46,29 @@ export default function Scheduler() {
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const today = new Date();
-  const weekDays = getWeekDays(weekOffset);
+    const weekDays = getWeekDays(weekOffset);
+    const getWeekMonthLabel = (days: Date[]) => {
+        const months = Array.from(
+            new Set(
+                days.map((d) =>
+                    d.toLocaleDateString("nl-NL", {
+                        month: "long",
+                        year: "numeric",
+                    })
+                )
+            )
+        );
+
+        return months.length === 1
+            ? months[0]
+            : `${months[0]} – ${months[months.length - 1]}`;
+    };
+
 
   useEffect(() => {
     const fetchKavels = async () => {
       try {
-        const response = await authFetch("/api/kavels");
+        const response = await authFetch("/api/kavels/approved");
         if (!response.ok) throw new Error("Failed to fetch kavels");
         const data = await response.json();
         setKavels(data);
@@ -59,6 +79,7 @@ export default function Scheduler() {
             id: 1,
             naam: "Kavel A",
             beschrijving: "Test kavel",
+            locatieId: -1,
             minimumPrijs: 100,
             maximumPrijs: 200,
             hoeveelheidContainers: 5,
@@ -70,6 +91,23 @@ export default function Scheduler() {
 
     fetchKavels();
   }, []);
+
+  useEffect(() => {
+  const fetchLocations = async () => {
+    try {
+      const response = await authFetch("/api/locaties");
+      if (!response.ok) throw new Error("Failed to fetch locaties");
+
+      const data = await response.json();
+      setLocations(data);
+    } catch (error) {
+      console.error("Error fetching locaties:", error);
+    }
+  };
+
+  fetchLocations();
+}, []);
+
 
   useEffect(() => {
     const fetchVeilingen = async () => {
@@ -308,6 +346,7 @@ export default function Scheduler() {
       durationHours: 1,
       name: "",
       kavelIds: [],
+      locationId: 0,
     };
 
     setEditingAppointment(newAppointment);
@@ -316,6 +355,7 @@ export default function Scheduler() {
       endTime: formatTime(validStartHour + 1),
       name: "",
       kavelIds: [],
+      locationId: 0,
     });
     setIsPopupOpen(true);
   };
@@ -350,6 +390,7 @@ export default function Scheduler() {
       endTime: formatTime(appointment.startHour + appointment.durationHours),
       name: appointment.name,
       kavelIds: appointment.kavelIds,
+      locationId: appointment.locationId || null,
     });
     setIsPopupOpen(true);
   };
@@ -568,6 +609,12 @@ export default function Scheduler() {
           </div>
 
           <div className="lg:col-span-3 bg-white rounded-lg shadow-lg overflow-hidden">
+                      <div
+                          className="text-center py-3 font-bold text-lg"
+                          style={{ color: "#7A1F3D" }}
+                      >
+                          {getWeekMonthLabel(weekDays)}
+                      </div>
             <div
               className="grid grid-cols-8 border-b-2"
               style={{ borderColor: "#7A1F3D" }}
@@ -725,6 +772,7 @@ export default function Scheduler() {
         editingAppointment={editingAppointment}
         appointments={appointments}
         kavels={kavels}
+        locaties={locations}
         formData={formData}
         onFormDataChange={setFormData}
         onSubmit={handleFormSubmit}

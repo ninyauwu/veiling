@@ -24,6 +24,13 @@ function HeaderLoggedIn({
         window.location.href = "/login";
     }
 
+    const role =
+        roles.includes("Veilingmeester")
+            ? "Veilingmeester"
+            : roles.includes("Leverancier")
+                ? "Leverancier"
+                : "Bedrijfsvertegenwoordiger";
+
     return (
         <header>
             <div style={containerStyle}>
@@ -43,7 +50,11 @@ function HeaderLoggedIn({
                     )}
                 </div>
 
-                <AccountDropdown align="right" onLogout={handleLogout}>
+                <AccountDropdown
+                    align="right"
+                    onLogout={handleLogout}
+                    role={role}
+                >
                     <AccountDropdownLine>
                         <strong>{email}</strong>
                     </AccountDropdownLine>

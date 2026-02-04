@@ -1,4 +1,7 @@
-﻿function LandingsPagina() {
+﻿import { useNavigate } from "react-router-dom";
+
+function LandingsPagina() {
+  const navigator = useNavigate();
   return (
     <div className="bg-white w-full overflow-x-hidden">
       <div
@@ -40,6 +43,7 @@
 
           <div className="flex gap-6 justify-center">
             <button
+              onClick={() => navigator('/login')}
               className="px-8 py-4 rounded-lg font-semibold text-lg transition"
               style={{
                 backgroundColor: "white",
@@ -76,6 +80,7 @@
                 backgroundColor: "transparent",
                 backdropFilter: "blur(10px)",
               }}
+              onClick={() => navigator('/login')}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.18)")
               }

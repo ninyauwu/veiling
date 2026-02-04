@@ -11,6 +11,7 @@ public interface IAppDbContext {
     public DbSet<Veiling.Server.Models.Veiling> Veilingen { get; set; }
     public DbSet<Kavel> Kavels { get; set; }
     public DbSet<Bod> Boden { get; set; }
+    public DbSet<Aankoop> Aankopen { get; set; }
 
     public Task SaveChangesAsync();
     public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;

@@ -30,7 +30,7 @@ namespace Veiling.Server.Controllers
         {
             return await _context.Boden
                 .Include(b => b.Gebruiker)
-                .Include(b => b.Kavel)
+                .Include(b => b.KavelVeiling)
                 .ToListAsync();
         }
 //TODO: Bv1 kan alleen hun eigen boden zien, Vk3 kan al de boden zien die op hun kavel zijn geboden
@@ -43,7 +43,7 @@ namespace Veiling.Server.Controllers
         {
             var bod = await _context.Boden
                 .Include(b => b.Gebruiker)
-                .Include(b => b.Kavel)
+                .Include(b => b.KavelVeiling)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (bod == null)
@@ -63,7 +63,7 @@ namespace Veiling.Server.Controllers
         public async Task<ActionResult<IEnumerable<Bod>>> GetBodenByKavel(int kavelId)
         {
             return await _context.Boden
-                .Where(b => b.KavelId == kavelId)
+                .Where(b => b.KavelVeiling != null && b.KavelVeiling.Kavel.Id == kavelId)
                 .Include(b => b.Gebruiker)
                 .OrderByDescending(b => b.Koopprijs)
                 .ToListAsync();
@@ -78,7 +78,7 @@ namespace Veiling.Server.Controllers
         {
             return await _context.Boden
                 .Where(b => b.GebruikerId == gebruikerId)
-                .Include(b => b.Kavel)
+                .Include(b => b.KavelVeiling)
                 .OrderByDescending(b => b.Datumtijd)
                 .ToListAsync();
         }
@@ -89,7 +89,7 @@ namespace Veiling.Server.Controllers
         public async Task<ActionResult<Bod>> GetHoogsteBod(int kavelId)
         {
             var hoogsteBod = await _context.Boden
-                .Where(b => b.KavelId == kavelId)
+                .Where(b => b.KavelVeiling != null && b.KavelVeiling.KavelId == kavelId)
                 .Include(b => b.Gebruiker)
                 .OrderByDescending(b => b.Koopprijs)
                 .FirstOrDefaultAsync();

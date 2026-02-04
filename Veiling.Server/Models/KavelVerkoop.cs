@@ -8,4 +8,6 @@ public class KavelVeiling {
     
     public required int KavelId { get; set; }
     public required Kavel Kavel { get; set; }
+    public int? BodId { get; set; }
+    public Bod Bod { get; set; }
 }
